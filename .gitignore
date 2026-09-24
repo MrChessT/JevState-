@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+.env*
+!.env.example
+.vercel
+*.tsbuildinfo
+.claude/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Resultados locales de evaluación con Jev real (los de referencia sí se versionan en eval/results/)
+eval/.tmp/

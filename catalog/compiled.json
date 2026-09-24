@@ -1,0 +1,1454 @@
+{
+  "version": "2026-09-24.c9aa22b3",
+  "hash": "c9aa22b3196cfc12033384b9596a09fff46f68474d027595cf6dfd3a2e74f209",
+  "fields": [
+    {
+      "id": "operacion",
+      "type": "enum",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Operación",
+        "en": "Operation"
+      },
+      "question": "Is the property offered for sale, for long-term rent or for holiday rent?",
+      "enumValues": [
+        "venta",
+        "alquiler",
+        "alquiler_vacacional"
+      ],
+      "options": {
+        "venta": "For sale.",
+        "alquiler": "For long-term rent, paid monthly.",
+        "alquiler_vacacional": "For holiday rent by days or weeks."
+      }
+    },
+    {
+      "id": "tipo",
+      "type": "enum",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld"
+      ],
+      "gate": {
+        "act": 0.8,
+        "ask": 0.55
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Tipo de inmueble",
+        "en": "Property type"
+      },
+      "question": "What kind of property is it?",
+      "enumValues": [
+        "piso",
+        "atico",
+        "duplex",
+        "casa",
+        "chalet",
+        "adosado",
+        "estudio",
+        "local",
+        "oficina",
+        "terreno",
+        "garaje"
+      ],
+      "options": {
+        "piso": "Flat or apartment in a building.",
+        "atico": "Penthouse: top-floor flat, usually with a terrace.",
+        "duplex": "Flat on two floors.",
+        "casa": "House, not described as a villa or a terraced house.",
+        "chalet": "Detached villa, usually with a plot or garden.",
+        "adosado": "Terraced or semi-detached house.",
+        "estudio": "Studio: one main room with kitchen and bathroom.",
+        "local": "Commercial premises or shop.",
+        "oficina": "Office.",
+        "terreno": "Land or plot.",
+        "garaje": "Parking space or garage on its own."
+      }
+    },
+    {
+      "id": "precio",
+      "type": "currency",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "meta",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Precio",
+        "en": "Price"
+      },
+      "unit": "EUR",
+      "question": "Is {candidate} the current asking price of the property, and not the community fees, the property tax, a deposit or a previous price?",
+      "criteria": {
+        "true": "Yes: it is the current asking price (the monthly rent if it is rented out).",
+        "false": "No: it is another amount, or a previous price."
+      }
+    },
+    {
+      "id": "superficie_construida",
+      "type": "area",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Superficie construida",
+        "en": "Built area"
+      },
+      "unit": "m2",
+      "question": "Is {candidate} the built area of the property, and not the usable area or the plot?",
+      "criteria": {
+        "true": "Yes: it is the built area.",
+        "false": "No: it is the usable area, the plot, a terrace or another figure."
+      }
+    },
+    {
+      "id": "superficie_util",
+      "type": "area",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Superficie útil",
+        "en": "Usable area"
+      },
+      "unit": "m2",
+      "question": "Is {candidate} the usable (net) floor area of the property?",
+      "criteria": {
+        "true": "Yes: it is the usable floor area.",
+        "false": "No: it is the built area, the plot or another figure."
+      }
+    },
+    {
+      "id": "superficie_parcela",
+      "type": "area",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Parcela",
+        "en": "Plot size"
+      },
+      "unit": "m2",
+      "question": "Is {candidate} the size of the plot or land that comes with the property?",
+      "criteria": {
+        "true": "Yes: it is the plot size.",
+        "false": "No: it is the built area or another figure."
+      }
+    },
+    {
+      "id": "habitaciones",
+      "type": "integer",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Habitaciones",
+        "en": "Bedrooms"
+      },
+      "question": "Is {candidate} the number of bedrooms?",
+      "criteria": {
+        "true": "Yes: it is the number of bedrooms.",
+        "false": "No: it counts other rooms, or it is another number."
+      }
+    },
+    {
+      "id": "banos",
+      "type": "integer",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Baños",
+        "en": "Bathrooms"
+      },
+      "question": "Is {candidate} the number of bathrooms?",
+      "criteria": {
+        "true": "Yes: it is the number of bathrooms (full bathrooms and toilets, as stated).",
+        "false": "No: it is another number."
+      }
+    },
+    {
+      "id": "planta",
+      "type": "integer",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Planta",
+        "en": "Floor"
+      },
+      "question": "Is {candidate} the floor the property is on, counting the ground floor as 0?",
+      "criteria": {
+        "true": "Yes: it is the floor number.",
+        "false": "No: it is the number of floors of the building, a door number or another figure."
+      }
+    },
+    {
+      "id": "planta_tipo",
+      "type": "enum",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.8,
+        "ask": 0.55
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Posición de la planta",
+        "en": "Floor position"
+      },
+      "question": "Which floor position does the property have in the building?",
+      "enumValues": [
+        "sotano",
+        "bajo",
+        "entresuelo",
+        "intermedia",
+        "ultima",
+        "atico"
+      ],
+      "options": {
+        "sotano": "Basement, below street level.",
+        "bajo": "Ground floor.",
+        "entresuelo": "Mezzanine, between the ground floor and the first floor.",
+        "intermedia": "A middle floor.",
+        "ultima": "The top floor, not described as a penthouse.",
+        "atico": "Penthouse floor."
+      }
+    },
+    {
+      "id": "zona",
+      "type": "text",
+      "pack": "core",
+      "extractors": [
+        "geocode"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": true,
+      "label": {
+        "es": "Zona",
+        "en": "Area"
+      }
+    },
+    {
+      "id": "direccion",
+      "type": "text",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "manual"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.6
+      },
+      "public": false,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Dirección",
+        "en": "Address"
+      }
+    },
+    {
+      "id": "referencia_catastral",
+      "type": "text",
+      "pack": "core",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.6
+      },
+      "public": false,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Referencia catastral",
+        "en": "Cadastral reference"
+      }
+    },
+    {
+      "id": "gastos_comunidad",
+      "type": "currency",
+      "pack": "financiero",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Gastos de comunidad",
+        "en": "Community fees"
+      },
+      "unit": "EUR/mes",
+      "question": "Is {candidate} the monthly community (homeowners' association) fee?",
+      "criteria": {
+        "true": "Yes: it is the monthly community fee.",
+        "false": "No: it is the price, the property tax, another period or another amount."
+      }
+    },
+    {
+      "id": "ibi",
+      "type": "currency",
+      "pack": "financiero",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "IBI",
+        "en": "Property tax (IBI)"
+      },
+      "unit": "EUR/año",
+      "question": "Is {candidate} the yearly property tax (IBI)?",
+      "criteria": {
+        "true": "Yes: it is the yearly property tax.",
+        "false": "No: it is the community fee, another period or another amount."
+      }
+    },
+    {
+      "id": "precio_anterior",
+      "type": "currency",
+      "pack": "financiero",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Precio anterior",
+        "en": "Previous price"
+      },
+      "unit": "EUR",
+      "question": "Is {candidate} a previous asking price that has since been lowered?",
+      "criteria": {
+        "true": "Yes: it is a previous price that was reduced.",
+        "false": "No: it is the current price or another amount."
+      }
+    },
+    {
+      "id": "negociable",
+      "type": "boolean",
+      "pack": "financiero",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Precio negociable",
+        "en": "Negotiable price"
+      },
+      "question": "Does the listing say that the price is negotiable?",
+      "criteria": {
+        "true": "Yes: the price is described as negotiable, open to offers or similar.",
+        "false": "No: nothing says the price is negotiable."
+      }
+    },
+    {
+      "id": "alquilado_con_inquilino",
+      "type": "boolean",
+      "pack": "financiero",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Alquilado con inquilino",
+        "en": "Sold with tenant"
+      },
+      "question": "Is the property sold with a tenant already living in it (for example \"ideal for investors, currently rented\")?",
+      "criteria": {
+        "true": "Yes: it is sold with a sitting tenant or an active lease.",
+        "false": "No: it is sold vacant or nothing says it is rented."
+      }
+    },
+    {
+      "id": "rentabilidad_declarada",
+      "type": "decimal",
+      "pack": "financiero",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": false,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Rentabilidad declarada",
+        "en": "Stated yield"
+      },
+      "unit": "%",
+      "question": "Is {candidate} the yearly rental yield that the listing claims?",
+      "criteria": {
+        "true": "Yes: it is the yield the listing claims.",
+        "false": "No: it is another percentage."
+      }
+    },
+    {
+      "id": "terraza",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Terraza",
+        "en": "Terrace"
+      },
+      "question": "Does the property have a terrace?",
+      "criteria": {
+        "true": "Yes: the property has its own terrace (not a small balcony, not only a shared roof).",
+        "false": "No: it has no terrace or it is not mentioned."
+      }
+    },
+    {
+      "id": "balcon",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Balcón",
+        "en": "Balcony"
+      },
+      "question": "Does the property have a balcony?",
+      "criteria": {
+        "true": "Yes: it has at least one balcony.",
+        "false": "No: it has no balcony or it is not mentioned."
+      }
+    },
+    {
+      "id": "garaje",
+      "type": "enum",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Garaje",
+        "en": "Parking"
+      },
+      "question": "Does the property come with a parking space, and is it included in the price?",
+      "enumValues": [
+        "incluido",
+        "opcional",
+        "no_tiene"
+      ],
+      "options": {
+        "incluido": "A parking space is included in the price.",
+        "opcional": "A parking space is available for an extra price.",
+        "no_tiene": "There is no parking space."
+      }
+    },
+    {
+      "id": "trastero",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Trastero",
+        "en": "Storage room"
+      },
+      "question": "Does the property include a storage room?",
+      "criteria": {
+        "true": "Yes: it includes a storage room.",
+        "false": "No: it has no storage room or it is not mentioned."
+      }
+    },
+    {
+      "id": "ascensor",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Ascensor",
+        "en": "Lift"
+      },
+      "question": "Does the building have a lift (elevator)?",
+      "criteria": {
+        "true": "Yes: the building has a lift.",
+        "false": "No: there is no lift or it is not mentioned."
+      }
+    },
+    {
+      "id": "piscina",
+      "type": "enum",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Piscina",
+        "en": "Swimming pool"
+      },
+      "question": "Does the property have access to a swimming pool?",
+      "enumValues": [
+        "privada",
+        "comunitaria",
+        "no_tiene"
+      ],
+      "options": {
+        "privada": "A private pool for this property only.",
+        "comunitaria": "A shared pool of the building or the residential complex.",
+        "no_tiene": "There is no pool."
+      }
+    },
+    {
+      "id": "aire_acondicionado",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Aire acondicionado",
+        "en": "Air conditioning"
+      },
+      "question": "Does the property have air conditioning?",
+      "criteria": {
+        "true": "Yes: it has air conditioning (split units or ducted).",
+        "false": "No: it has no air conditioning, or only pre-installation, or it is not mentioned."
+      }
+    },
+    {
+      "id": "calefaccion",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Calefacción",
+        "en": "Heating"
+      },
+      "question": "Does the property have a heating system?",
+      "criteria": {
+        "true": "Yes: it has central, individual or underfloor heating, or heat pumps.",
+        "false": "No: it has no heating or it is not mentioned."
+      }
+    },
+    {
+      "id": "orientacion",
+      "type": "enum",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.8,
+        "ask": 0.55
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Orientación",
+        "en": "Orientation"
+      },
+      "question": "Which direction do the main rooms of the property face?",
+      "enumValues": [
+        "norte",
+        "sur",
+        "este",
+        "oeste",
+        "noreste",
+        "noroeste",
+        "sureste",
+        "suroeste"
+      ],
+      "options": {
+        "norte": "North.",
+        "sur": "South.",
+        "este": "East.",
+        "oeste": "West.",
+        "noreste": "North-east.",
+        "noroeste": "North-west.",
+        "sureste": "South-east.",
+        "suroeste": "South-west."
+      }
+    },
+    {
+      "id": "exterior",
+      "type": "enum",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.8,
+        "ask": 0.55
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Exterior o interior",
+        "en": "Exterior or interior"
+      },
+      "question": "Do the main rooms face the street or an open space (exterior) or an inner courtyard (interior)?",
+      "enumValues": [
+        "exterior",
+        "interior"
+      ],
+      "options": {
+        "exterior": "Exterior: the main rooms face the street or an open space.",
+        "interior": "Interior: the main rooms face an inner courtyard or light well."
+      }
+    },
+    {
+      "id": "estado",
+      "type": "ordinal",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.6,
+        "ask": 0.4
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Estado",
+        "en": "Condition"
+      },
+      "question": "What condition is the property in?",
+      "enumValues": [
+        "a_reformar",
+        "para_actualizar",
+        "buen_estado",
+        "reformado",
+        "a_estrenar"
+      ],
+      "options": {
+        "a_reformar": "Needs a full renovation.",
+        "para_actualizar": "Usable, but kitchen, bathrooms or finishes need updating.",
+        "buen_estado": "Good condition, ready to move in.",
+        "reformado": "Recently renovated.",
+        "a_estrenar": "New, never lived in."
+      }
+    },
+    {
+      "id": "luminosidad",
+      "type": "ordinal",
+      "pack": "fisico",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.6,
+        "ask": 0.4
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Luminosidad",
+        "en": "Natural light"
+      },
+      "question": "How much natural light does the property get?",
+      "enumValues": [
+        "oscuro",
+        "poca_luz",
+        "luminoso",
+        "muy_luminoso"
+      ],
+      "options": {
+        "oscuro": "Dark, little natural light.",
+        "poca_luz": "Some natural light, not much.",
+        "luminoso": "Bright.",
+        "muy_luminoso": "Very bright, lots of natural light."
+      }
+    },
+    {
+      "id": "ruido",
+      "type": "ordinal",
+      "pack": "fisico",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.6,
+        "ask": 0.4
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Tranquilidad",
+        "en": "Quietness"
+      },
+      "question": "How quiet are the property and its surroundings?",
+      "enumValues": [
+        "muy_ruidoso",
+        "algo_ruidoso",
+        "tranquilo",
+        "muy_tranquilo"
+      ],
+      "options": {
+        "muy_ruidoso": "Very noisy (busy road, nightlife).",
+        "algo_ruidoso": "Some noise.",
+        "tranquilo": "Quiet.",
+        "muy_tranquilo": "Very quiet."
+      }
+    },
+    {
+      "id": "calidad_acabados",
+      "type": "ordinal",
+      "pack": "fisico",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.6,
+        "ask": 0.4
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Calidad de acabados",
+        "en": "Quality of finishes"
+      },
+      "question": "What is the quality of the finishes and materials?",
+      "enumValues": [
+        "basica",
+        "media",
+        "alta",
+        "lujo"
+      ],
+      "options": {
+        "basica": "Basic finishes.",
+        "media": "Standard finishes.",
+        "alta": "High-quality finishes.",
+        "lujo": "Luxury finishes and materials."
+      }
+    },
+    {
+      "id": "vistas",
+      "type": "enum",
+      "pack": "fisico",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.8,
+        "ask": 0.55
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Vistas",
+        "en": "Views"
+      },
+      "question": "What kind of views does the property have?",
+      "enumValues": [
+        "mar",
+        "montana",
+        "ciudad",
+        "jardin",
+        "sin_vistas_destacables"
+      ],
+      "options": {
+        "mar": "Sea views.",
+        "montana": "Mountain or countryside views.",
+        "ciudad": "City views.",
+        "jardin": "Garden or park views.",
+        "sin_vistas_destacables": "No notable views are mentioned."
+      }
+    },
+    {
+      "id": "accesible",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Accesible",
+        "en": "Step-free access"
+      },
+      "question": "Can the property be reached without steps (step-free access, suitable for wheelchairs)?",
+      "criteria": {
+        "true": "Yes: the listing says it has step-free or adapted access.",
+        "false": "No: it has steps or it is not mentioned."
+      }
+    },
+    {
+      "id": "amueblado",
+      "type": "boolean",
+      "pack": "fisico",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Amueblado",
+        "en": "Furnished"
+      },
+      "question": "Is the property offered furnished?",
+      "criteria": {
+        "true": "Yes: it is offered furnished.",
+        "false": "No: it is unfurnished or it is not mentioned."
+      }
+    },
+    {
+      "id": "vpo",
+      "type": "boolean",
+      "pack": "legal",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Vivienda protegida (VPO)",
+        "en": "Subsidised housing"
+      },
+      "question": "Is the property subsidised or price-controlled housing (VPO or similar protection)?",
+      "criteria": {
+        "true": "Yes: it is subsidised housing, with sale or rent restrictions.",
+        "false": "No: nothing says it is subsidised housing."
+      }
+    },
+    {
+      "id": "okupado",
+      "type": "boolean",
+      "pack": "legal",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Ocupado ilegalmente",
+        "en": "Illegally occupied"
+      },
+      "question": "Is the property occupied by people without a legal right to live there?",
+      "criteria": {
+        "true": "Yes: the listing says it is illegally occupied (\"okupado\", \"sin posesión\").",
+        "false": "No: nothing says it is illegally occupied."
+      }
+    },
+    {
+      "id": "nuda_propiedad",
+      "type": "boolean",
+      "pack": "legal",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Nuda propiedad",
+        "en": "Bare ownership"
+      },
+      "question": "Is only the bare ownership sold (someone else keeps the right to live in it)?",
+      "criteria": {
+        "true": "Yes: only the bare ownership is sold (\"nuda propiedad\").",
+        "false": "No: the full ownership is sold or it is not mentioned."
+      }
+    },
+    {
+      "id": "subasta",
+      "type": "boolean",
+      "pack": "legal",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Subasta",
+        "en": "Auction"
+      },
+      "question": "Is the property sold through an auction or a foreclosure process?",
+      "criteria": {
+        "true": "Yes: it is sold at auction or comes from a foreclosure process.",
+        "false": "No: nothing says it is an auction."
+      }
+    },
+    {
+      "id": "cargas_mencionadas",
+      "type": "boolean",
+      "pack": "legal",
+      "extractors": [
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": false,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Cargas mencionadas",
+        "en": "Charges mentioned"
+      },
+      "question": "Does the listing mention debts, liens or other charges on the property?",
+      "criteria": {
+        "true": "Yes: it mentions debts or charges on the property.",
+        "false": "No: nothing is said about debts or charges."
+      }
+    },
+    {
+      "id": "certificado_energetico",
+      "type": "enum",
+      "pack": "legal",
+      "extractors": [
+        "feed",
+        "features_table",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.85,
+        "ask": 0.6
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Certificado energético",
+        "en": "Energy rating"
+      },
+      "question": "What is the energy rating of the property?",
+      "enumValues": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "en_tramite",
+        "exento"
+      ],
+      "options": {
+        "a": "Energy rating A.",
+        "b": "Energy rating B.",
+        "c": "Energy rating C.",
+        "d": "Energy rating D.",
+        "e": "Energy rating E.",
+        "f": "Energy rating F.",
+        "g": "Energy rating G.",
+        "en_tramite": "The energy certificate is being processed.",
+        "exento": "The property is exempt from the energy certificate."
+      }
+    },
+    {
+      "id": "licencia_turistica",
+      "type": "boolean",
+      "pack": "vacacional",
+      "extractors": [
+        "feed",
+        "regex"
+      ],
+      "gate": {
+        "act": 0.9,
+        "ask": 0.7
+      },
+      "public": true,
+      "filterable": true,
+      "requiredForPublish": false,
+      "label": {
+        "es": "Licencia turística",
+        "en": "Tourist licence"
+      },
+      "question": "Does the listing state that the property has a tourist rental licence?",
+      "criteria": {
+        "true": "Yes: it states a tourist licence or its registration number.",
+        "false": "No: nothing is said about a tourist licence."
+      }
+    }
+  ],
+  "packs": [
+    {
+      "id": "core",
+      "fields": [
+        "operacion",
+        "tipo",
+        "precio",
+        "superficie_construida",
+        "superficie_util",
+        "superficie_parcela",
+        "habitaciones",
+        "banos",
+        "planta",
+        "planta_tipo",
+        "zona",
+        "direccion",
+        "referencia_catastral"
+      ],
+      "maxConcurrency": 8,
+      "stage": "verify"
+    },
+    {
+      "id": "financiero",
+      "fields": [
+        "gastos_comunidad",
+        "ibi",
+        "precio_anterior",
+        "negociable",
+        "alquilado_con_inquilino",
+        "rentabilidad_declarada"
+      ],
+      "maxConcurrency": 8,
+      "stage": "verify"
+    },
+    {
+      "id": "fisico",
+      "fields": [
+        "terraza",
+        "balcon",
+        "garaje",
+        "trastero",
+        "ascensor",
+        "piscina",
+        "aire_acondicionado",
+        "calefaccion",
+        "orientacion",
+        "exterior",
+        "estado",
+        "luminosidad",
+        "ruido",
+        "calidad_acabados",
+        "vistas",
+        "accesible",
+        "amueblado"
+      ],
+      "maxConcurrency": 6,
+      "stage": "reasoning"
+    },
+    {
+      "id": "legal",
+      "fields": [
+        "vpo",
+        "okupado",
+        "nuda_propiedad",
+        "subasta",
+        "cargas_mencionadas",
+        "certificado_energetico"
+      ],
+      "maxConcurrency": 6,
+      "stage": "reasoning"
+    },
+    {
+      "id": "vacacional",
+      "fields": [
+        "licencia_turistica"
+      ],
+      "maxConcurrency": 4,
+      "stage": "reasoning",
+      "condition": {
+        "field": "operacion",
+        "op": "=",
+        "values": [
+          "alquiler_vacacional"
+        ]
+      }
+    }
+  ],
+  "adjudication": [
+    {
+      "field": "precio",
+      "sourcePriority": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "meta",
+        "visible_text"
+      ],
+      "tolerance": {
+        "kind": "relative",
+        "value": "1"
+      },
+      "reasons": {
+        "precio_rebajado": "The price was lowered and one of the amounts is the old price.",
+        "precio_con_garaje": "One amount includes a parking space or storage room and the other does not.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "otra_cantidad": "One amount is something else, such as community fees or a deposit.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "revisar"
+    },
+    {
+      "field": "superficie_construida",
+      "sourcePriority": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "visible_text",
+        "meta"
+      ],
+      "tolerance": {
+        "kind": "relative",
+        "value": "3"
+      },
+      "reasons": {
+        "util_frente_a_construida": "One figure is the usable area and the other the built area.",
+        "incluye_terraza": "One figure includes terraces or common areas.",
+        "incluye_parcela": "One figure is the plot rather than the building.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "fuente_fuerte"
+    },
+    {
+      "field": "superficie_util",
+      "sourcePriority": [
+        "feed",
+        "features_table",
+        "visible_text",
+        "jsonld",
+        "meta"
+      ],
+      "tolerance": {
+        "kind": "relative",
+        "value": "3"
+      },
+      "reasons": {
+        "util_frente_a_construida": "One figure is the built area rather than the usable area.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "fuente_fuerte"
+    },
+    {
+      "field": "habitaciones",
+      "sourcePriority": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "visible_text",
+        "meta"
+      ],
+      "tolerance": {
+        "kind": "absolute",
+        "value": "0"
+      },
+      "reasons": {
+        "cuenta_despacho": "One figure counts a study, office or box room as a bedroom.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "fuente_fuerte"
+    },
+    {
+      "field": "banos",
+      "sourcePriority": [
+        "feed",
+        "jsonld",
+        "features_table",
+        "visible_text",
+        "meta"
+      ],
+      "tolerance": {
+        "kind": "absolute",
+        "value": "0"
+      },
+      "reasons": {
+        "cuenta_aseo": "One figure counts toilets without a shower and the other does not.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "fuente_fuerte"
+    },
+    {
+      "field": "gastos_comunidad",
+      "sourcePriority": [
+        "feed",
+        "features_table",
+        "visible_text"
+      ],
+      "tolerance": {
+        "kind": "relative",
+        "value": "5"
+      },
+      "reasons": {
+        "periodo_distinto": "The amounts refer to different periods (monthly, quarterly, yearly).",
+        "otra_cantidad": "One amount is something else, such as the property tax.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "no_consta"
+    },
+    {
+      "field": "ibi",
+      "sourcePriority": [
+        "feed",
+        "features_table",
+        "visible_text"
+      ],
+      "tolerance": {
+        "kind": "relative",
+        "value": "5"
+      },
+      "reasons": {
+        "periodo_distinto": "The amounts refer to different periods.",
+        "otra_cantidad": "One amount is something else, such as community fees.",
+        "error_de_metadatos": "The page metadata is out of date or wrong.",
+        "no_determinable": "It cannot be told from the evidence."
+      },
+      "onLowConfidence": "no_consta"
+    }
+  ]
+}

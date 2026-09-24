@@ -1,0 +1,6 @@
+pack,fields,max_concurrency,stage,condition
+core,operacion|tipo|precio|superficie_construida|superficie_util|superficie_parcela|habitaciones|banos|planta|planta_tipo|zona|direccion|referencia_catastral,8,verify,
+financiero,gastos_comunidad|ibi|precio_anterior|negociable|alquilado_con_inquilino|rentabilidad_declarada,8,verify,
+fisico,terraza|balcon|garaje|trastero|ascensor|piscina|aire_acondicionado|calefaccion|orientacion|exterior|estado|luminosidad|ruido|calidad_acabados|vistas|accesible|amueblado,6,reasoning,
+legal,vpo|okupado|nuda_propiedad|subasta|cargas_mencionadas|certificado_energetico,6,reasoning,
+vacacional,licencia_turistica,4,reasoning,operacion = alquiler_vacacional
