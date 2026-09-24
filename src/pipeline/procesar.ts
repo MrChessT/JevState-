@@ -56,7 +56,11 @@ const valor = (c: CanonicoInmueble, id: string) => {
 
 /** Se publica solo si todos los campos obligatorios tienen valor fiable. */
 export function publicable(c: CanonicoInmueble, catalog: CompiledCatalog): { ok: boolean; faltan: string[] } {
-  const faltan = catalog.fields.filter((f) => f.requiredForPublish).filter((f) => !["confirmado", "probable"].includes(c.campos[f.id]?.status ?? "")).map((f) => f.id);
+  const faltan = catalog.fields
+    .filter((f) => f.requiredForPublish)
+    .filter((f) => !(f.requiredExcept && f.requiredExcept.values.includes(String(c.campos[f.requiredExcept.field]?.value ?? ""))))
+    .filter((f) => !["confirmado", "probable"].includes(c.campos[f.id]?.status ?? ""))
+    .map((f) => f.id);
   return { ok: faltan.length === 0, faltan };
 }
 

@@ -18,6 +18,8 @@ export interface CaseResult {
   /** El sistema afirmó un dato que no estaba en la evidencia. Tolerancia: cero. */
   invented?: boolean;
   detail?: string;
+  /** Etiquetas para desglosar el resultado (afirmado, error_confirmado, por escenario…). */
+  etiquetas?: string[];
 }
 
 export interface Suite {
@@ -36,6 +38,7 @@ export interface SuiteResult {
   precision: number;
   inventedRate: number;
   failures: CaseResult[];
+  etiquetas: Record<string, number>;
 }
 
 export interface Baseline {
@@ -59,6 +62,7 @@ export async function runSuites(suites: Suite[], ctx: SuiteContext): Promise<Sui
       precision: cases.length === 0 ? 1 : correct / cases.length,
       inventedRate: cases.length === 0 ? 0 : invented / cases.length,
       failures: cases.filter((c) => !c.ok || c.invented),
+      etiquetas: cases.flatMap((c) => c.etiquetas ?? []).reduce<Record<string, number>>((acc, e) => ((acc[e] = (acc[e] ?? 0) + 1), acc), {}),
     });
   }
   return results;
@@ -107,6 +111,7 @@ export function compareWithBaseline(results: SuiteResult[], baseline: Baseline):
     } else {
       lines.push(`${head}  ✓ (línea base ${pct(ref.precision)})`);
     }
+    if (Object.keys(r.etiquetas).length) lines.push(`    ${Object.entries(r.etiquetas).sort().map(([k, v]) => `${k}=${v}`).join(" · ")}`);
     for (const f of r.failures.slice(0, 10)) lines.push(`    - ${f.id}: ${f.detail ?? (f.invented ? "dato inventado" : "fallo")}`);
     if (r.failures.length > 10) lines.push(`    … y ${r.failures.length - 10} más`);
   }

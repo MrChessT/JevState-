@@ -44,6 +44,13 @@ const RASGO_CAMPO: Partial<Record<Rasgo, { campo: string; valor: (negado: boolea
   exterior: { campo: "exterior", valor: () => "exterior" },
   vistas_mar: { campo: "vistas", valor: () => "mar" },
   reformado: { campo: "estado", valor: () => "reformado" },
+  a_estrenar: { campo: "estado", valor: () => "a_estrenar" },
+  muy_luminoso: { campo: "luminosidad", valor: () => "muy_luminoso" },
+  muy_tranquilo: { campo: "ruido", valor: () => "muy_tranquilo" },
+  garaje_incluido: { campo: "garaje", valor: (n) => (n ? "no_tiene" : "incluido") },
+  garaje_opcional: { campo: "garaje", valor: () => "opcional" },
+  piscina_comunitaria: { campo: "piscina", valor: () => "comunitaria" },
+  piscina_privada: { campo: "piscina", valor: () => "privada" },
   a_reformar: { campo: "estado", valor: () => "a_reformar" },
   luminoso: { campo: "luminosidad", valor: () => "luminoso" },
   tranquilo: { campo: "ruido", valor: () => "tranquilo" },
@@ -78,6 +85,9 @@ export function evidenciasDeTexto(texto: string, o: { listingKey: string; source
   }
   for (const c of extraerCertificado(texto)) add(c.inicio, c.fin, "certificado_energetico", { valor: c.valor });
   for (const r of extraerReferenciaCatastral(texto)) add(r.inicio, r.fin, "referencia_catastral", { valor: r.valor });
+  for (const m of texto.matchAll(/orientaci[oó]n\s+(norte|sur|este|oeste|noreste|noroeste|sureste|suroeste)\b/gi)) {
+    add(m.index!, m.index! + m[0].length, "orientacion", { valor: m[1]!.toLowerCase() });
+  }
   for (const m of extraerMenciones(texto)) {
     const map = RASGO_CAMPO[m.rasgo];
     if (map) add(m.inicio, m.fin, map.campo, { valor: map.valor(m.negado), mencion: true, negado: m.negado });

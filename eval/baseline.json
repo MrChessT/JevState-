@@ -4,6 +4,31 @@
       "precision": 1,
       "inventedRate": 0,
       "total": 71
+    },
+    "normalizadores": {
+      "precision": 1,
+      "inventedRate": 0,
+      "total": 207
+    },
+    "zonas": {
+      "precision": 1,
+      "inventedRate": 0,
+      "total": 327
+    },
+    "proximidad": {
+      "precision": 1,
+      "inventedRate": 0,
+      "total": 25
+    },
+    "pipeline-oraculo": {
+      "precision": 1,
+      "inventedRate": 0,
+      "total": 10500
+    },
+    "pipeline-sin-jev": {
+      "precision": 0.9687,
+      "inventedRate": 0,
+      "total": 10500
     }
   }
 }

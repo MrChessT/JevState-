@@ -7,6 +7,7 @@ import { PREGUNTAS } from "../src/asistente/catalogo";
 import { FakeJev } from "../src/jev/fake";
 import { preguntaBooleana, preguntaCandidatos, preguntaConsta, preguntaEnum, preguntaMotivo, preguntaOrdinal, preguntaVerificar, valorOrdinal } from "../src/sde/preguntas";
 import type { CaseResult, Suite } from "./framework";
+import { normalizadores, pipelineJev50, pipelineOraculo, pipelineSinJev, proximidad, zonas } from "./suites-fase1";
 
 /** Cadenas que ve Jev en una pregunta (instrucciones y criterios), sin las claves de las opciones. */
 function textsOf(value: unknown, out: string[] = []): string[] {
@@ -113,5 +114,5 @@ export const contratoCatalogo: Suite = {
   },
 };
 
-export const SUITES_SIN_JEV: Suite[] = [contratoCatalogo];
-export const SUITES_CON_JEV: Suite[] = [];
+export const SUITES_SIN_JEV: Suite[] = [contratoCatalogo, normalizadores, zonas, proximidad, pipelineOraculo, pipelineSinJev];
+export const SUITES_CON_JEV: Suite[] = [pipelineJev50];

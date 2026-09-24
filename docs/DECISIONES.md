@@ -155,6 +155,76 @@ La suite sin Jev de la fase 0 es el **contrato del catálogo** (71 casos). Compr
 ### D-061 · e2e con Supabase inalcanzable *(aplicada)*
 La CI de e2e apunta a propósito a un Supabase que no existe, para demostrar que el portal público no depende de él. Los recorridos con sesión real (cuenta, visita) se añadirán con Supabase local en la fase 5.
 
+## Fase 1 · Datos
+
+### D-100 · Normalizadores compartidos *(aplicada)*
+`src/extraccion/` sirve al pipeline (fichas) y servirá al asistente (mensajes): un solo código para leer «250k», «doscientos cincuenta mil», «3ª planta» o «sin ascensor». Todo importe se calcula con decimal.js.
+
+### D-101 · Cifras ambiguas *(aplicada)*
+«1,500» puede ser 1,5 o 1.500. El código no elige: la cifra lleva `alternativas` y ambas entran como candidatas en la adjudicación, así que decide Jev (o la revisión humana).
+
+### D-102 · Contexto de los importes *(aplicada)*
+El contexto (precio, precio anterior, comunidad, IBI, fianza, €/m², garaje, cuota) se busca dentro de la misma cláusula, cortando en la puntuación. Así «Precio 235.000 € (antes 250.000 €)» no contamina un importe con el contexto del otro. El contexto es una pista para describir el candidato a Jev; no decide solo.
+
+### D-103 · Feed XML estándar de portales *(aplicada; pendiente de tu feed real, P-4)*
+El adaptador genérico lee el formato Kyero v3, el más extendido en España para intercambiar inmuebles con portales, más las etiquetas que suelen añadir los CRM (`address`, `postcode`, `floor`, `community_fees`, `ibi`, `title`). El adaptador no interpreta nada: aplana a pares ruta → literal, y la interpretación la hacen las evidencias. En el formato Kyero, `0` en `plot` o `built` significa «no aplica»: no se convierte en una evidencia de 0 m².
+
+### D-104 · Referencia catastral *(aplicada)*
+Se valida el formato (20 caracteres: 7 + 7 + 4 + 2) pero no se recalculan los dígitos de control. Si se necesita, se añade la validación con el algoritmo oficial y sus casos de prueba.
+
+### D-110 · Diccionario de zonas propio *(aplicada)*
+Tiene los 45 municipios de la Región de Murcia con su código INE y 65 barrios o pedanías de los municipios con más mercado, con alias y erratas frecuentes («cartajena», «la ribera», «lo pagan»). La migración 0008 se genera desde el mismo archivo (`npm run zonas:sql`, comprobado en la CI), así que el código y la base de datos no divergen. «La Manga» existe en Cartagena y en San Javier: la búsqueda devuelve ambas, y en el asistente decidirá Jev con `zona_i` (o se ampliará a las dos, según la política de buscar).
+
+### D-111 · Geometrías y colindancias aproximadas *(pendiente)*
+Los centroides son aproximados (±1-2 km) y las colindancias se han escrito a mano. Cuando se carguen los límites oficiales del CNIG/IGN, `app.recalcular_colindancias()` las calcula con `ST_Touches` y la geocodificación pasa a usar punto-en-polígono. Hasta entonces, el barrio de un inmueble con coordenadas es el barrio más cercano de su municipio (radio de 2,5 km).
+
+### D-112 · Geocodificador *(aplicada)*
+Es local y determinista: usa las coordenadas del feed, el municipio (con erratas), el código postal y la dirección. Si el código postal contradice al municipio, la confianza baja y la zona va a revisión. CartoCiudad (IGN, sin clave) puede enchufarse detrás de `GeocoderPort` para direcciones sin coordenadas.
+
+### D-113 · Ubicación pública aproximada *(aplicada)*
+El portal nunca muestra la ubicación exacta: se desplaza entre 120 y 250 m, en una dirección fija por inmueble (determinista). La exacta queda en `listing_private`.
+
+### D-114 · Puntos de interés de OpenStreetMap *(aplicada; la importación está pendiente de red)*
+La consulta Overpass (playa, colegios y guarderías, estaciones y paradas, hospitales y centros de salud, supermercados) y su parser tienen tests. **La política de red de este entorno bloquea overpass-api.de**, así que la importación (`npm run poi:importar`) se ejecutará en el despliegue o donde haya salida. Por inmueble se guardan los 3 puntos más cercanos de cada categoría dentro de un radio por categoría. Licencia ODbL: se cita «© OpenStreetMap contributors».
+
+### D-120 · Mini cuando el texto coincide *(aplicada)*
+La especificación dice «mini si no hay otra evidencia que lo contradiga» y «verify cuando hay valor estructurado y texto». Criterio aplicado:
+- Si el texto dice lo mismo que la fuente estructurada **sin matices**, no la contradice y basta la etapa mini (+0,03 de confianza).
+- Si el texto trae un matiz, se verifica con Jev. Matices: otro contexto («antes 250.000» para el precio), una cifra ambigua o una superficie sin tipo.
+
+Así Jev solo trabaja donde aporta algo.
+
+### D-121 · Jev caído en el pipeline *(aplicada)*
+Cada paquete se reintenta 3 veces con backoff. Si aun así falla, el trabajo falla y la cola lo reintenta más tarde (10 s × 2ⁿ, hasta 1 h). En el **último** intento, el worker usa el modo `sin_jev`:
+- lo estructurado sin conflicto se acepta (mini);
+- lo demás muestra la fuente más fuerte **marcada** como «revisar» y va a la cola de revisión.
+
+Un Jev caído no bloquea la publicación y no se inventa nada (evaluación: 0 inventados en modo sin Jev).
+
+### D-122 · El «no» de Jev en los booleanos *(aplicada)*
+Las preguntas booleanas del catálogo definen el «no» como «no tiene o no se menciona». Por eso un «no» solo se guarda como `false` si hay una evidencia negativa explícita («sin ascensor», `pool = 0`); si no la hay, el campo queda como `no_consta`. Decir «no tiene terraza» cuando el anuncio no habla de ella sería inventar.
+
+### D-123 · Ordinales con «¿consta?» *(aplicada)*
+`score` siempre devuelve un nivel, aunque el anuncio no diga nada. Por eso cada ordinal (estado, luminosidad, ruido, acabados) va acompañado de un `noul` «¿el anuncio dice algo de esto?», y el nivel solo se acepta si la respuesta es sí.
+
+### D-124 · Citar la descripción completa *(aplicada)*
+Si Jev deduce un atributo que ningún extractor encontró (por ejemplo, «zona chill-out en la azotea» como terraza), el campo cita una evidencia que es la descripción completa. Así, todo valor tiene su evidencia y la cola de revisión puede mostrar de dónde sale.
+
+### D-125 · Obligatorio salvo por tipo *(aplicada)*
+`required_for_publish` admite `si salvo tipo in (local, terreno…)`: un terreno no tiene habitaciones y un local no tiene dormitorios. El compilador valida que los valores existan en el enumerado. Sin esto, los terrenos y los locales nunca se habrían podido publicar.
+
+### D-126 · Estado de publicación *(aplicada)*
+Un inmueble nuevo se publica solo si todos sus campos obligatorios están confirmados o son probables. Si no, queda en borrador y los campos que faltan van a la cola de revisión. Una vez creado, el pipeline no cambia su estado: lo gestiona el equipo.
+
+### D-127 · Datos ficticios y verdad de referencia *(aplicada)*
+`npm run ficticios` genera 300 inmuebles deterministas, con referencia `FIC-`, la marca `ficticio`, un aviso en la descripción y un comentario en el XML. El generador produce también la **verdad** de cada campo (lo que se sabe leyendo todas las fuentes; si no aparece en ninguna, «no consta»). Los archivos van a `datos/ficticios/`, que no se versiona.
+
+### D-128 · Qué mide la evaluación de la fase 1 *(aplicada)*
+- **Baterías sin Jev**: 207 casos de normalizadores, 327 de zonas con erratas y 25 de proximidad.
+- **Pipeline con oráculo**: los 300 ficticios con un Jev que responde según la verdad. Mide todo lo que no es Jev (extracción, cascada, puertas, adjudicación) con un Jev perfecto. Resultado: 100 % y 0 inventados.
+- **Pipeline sin Jev**: 96,9 % de campos correctos, 0 inventados y 0 errores confirmados; lo dudoso queda marcado como «revisar».
+- **Pipeline con Jev real** (`npm run eval:jev`): los 50 primeros ficticios, con la misma verdad. Cuando haya inmuebles reales, se sustituirán por 50 etiquetados a mano (sección 8).
+
 ## Pendiente de tu respuesta
 
 | # | Pregunta | Mientras tanto |

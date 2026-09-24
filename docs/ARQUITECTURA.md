@@ -2,7 +2,7 @@
 
 Plataforma inmobiliaria con asistente dirigido por **Jev** (TypeSafe AI). Este documento describe cómo está construida y cómo encajan las piezas. Las decisiones y sus motivos están en [DECISIONES.md](DECISIONES.md); el catálogo de preguntas y los umbrales, en [CATALOGO_JEV.md](CATALOGO_JEV.md), que se genera desde el código.
 
-> **Estado:** fase 0 (base) terminada. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
+> **Estado:** fases 0 (base) y 1 (datos) terminadas. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
 
 ## 1. Principio rector
 
@@ -109,7 +109,7 @@ interface JevPort {
 
 `npm run catalog:compile` valida (tipos, ids únicos, referencias entre pestañas, textos en inglés, claves en español, `{candidate}` en los numéricos, opciones reservadas), versiona, genera los tipos TypeScript y `docs/CATALOGO_JEV.md`, y ejecuta la evaluación. Si baja la precisión o aparece un dato inventado, falla. Con `--check` (CI) no escribe nada y falla si algo no está al día.
 
-## 5. Pipeline de datos *(fase 1)*
+## 5. Pipeline de datos
 
 ```
 Fuente (feed XML/JSON del CRM · alta manual · CSV)            ← adaptadores; los externos, solo con legal_ok
@@ -129,7 +129,19 @@ listing_fields (value, confidence, status, method, evidence_ids, catalog_version
    └─ corrección manual → siempre gana (un trigger impide sobrescribirla)
 ```
 
-Ya existe en la fase 0: el esquema (`listing_evidence`, `listing_fields`, `review_queue`, `eval_labels`, `jobs`), las preguntas SDE generadas desde el catálogo (`src/sde/preguntas.ts`), la cola de trabajos con `FOR UPDATE SKIP LOCKED` y backoff exponencial, y la protección de las correcciones manuales.
+| Pieza | Dónde |
+| --- | --- |
+| Adaptadores (XML de portales, CSV) con base legal e idempotencia por hash | `src/ingesta/` |
+| Normalizadores (números, importes, superficies, estancias, planta, certificado, catastro, fechas, direcciones, características, proximidad) | `src/extraccion/` |
+| Evidencias por campo desde feed, JSON-LD, meta, tabla y texto | `src/evidencia/` |
+| Zonas (45 municipios + 65 barrios), búsqueda difusa y geocodificador | `src/zonas/`, migración 0008 |
+| Cascada por paquetes, adjudicación, canónico y modo sin Jev | `src/sde/cascada/` |
+| Pipeline por inmueble (publicación, slug, ubicación pública, distancias) | `src/pipeline/procesar.ts` |
+| Persistencia transaccional (`sde_guardar`) y cola de trabajos por la API | migración 0009, `src/pipeline/almacen.ts` |
+| Worker (`npm run worker`), ingesta (`npm run ingestar`) y POI (`npm run poi:importar`) | `scripts/` |
+| 300 ficticios con verdad de referencia (`npm run ficticios`) | `src/ficticios/` |
+
+Reglas que garantizan «nunca se inventa» (D-120 a D-124): el «no» de Jev sin evidencia negativa es `no_consta`; los ordinales exigen «¿consta?»; todo valor cita al menos una evidencia (lo valida el esquema zod del canónico); los enumerados incompatibles con la fuente estructurada nunca se confirman solos.
 
 ## 6. Asistente *(fases 3-4)*
 

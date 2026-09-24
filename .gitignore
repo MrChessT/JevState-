@@ -17,3 +17,4 @@ eval/.tmp/
 # Playwright
 test-results/
 playwright-report/
+datos/ficticios/

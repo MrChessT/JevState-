@@ -105,6 +105,8 @@ export const CompiledField = z.object({
   public: z.boolean(),
   filterable: z.boolean(),
   requiredForPublish: z.boolean(),
+  /** Excepciones: no es obligatorio si el campo `field` toma uno de estos valores (p. ej. tipo = terreno). */
+  requiredExcept: z.object({ field: z.string(), values: z.array(z.string()).min(1) }).optional(),
   label: z.object({ es: z.string(), en: z.string() }),
 });
 
@@ -202,9 +204,15 @@ export function compileCatalog(sheets: SheetRows): CatalogBody {
       gate: { act: unit(r.gate_act!, `${where}.gate_act`, errors), ask: unit(r.gate_ask!, `${where}.gate_ask`, errors) },
       public: siNo(r.public!, `${where}.public`, errors),
       filterable: siNo(r.filterable!, `${where}.filterable`, errors),
-      requiredForPublish: siNo(r.required_for_publish!, `${where}.required_for_publish`, errors),
+      requiredForPublish: false,
       label: { es: r.label_es!, en: r.label_en! },
     };
+    // required_for_publish: «si», «no» o «si salvo tipo in (local, terreno)».
+    const req = /^si\s+salvo\s+([a-z][a-z0-9_]*)\s+in\s*\(([^)]*)\)$/i.exec(r.required_for_publish!.trim());
+    if (req) {
+      field.requiredForPublish = true;
+      field.requiredExcept = { field: req[1]!, values: req[2]!.split(",").map((v) => v.trim()).filter(Boolean) };
+    } else field.requiredForPublish = siNo(r.required_for_publish!, `${where}.required_for_publish`, errors);
     if (field.gate.ask > field.gate.act) errors.push(`${where}: gate_ask no puede ser mayor que gate_act`);
     if (!field.label.es || !field.label.en) errors.push(`${where}: faltan las etiquetas label_es / label_en`);
     if (r.unit) field.unit = r.unit;
@@ -278,6 +286,11 @@ export function compileCatalog(sheets: SheetRows): CatalogBody {
     packs.push({ id: r.pack!, fields: list, maxConcurrency: max, stage: r.stage as CompiledPack["stage"], ...(condition ? { condition } : {}) });
   }
   for (const f of fields) {
+    if (f.requiredExcept) {
+      const ref = fieldById.get(f.requiredExcept.field);
+      if (!ref?.enumValues) errors.push(`Fields (${f.id}): required_for_publish hace referencia a «${f.requiredExcept.field}», que no es un enum`);
+      else for (const v of f.requiredExcept.values) if (!ref.enumValues.includes(v)) errors.push(`Fields (${f.id}): «${v}» no es un valor de ${ref.id}`);
+    }
     if (!packIds.has(f.pack)) errors.push(`Fields (${f.id}): el paquete «${f.pack}» no existe en Parallel_Packs`);
     else if (!fieldInPack.has(f.id)) errors.push(`Fields (${f.id}): no aparece en la lista de campos del paquete «${f.pack}»`);
   }

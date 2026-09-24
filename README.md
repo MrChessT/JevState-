@@ -13,8 +13,8 @@ Portal, asistente, backoffice, pipeline de datos y valoración para una inmobili
 | Fase | Contenido | Estado |
 | --- | --- | --- |
 | 0 · Base | Repo, CI, sistema de diseño, marca, i18n (es/en), auth con magic link, esquema con RLS, JevPort + FakeJev, puertas, umbrales, plano de control | **Hecha** |
-| 1 · Datos | Ingesta, evidencias, normalizadores, cascada SDE, adjudicación, cola de revisión, geocodificación, POI, 300 inmuebles ficticios | Siguiente |
-| 2 · Portal | Resultados con lista y mapa, ficha, zonas, favoritos, comparador, SEO | — |
+| 1 · Datos | Ingesta, evidencias, normalizadores, cascada SDE, adjudicación, cola de revisión, geocodificación, POI, 300 inmuebles ficticios | **Hecha** |
+| 2 · Portal | Resultados con lista y mapa, ficha, zonas, favoritos, comparador, SEO | Siguiente |
 | 3-4 · Asistente | Llamadas 1 y 2, ficha de búsqueda con chips, relajación, encaje, feedback, alertas | — |
 | 5 · Conversión | Visitas y contacto con confirmación, CRM, emails, calendario | — |
 | 6 · Valoración | Comparables + ajuste de Jev; modelo ML si supera la validación | — |
@@ -37,6 +37,17 @@ npm run e2e                            # Playwright + axe (tras npm run build)
 npm run db:test:local                  # migraciones + pgTAP en Postgres local (sin Docker)
 npm run db:start && npm run db:test    # lo mismo con Supabase CLI
 npm run eval:jev && npm run eval:sweep # con Jev real
+```
+
+## Datos
+
+```bash
+npm run ficticios                                   # 300 inmuebles ficticios en datos/ficticios/
+npm run ingestar -- --archivo datos/ficticios/feed.xml --paginas datos/ficticios/paginas   # en memoria, con resumen
+npm run ingestar -- --archivo feed.xml --supabase   # encola en Supabase (AGENCY_ID + service role)
+npm run worker                                      # procesa la cola (enriquecimiento con Jev)
+npm run poi:importar                                # POI de OpenStreetMap (necesita red)
+npm run zonas:sql                                   # regenera la migración de zonas desde src/zonas/datos.ts
 ```
 
 La CI (`.github/workflows/ci.yml`) ejecuta en cada PR la aplicación, los e2e con accesibilidad y la base de datos. La evaluación con Jev real (`eval-jev.yml`) se lanza a mano o cada semana.

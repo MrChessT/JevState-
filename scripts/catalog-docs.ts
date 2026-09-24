@@ -87,7 +87,7 @@ export function renderCatalogDoc(catalog: CompiledCatalog, assistantVersion: str
         const f = catalog.fields.find((x) => x.id === id)!;
         const opts = f.options ? Object.entries(f.options).map(([k, v]) => `\`${k}\`: ${v}`).join("<br>") : f.criteria ? `**sí**: ${f.criteria.true}<br>**no**: ${f.criteria.false}` : "—";
         const jev = f.type === "text" ? "Nunca (literal de la fuente)" : f.type === "boolean" ? "noul" : f.type === "enum" ? "choice + `no_consta`" : f.type === "ordinal" ? "score" : "noul (verify) / choice entre candidatos + `ninguno`";
-        return `| \`${f.id}\` | ${f.type}${f.unit ? ` (${f.unit})` : ""} | ${jev} | ${esc(f.question ?? "—")} | ${esc(opts)} | ${f.gate.act} / ${f.gate.ask} | ${f.public ? "sí" : "no"} | ${f.filterable ? "sí" : "no"} | ${f.requiredForPublish ? "sí" : "no"} | ${f.extractors.join(", ")} |`;
+        return `| \`${f.id}\` | ${f.type}${f.unit ? ` (${f.unit})` : ""} | ${jev} | ${esc(f.question ?? "—")} | ${esc(opts)} | ${f.gate.act} / ${f.gate.ask} | ${f.public ? "sí" : "no"} | ${f.filterable ? "sí" : "no"} | ${f.requiredForPublish ? (f.requiredExcept ? `sí, salvo ${f.requiredExcept.field} ∈ {${f.requiredExcept.values.join(", ")}}` : "sí") : "no"} | ${f.extractors.join(", ")} |`;
       });
       return `#### Paquete \`${p.id}\` (${p.stage})\n\n| campo | tipo | Jev | pregunta (en) | opciones / criterios | act / ask | público | filtro | obligatorio | extractores |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n${rows.join("\n")}`;
     })

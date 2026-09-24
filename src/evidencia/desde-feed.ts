@@ -49,8 +49,8 @@ export function evidenciasDeFeed(r: RegistroFuente): Evidencia[] {
     const key = k(...claves);
     if (!key) continue;
     const v = numero(c[key]!);
-    // Kyero usa 0 para «no aplica» en la parcela: no es una evidencia de 0 m².
-    if (!v || (v.isZero() && campo === "superficie_parcela")) continue;
+    // Kyero usa 0 para «no aplica» (parcela de un piso, construida de un terreno): no es un dato.
+    if (!v || (v.isZero() && campo.startsWith("superficie"))) continue;
     if ((campo === "habitaciones" || campo === "banos") && !v.isInteger()) continue;
     add(key, campo, { valor: v.toString(), unidad });
   }

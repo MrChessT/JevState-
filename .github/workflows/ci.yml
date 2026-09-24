@@ -1,4 +1,4 @@
-# Puerta de calidad en cada push a main y en cada pull request.
+# Puerta de calidad en cada push (cualquier rama) y en cada pull request.
 #   app: lint, tipos, tests, catálogo al día + evaluación sin Jev, build.
 #   e2e: recorridos y accesibilidad (axe, WCAG 2.2 AA) contra el build de producción.
 #   db:  todas las migraciones en un Supabase limpio + tests pgTAP de RLS y reglas.
@@ -6,7 +6,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 concurrency:
@@ -33,6 +33,7 @@ jobs:
       # Falla si catalog/compiled.json, los tipos o docs/CATALOGO_JEV.md no están al día,
       # o si la evaluación sin Jev empeora respecto a eval/baseline.json.
       - run: npm run catalog:compile -- --check
+      - run: npm run zonas:sql -- --check
       - run: npm run eval
       - run: npm run build
 

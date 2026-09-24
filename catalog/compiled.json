@@ -1,6 +1,6 @@
 {
-  "version": "2026-09-24.c9aa22b3",
-  "hash": "c9aa22b3196cfc12033384b9596a09fff46f68474d027595cf6dfd3a2e74f209",
+  "version": "2026-09-24.a1a63988",
+  "hash": "a1a63988ff58ecbf128f5193560c209e3a65549b4011ba76d9188760e723e7f2",
   "fields": [
     {
       "id": "operacion",
@@ -130,6 +130,13 @@
         "es": "Superficie construida",
         "en": "Built area"
       },
+      "requiredExcept": {
+        "field": "tipo",
+        "values": [
+          "terreno",
+          "garaje"
+        ]
+      },
       "unit": "m2",
       "question": "Is {candidate} the built area of the property, and not the usable area or the plot?",
       "criteria": {
@@ -211,6 +218,15 @@
       "label": {
         "es": "Habitaciones",
         "en": "Bedrooms"
+      },
+      "requiredExcept": {
+        "field": "tipo",
+        "values": [
+          "local",
+          "oficina",
+          "terreno",
+          "garaje"
+        ]
       },
       "question": "Is {candidate} the number of bedrooms?",
       "criteria": {

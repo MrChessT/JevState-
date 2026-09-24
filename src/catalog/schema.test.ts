@@ -106,6 +106,15 @@ describe("compileCatalog", () => {
     expect(text).toMatch(/solo aplica a campos numéricos/);
   });
 
+  it("obligatorio salvo ciertos tipos, con valores validados", () => {
+    const op = 'tipo,enum,piso|terreno,,core,Which type?,,,"piso: Flat. | terreno: Land.",feed,0.8,0.5,si,si,si,Tipo,Type';
+    const hab = "habitaciones,integer,,,core,Is {candidate} the number of bedrooms?,Yes.,No.,,feed,0.85,0.6,si,si,si salvo tipo in (terreno),Habitaciones,Bedrooms";
+    const body = compileCatalog(sheets([TERRAZA, op, hab], ["core,terraza|tipo|habitaciones,4,verify,"]));
+    expect(body.fields.find((f) => f.id === "habitaciones")).toMatchObject({ requiredForPublish: true, requiredExcept: { field: "tipo", values: ["terreno"] } });
+    const mala = hab.replace("(terreno)", "(castillo)");
+    expect(errorsOf(() => compileCatalog(sheets([TERRAZA, op, mala], ["core,terraza|tipo|habitaciones,4,verify,"]))).join("\n")).toMatch(/«castillo» no es un valor de tipo/);
+  });
+
   it("condiciones de paquete sobre valores existentes", () => {
     const op = 'operacion,enum,venta|alquiler,,core,Sale or rent?,,,"venta: Sale. | alquiler: Rent.",feed,0.8,0.5,si,si,si,Operación,Operation';
     const text = errorsOf(() => compileCatalog(sheets([TERRAZA, op], ["core,terraza|operacion,4,verify,operacion = subasta"]))).join("\n");

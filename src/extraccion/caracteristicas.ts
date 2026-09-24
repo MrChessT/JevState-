@@ -5,7 +5,8 @@ import { plano, type Tramo } from "./texto";
 export type Rasgo =
   | "terraza" | "balcon" | "garaje" | "trastero" | "ascensor" | "piscina" | "aire_acondicionado" | "calefaccion"
   | "amueblado" | "accesible" | "exterior" | "vistas_mar" | "jardin" | "reformado" | "a_reformar" | "luminoso"
-  | "tranquilo" | "okupado" | "nuda_propiedad" | "subasta" | "vpo" | "alquilado" | "licencia_turistica" | "negociable";
+  | "tranquilo" | "muy_tranquilo" | "muy_luminoso" | "a_estrenar" | "garaje_incluido" | "garaje_opcional"
+  | "piscina_comunitaria" | "piscina_privada" | "okupado" | "nuda_propiedad" | "subasta" | "vpo" | "alquilado" | "licencia_turistica" | "negociable";
 
 export interface Mencion extends Tramo {
   rasgo: Rasgo;
@@ -26,10 +27,17 @@ const DICCIONARIO: Record<Rasgo, RegExp> = {
   exterior: /\bexterior\b/,
   vistas_mar: /\bvistas?\s+al\s+mar\b|\bvistas?\s+al\s+mar\s+menor\b|\bsea\s+views?\b|\bprimera\s+linea\b/,
   jardin: /\bjard[ií]n\b|\bgarden\b/,
-  reformado: /\breformad[oa]\b|\brenovated\b|\ba\s+estrenar\b/,
+  reformado: /\breformad[oa]\b|\brenovated\b/,
+  a_estrenar: /\ba\s+estrenar\b|\bobra\s+nueva\b|\bnew\s+build\b/,
+  garaje_incluido: /\b(garaje|plaza\s+de\s+(garaje|aparcamiento)|parking)\s+incluid[ao]\b|\bincluye\s+(plaza\s+de\s+)?(garaje|aparcamiento|parking)\b/,
+  garaje_opcional: /\b(garaje|plaza\s+de\s+(garaje|aparcamiento)|parking)\s+opcional\b|\bopci[oó]n\s+(de\s+)?(compra\s+de\s+)?(plaza\s+de\s+)?garaje\b/,
+  piscina_comunitaria: /\bpiscina\s+comunitaria\b|\bcommunal\s+pool\b|\bshared\s+pool\b/,
+  piscina_privada: /\bpiscina\s+privada\b|\bprivate\s+pool\b/,
   a_reformar: /\b(a|para)\s+reformar\b|\bnecesita\s+reforma\b|\bto\s+renovate\b|\bpara\s+actualizar\b/,
-  luminoso: /\bluminos[oa]\b|\bmucha\s+luz\b|\bbright\b/,
-  tranquilo: /\btranquil[oa]\b|\bsilencios[oa]\b|\bquiet\b/,
+  luminoso: /(?<!muy\s)\bluminos[oa]\b|\bbright\b/,
+  muy_luminoso: /\bmuy\s+luminos[oa]\b|\bmucha\s+luz\b|\bvery\s+bright\b/,
+  tranquilo: /(?<!muy\s)\btranquil[oa]\b|\bsilencios[oa]\b|\bquiet\b/,
+  muy_tranquilo: /\bmuy\s+tranquil[oa]\b|\bvery\s+quiet\b/,
   okupado: /\bokupad[oa]\b|\bocupad[oa]\s+ilegalmente\b|\bsin\s+posesi[oó]n\b/,
   nuda_propiedad: /\bnuda\s+propiedad\b/,
   subasta: /\bsubasta\b|\bejecuci[oó]n\s+hipotecaria\b|\bauction\b/,

@@ -28,7 +28,8 @@
     "zonas:sql": "tsx scripts/zonas-sql.ts",
     "ingestar": "tsx --env-file-if-exists=.env.local scripts/ingestar.ts",
     "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
-    "poi:importar": "tsx --env-file-if-exists=.env.local scripts/poi-importar.ts"
+    "poi:importar": "tsx --env-file-if-exists=.env.local scripts/poi-importar.ts",
+    "ficticios": "tsx scripts/generar-ficticios.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
