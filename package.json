@@ -25,7 +25,10 @@
     "db:test": "supabase test db",
     "db:test:local": "bash scripts/db-test-local.sh",
     "e2e": "playwright test",
-    "zonas:sql": "tsx scripts/zonas-sql.ts"
+    "zonas:sql": "tsx scripts/zonas-sql.ts",
+    "ingestar": "tsx --env-file-if-exists=.env.local scripts/ingestar.ts",
+    "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
+    "poi:importar": "tsx --env-file-if-exists=.env.local scripts/poi-importar.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

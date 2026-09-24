@@ -1,6 +1,6 @@
 // Objeto de evidencia (sección 3.2). Determinista: ninguna evidencia sale de un modelo.
 import { z } from "zod";
-import { sha256 } from "@/jev/stable";
+import { uuidDe } from "@/jev/stable";
 import { SOURCES, type Source } from "@/catalog/schema";
 
 export const Evidencia = z.object({
@@ -46,8 +46,7 @@ export const ESTRUCTURADAS: ReadonlySet<Source> = new Set<Source>(["manual", "fe
 
 /** Id determinista (formato UUID) para que reprocesar no duplique evidencias. */
 export function idEvidencia(listingKey: string, source: string, path: string, raw: string, campo: string): string {
-  const h = sha256(`${listingKey}\u0000${source}\u0000${path}\u0000${raw}\u0000${campo}`);
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${((parseInt(h.slice(16, 18), 16) & 0x3f) | 0x80).toString(16)}${h.slice(18, 20)}-${h.slice(20, 32)}`;
+  return uuidDe(`${listingKey}\u0000${source}\u0000${path}\u0000${raw}\u0000${campo}`);
 }
 
 export function evidencia(e: Omit<Evidencia, "id" | "sourceWeight"> & { sourceWeight?: number }): Evidencia {
