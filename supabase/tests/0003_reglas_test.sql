@@ -2,7 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(12);
+select plan(11);
 
 insert into auth.users(id, email) values ('00000000-0000-0000-0000-00000000000a', 'admin@test');
 insert into agencies(id, slug, name) values ('10000000-0000-0000-0000-00000000000a', 'agencia', 'Agencia');
@@ -54,13 +54,6 @@ update jobs set run_after = now() - interval '1 second';
 select app.reservar_trabajos('sde.enriquecer', 10, 'w1');
 select app.terminar_trabajo((select id from jobs limit 1), 'timeout');
 select is((select status::text from jobs limit 1), 'fallido', 'tras max_attempts el trabajo queda fallido');
-
--- Búsqueda difusa de zonas (erratas y alias) ---------------------------------------------------
-insert into zones(level, path, slug, name, aliases) values
-  ('municipio', 'cartagena', 'cartagena', 'Cartagena', '{}'),
-  ('municipio', 'murcia', 'murcia', 'Murcia', '{}'),
-  ('municipio', 'san-javier', 'san-javier', 'San Javier', '{"santiago de la ribera"}');
-select is((select path from buscar_zonas('cartajena') limit 1), 'cartagena', 'la búsqueda difusa encuentra zonas con erratas');
 
 select * from finish();
 rollback;

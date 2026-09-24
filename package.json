@@ -24,7 +24,8 @@
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
     "db:test:local": "bash scripts/db-test-local.sh",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "zonas:sql": "tsx scripts/zonas-sql.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
@@ -32,7 +33,9 @@
     "@typesafe-ai/sdk": "0.6.0",
     "@vercel/oidc": "^3.8.9",
     "decimal.js": "10.6.0",
+    "fast-xml-parser": "^5.11.1",
     "next": "16.3.6",
+    "node-html-parser": "^7.1.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
