@@ -2,7 +2,7 @@
 
 Plataforma inmobiliaria con asistente dirigido por **Jev** (TypeSafe AI). Este documento describe cómo está construida y cómo encajan las piezas. Las decisiones y sus motivos están en [DECISIONES.md](DECISIONES.md); el catálogo de preguntas y los umbrales, en [CATALOGO_JEV.md](CATALOGO_JEV.md), que se genera desde el código.
 
-> **Estado:** fases 0 (base) y 1 (datos) terminadas. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
+> **Estado:** fases 0 (base), 1 (datos) y 2 (portal) terminadas. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
 
 ## 1. Principio rector
 

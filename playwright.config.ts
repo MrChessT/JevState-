@@ -27,6 +27,7 @@ export default defineConfig({
       // Supabase inalcanzable a propósito: el portal debe funcionar igual (degradación).
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:59999",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "e2e",
+      PORTAL_DATOS: "ficticios",
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

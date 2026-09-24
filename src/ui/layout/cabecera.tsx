@@ -13,7 +13,9 @@ export function Cabecera({ locale, d }: { locale: Locale; d: Diccionario }) {
       ["alquiler", d.nav.alquilar],
       ["valorar", d.nav.vender],
       ["asistente", d.nav.asistente],
+      ["zonas", d.zonas.titulo],
       ["agencia", d.nav.agencia],
+      ["favoritos", d.favoritos.titulo],
     ] as Array<[Segmento, string]>
   ).filter(([seg]) => publicada(seg));
   return (

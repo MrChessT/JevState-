@@ -70,7 +70,7 @@ test.describe("portal (fase 0)", () => {
 
 test("sin scroll horizontal en ninguna página (móvil de 360 px)", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
-  for (const ruta of ["/", "/en", "/legal/privacidad", "/cuenta/entrar", "/no-existe"]) {
+  for (const ruta of ["/", "/en", "/venta", "/venta/murcia", "/zonas", "/zonas/murcia", "/favoritos", "/comparar", "/legal/privacidad", "/cuenta/entrar", "/no-existe"]) {
     await page.goto(ruta);
     const desborde = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(desborde, ruta).toBeLessThanOrEqual(0);

@@ -46,7 +46,7 @@ export function slugInmueble(c: CanonicoInmueble, ref: string): string {
   const tipo = TIPO_SLUG[String(c.campos.tipo?.value ?? "")] ?? "inmueble";
   const hab = c.campos.habitaciones?.value;
   const r = ref.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  return [tipo, typeof hab === "number" ? `${hab}-hab` : null, "ref", r].filter(Boolean).join("-");
+  return [tipo, typeof hab === "number" && hab > 0 ? `${hab}-hab` : null, "ref", r].filter(Boolean).join("-");
 }
 
 const valor = (c: CanonicoInmueble, id: string) => {

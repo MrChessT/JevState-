@@ -225,6 +225,29 @@ Un inmueble nuevo se publica solo si todos sus campos obligatorios están confir
 - **Pipeline sin Jev**: 96,9 % de campos correctos, 0 inventados y 0 errores confirmados; lo dudoso queda marcado como «revisar».
 - **Pipeline con Jev real** (`npm run eval:jev`): los 50 primeros ficticios, con la misma verdad. Cuando haya inmuebles reales, se sustituirán por 50 etiquetados a mano (sección 8).
 
+## Fase 2 · Portal
+
+### D-200 · Fuente de datos del portal *(aplicada)*
+El portal lee de Supabase con la clave anónima y RLS: las RPC `buscar_inmuebles` y `ficha_inmueble` (migración 0010) son `SECURITY INVOKER`. Sin Supabase, o con `PORTAL_DATOS=ficticios`, usa los 300 ficticios procesados por el pipeline real con el Jev oráculo. Así, la demo muestra el comportamiento esperado sin base de datos, y los e2e usan siempre este modo.
+
+### D-201 · URLs, filtros e indexación *(aplicada)*
+La operación y la zona van en la ruta (`/venta/murcia/el-carmen`) y el resto de filtros en la query, siempre en orden canónico. Las páginas con filtros llevan `noindex, follow`, y su canónica es la de operación más zona. La ficha cuelga de su zona (`/venta/murcia/el-carmen/piso-3-hab-ref-1234`). El buscador funciona sin JavaScript: el formulario hace GET a `/api/buscar`, que redirige con 303 a la URL canónica.
+
+### D-202 · Requisitos en los filtros *(aplicada)*
+«Con terraza» exige que el campo esté `confirmado` o `probable` (sección 4.4). En la tarjeta, lo probable se marca en naranja. Lo que está en revisión no cuenta.
+
+### D-203 · Mapa *(aplicada)*
+MapLibre se carga solo cuando el mapa entra en pantalla y usa las teselas de OpenFreeMap (sin clave), configurables con `NEXT_PUBLIC_MAP_STYLE` (P-5). La lista y el mapa están sincronizados en los dos sentidos. Muestra siempre la ubicación aproximada (D-113). Este entorno de trabajo no tiene acceso a las teselas, así que aquí el mapa se ve vacío; en un navegador normal carga.
+
+### D-204 · Favoritos y comparador sin cuenta *(aplicada)*
+Se guardan en `localStorage`, con un evento para que todas las tarjetas se actualicen a la vez. La página lo dice («se guardan en este navegador»). La sincronización con la cuenta llega con la fase de cuenta y alertas.
+
+### D-205 · Imágenes *(pendiente con Storage)*
+Las fotos de los ficticios son SVG deterministas generados por una ruta (sin red). Las fotos reales usarán Supabase Storage con un CDN de transformación (AVIF/WebP). Mientras tanto, las tarjetas usan `<img>` con carga diferida y tamaños fijos, para no mover el diseño.
+
+### D-206 · Precio frente a la zona *(aplicada)*
+Es la mediana del €/m² de la oferta publicada del municipio (con sus barrios). Se muestra solo con 3 inmuebles o más, e indica cuántos se han usado. Es precio de oferta, no de cierre.
+
 ## Pendiente de tu respuesta
 
 | # | Pregunta | Mientras tanto |

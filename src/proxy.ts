@@ -27,5 +27,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Fuera: API, auth (callback), estáticos, archivos con extensión, sitemap y robots.
-  matcher: ["/((?!api/|auth/|_next/|favicon.ico|icon|apple-icon|opengraph-image|sitemap.xml|robots.txt|.*\\.[a-zA-Z0-9]+$).*)"],
+  matcher: ["/((?!api/|auth/|ficticios/|_next/|favicon.ico|icon|apple-icon|opengraph-image|sitemap.xml|robots.txt|.*\\.[a-zA-Z0-9]+$).*)"],
 };

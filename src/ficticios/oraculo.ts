@@ -2,9 +2,9 @@
 // NO es Jev (extracción, cascada, puertas, adjudicación) con un Jev perfecto; con Jev real se mide Jev.
 import Decimal from "decimal.js";
 import type { ChoiceCriteria, EntryType } from "@typesafe-ai/sdk";
-import type { CompiledCatalog } from "../src/catalog/schema";
-import type { Responder } from "../src/jev/fake";
-import type { ValorVerdad } from "../src/ficticios/generador";
+import type { CompiledCatalog } from "@/catalog/schema";
+import type { Responder } from "@/jev/fake";
+import type { ValorVerdad } from "./generador";
 
 const primerNumero = (s: string): Decimal | null => {
   const m = /-?\d+(?:\.\d+)?/.exec(s);

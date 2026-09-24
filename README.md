@@ -14,8 +14,8 @@ Portal, asistente, backoffice, pipeline de datos y valoración para una inmobili
 | --- | --- | --- |
 | 0 · Base | Repo, CI, sistema de diseño, marca, i18n (es/en), auth con magic link, esquema con RLS, JevPort + FakeJev, puertas, umbrales, plano de control | **Hecha** |
 | 1 · Datos | Ingesta, evidencias, normalizadores, cascada SDE, adjudicación, cola de revisión, geocodificación, POI, 300 inmuebles ficticios | **Hecha** |
-| 2 · Portal | Resultados con lista y mapa, ficha, zonas, favoritos, comparador, SEO | Siguiente |
-| 3-4 · Asistente | Llamadas 1 y 2, ficha de búsqueda con chips, relajación, encaje, feedback, alertas | — |
+| 2 · Portal | Resultados con lista y mapa, ficha, zonas, favoritos, comparador, SEO | **Hecha** |
+| 3-4 · Asistente | Llamadas 1 y 2, ficha de búsqueda con chips, relajación, encaje, feedback, alertas | Siguiente |
 | 5 · Conversión | Visitas y contacto con confirmación, CRM, emails, calendario | — |
 | 6 · Valoración | Comparables + ajuste de Jev; modelo ML si supera la validación | — |
 | 7 · Endurecimiento | Barrido de umbrales con Jev real, e2e completos, carga y seguridad | — |

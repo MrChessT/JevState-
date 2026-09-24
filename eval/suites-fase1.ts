@@ -20,7 +20,7 @@ import { CASOS_NORMALIZADORES } from "./datasets/normalizadores";
 import { CASOS_PROXIMIDAD } from "./datasets/proximidad";
 import { casosZonas } from "./datasets/zonas";
 import type { CaseResult, Suite } from "./framework";
-import { oraculo } from "./oraculo";
+import { oraculo } from "../src/ficticios/oraculo";
 
 const igual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
