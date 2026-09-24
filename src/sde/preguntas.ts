@@ -63,6 +63,14 @@ export function preguntaMotivo(f: CompiledField, r: CompiledRule): Question {
   return choice({ question: "The sources disagree about this value. What best explains the difference?", field: f.label.en }, r.reasons);
 }
 
+/** Acompaña a un ordinal: ¿el anuncio dice algo de este aspecto? (un score siempre da un nivel). */
+export function preguntaConsta(f: CompiledField): Question {
+  return noul(`Does the listing say anything about the ${f.label.en.toLowerCase()} of the property?`, {
+    true: "Yes: the listing describes it, directly or clearly implied.",
+    false: "No: the listing does not say anything about it.",
+  });
+}
+
 /** Nivel del score → valor del enumerado ordinal (tabla del catálogo). */
 export function valorOrdinal(f: CompiledField, level: number): string {
   const values = f.enumValues ?? [];

@@ -5,7 +5,7 @@ import type { Question } from "@typesafe-ai/sdk";
 import { checkEnglish, checkKey, NUMERIC_TYPES } from "../src/catalog/schema";
 import { PREGUNTAS } from "../src/asistente/catalogo";
 import { FakeJev } from "../src/jev/fake";
-import { preguntaBooleana, preguntaCandidatos, preguntaEnum, preguntaMotivo, preguntaOrdinal, preguntaVerificar, valorOrdinal } from "../src/sde/preguntas";
+import { preguntaBooleana, preguntaCandidatos, preguntaConsta, preguntaEnum, preguntaMotivo, preguntaOrdinal, preguntaVerificar, valorOrdinal } from "../src/sde/preguntas";
 import type { CaseResult, Suite } from "./framework";
 
 /** Cadenas que ve Jev en una pregunta (instrucciones y criterios), sin las claves de las opciones. */
@@ -56,6 +56,7 @@ export const contratoCatalogo: Suite = {
         else if (f.type === "enum") questions.push([f.id, preguntaEnum(f)]);
         else if (f.type === "ordinal") {
           questions.push([f.id, preguntaOrdinal(f)]);
+          questions.push([`${f.id}__consta`, preguntaConsta(f)]);
           f.enumValues!.forEach((v, i) => {
             if (valorOrdinal(f, i) !== v) errors.push(`${f.id}: el nivel ${i} no corresponde a «${v}»`);
           });
