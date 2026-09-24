@@ -1,0 +1,97 @@
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in oklab, var(--fondo) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--borde);
+}
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  min-height: 64px;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: var(--t-lg);
+  color: var(--texto);
+  text-decoration: none;
+  margin-right: auto;
+  min-width: 0;
+}
+.logoTexto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.logoMarca {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-2);
+  background: var(--marca);
+  color: var(--marca-texto);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+.nav {
+  display: none;
+  gap: var(--e-1);
+}
+.nav a {
+  padding: var(--e-2) var(--e-3);
+  border-radius: var(--r-2);
+  color: var(--texto);
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav a:hover { background: var(--superficie-2); }
+@media (min-width: 60rem) {
+  .nav { display: flex; }
+}
+.herramientas {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+@media (max-width: 40rem) {
+  .barra { flex-wrap: wrap; row-gap: var(--e-2); padding-block: var(--e-2); }
+  .logo { flex: 1 1 100%; }
+  .herramientas { flex: 1 1 100%; justify-content: space-between; }
+}
+.selector {
+  min-height: 36px;
+  padding: 0 var(--e-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-2);
+  background: var(--superficie);
+  font-size: var(--t-sm);
+}
+.pie {
+  margin-top: var(--e-8);
+  padding-block: var(--e-6);
+  border-top: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto-suave);
+  font-size: var(--t-sm);
+}
+.pieFilas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4) var(--e-6);
+  justify-content: space-between;
+}
+.pie nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pie a { color: var(--texto-suave); }

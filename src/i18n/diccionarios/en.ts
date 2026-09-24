@@ -1,0 +1,103 @@
+import type { Diccionario } from "../diccionario";
+
+// Interface texts in English. Human translations only (section 2.1).
+const en: Diccionario = {
+  meta: {
+    descripcion: "{marca}: flats, houses and commercial premises for sale and rent in the Region of Murcia. Search with our assistant, compare and book a viewing.",
+  },
+  nav: {
+    saltar: "Skip to content",
+    principal: "Main navigation",
+    comprar: "Buy",
+    alquilar: "Rent",
+    vender: "Sell",
+    asistente: "Assistant",
+    agencia: "About us",
+    contacto: "Contact",
+    cuenta: "My account",
+    entrar: "Sign in",
+    idioma: "Language",
+    tema: "Theme",
+    temaClaro: "Light",
+    temaOscuro: "Dark",
+    temaSistema: "Automatic",
+  },
+  inicio: {
+    titulo: "Find your home in the Region of Murcia",
+    subtitulo: "Tell us what you are looking for in your own words. We show you what fits and why, without making anything up.",
+    ctaAsistente: "Search with the assistant",
+    ctaValorar: "Value my home",
+    promesasTitulo: "How we work",
+    promesas: [
+      { titulo: "Data with its source", texto: "Every price, size or feature comes from the listing. If something is not stated, we tell you and ask the agent." },
+      { titulo: "You decide", texto: "The assistant suggests and explains. Nothing is sent, not a viewing request nor a message, without your confirmation." },
+      { titulo: "No account needed", texto: "Search, compare and ask for information without signing up. An account only keeps your favourites and alerts." },
+    ],
+    captacionTitulo: "Want to sell or let your home?",
+    captacionTexto: "Get an indicative valuation based on comparable homes nearby, and an agent will call you with an accurate valuation within 24 hours.",
+    enPreparacion: "The portal is being prepared: search, listings and the assistant are switched on in the next phases.",
+  },
+  confianza: {
+    confirmado: "Confirmed",
+    probable: "Likely",
+    no_consta: "Not stated",
+    revisar: "Pending review",
+    noConstaAyuda: "Not stated in the listing. Would you like us to ask the agent?",
+    probableAyuda: "Taken from the description; not confirmed by the agent.",
+  },
+  cuenta: {
+    entrarTitulo: "Sign in to your account",
+    entrarTexto: "We will email you a sign-in link. No passwords.",
+    email: "Email",
+    enviar: "Email me the link",
+    enviando: "Sending…",
+    enviado: "If the address is correct, you will receive a sign-in link in a few seconds. Please also check your spam folder.",
+    emailNoValido: "Please enter a valid email address.",
+    error: "We could not send the link. Please try again in a few minutes.",
+    noConfigurada: "Accounts are not available in this environment (Supabase is not configured).",
+    titulo: "My account",
+    sesionComo: "You are signed in as {email}.",
+    salir: "Sign out",
+    queGuardas: "With an account you can keep favourites, saved searches and alerts, and see your assistant history.",
+    tusDatos: "Your data",
+    tusDatosTexto: "You can request access to, rectification, erasure or portability of your data, or restrict or object to its processing, by writing to {email}.",
+    enlaceCaducado: "The link has expired or has already been used. Please request a new one.",
+  },
+  admin: {
+    titulo: "Back office",
+    sinPermiso: "Your account is not part of the agency team.",
+    rol: { admin: "Administration", agente: "Agent", editor: "Editor" },
+    secciones: {
+      inmuebles: "Listings",
+      revision: "Review queue",
+      crm: "Leads and viewings",
+      catalogo: "Control plane",
+      analitica: "Analytics",
+      auditoria: "Audit",
+    },
+    proximamente: "Available in a later phase.",
+    catalogoVersion: "Data catalogue {datos} · assistant {asistente}",
+  },
+  pie: {
+    legal: "Legal",
+    avisoLegal: "Legal notice",
+    privacidad: "Privacy",
+    cookies: "Cookies",
+    derechos: "© {anio} {marca}. All rights reserved.",
+    avisoFicticios: "The properties in this development environment are fictitious.",
+  },
+  legal: {
+    borrador: "Base text pending legal review before publication.",
+    actualizado: "Last updated: {fecha}",
+  },
+  error404: {
+    titulo: "We could not find this page",
+    texto: "The property may no longer be available, or the link may be wrong.",
+    volver: "Back to home",
+  },
+  estilo: {
+    titulo: "Design system",
+  },
+};
+
+export default en;

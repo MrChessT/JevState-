@@ -1,0 +1,96 @@
+/* Botones */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 44px; /* objetivo táctil (WCAG 2.5.8) */
+  padding: var(--e-2) var(--e-5);
+  border-radius: var(--r-2);
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: var(--t-base);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--curva), border-color var(--dur-1) var(--curva), transform var(--dur-1) var(--curva);
+}
+.boton:active { transform: translateY(1px); }
+.boton[disabled], .boton[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.primario { background: var(--marca); color: var(--marca-texto); }
+.primario:hover { background: var(--marca-fuerte); text-decoration: none; }
+.acento { background: var(--acento); color: var(--acento-texto); }
+.acento:hover { background: color-mix(in oklab, var(--acento) 85%, black); text-decoration: none; }
+.secundario { background: var(--superficie); color: var(--texto); border-color: var(--borde-fuerte); }
+.secundario:hover { background: var(--superficie-2); text-decoration: none; }
+.fantasma { background: transparent; color: var(--texto); }
+.fantasma:hover { background: var(--superficie-2); text-decoration: none; }
+.pequeno { min-height: 36px; padding: var(--e-1) var(--e-3); font-size: var(--t-sm); }
+
+/* Chips (ficha de búsqueda, respuestas rápidas) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  min-height: 36px;
+  padding: var(--e-1) var(--e-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--borde-fuerte);
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--marca-suave); border-color: var(--marca); font-weight: 600; }
+.chipDudoso { border-style: dashed; border-color: var(--aviso); }
+
+/* Etiquetas de confianza: siempre texto + icono, nunca solo color (WCAG 1.4.1) */
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.1em 0.55em;
+  border-radius: var(--r-1);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.confirmado { background: var(--ok-fondo); color: var(--ok); }
+.probable { background: var(--aviso-fondo); color: var(--aviso); }
+.no_consta { background: var(--superficie-2); color: var(--texto-suave); }
+.revisar { background: var(--info-fondo); color: var(--info); }
+
+/* Tarjetas */
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-3);
+  padding: var(--e-5);
+  box-shadow: var(--sombra-1);
+}
+
+/* Formularios */
+.campo { display: grid; gap: var(--e-1); }
+.campo label { font-weight: 600; font-size: var(--t-sm); }
+.campo input {
+  min-height: 44px;
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-2);
+  background: var(--superficie);
+}
+.campo input[aria-invalid="true"] { border-color: var(--error); }
+.ayuda { font-size: var(--t-sm); color: var(--texto-suave); }
+.errorCampo { font-size: var(--t-sm); color: var(--error); }
+
+.aviso {
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--r-2);
+  border-left: 4px solid currentColor;
+}
+.avisoInfo { background: var(--info-fondo); color: var(--info); }
+.avisoOk { background: var(--ok-fondo); color: var(--ok); }
+.avisoError { background: var(--error-fondo); color: var(--error); }
+.avisoDudoso { background: var(--aviso-fondo); color: var(--aviso); }
+.aviso p { margin: 0; color: var(--texto); }

@@ -1,0 +1,77 @@
+# Puerta de calidad en cada push a main y en cada pull request.
+#   app: lint, tipos, tests, catálogo al día + evaluación sin Jev, build.
+#   e2e: recorridos y accesibilidad (axe, WCAG 2.2 AA) contra el build de producción.
+#   db:  todas las migraciones en un Supabase limpio + tests pgTAP de RLS y reglas.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      # Falla si catalog/compiled.json, los tipos o docs/CATALOGO_JEV.md no están al día,
+      # o si la evaluación sin Jev empeora respecto a eval/baseline.json.
+      - run: npm run catalog:compile -- --check
+      - run: npm run eval
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-trazas
+          path: test-results/
+          retention-days: 7
+
+  db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.1
+      - name: Supabase local con todas las migraciones
+        run: supabase start -x analytics,edge-runtime,functions,imgproxy,inbucket,meta,realtime,studio,vector
+      - name: Tests SQL (pgTAP)
+        run: |
+          set -o pipefail
+          if ! supabase test db 2>&1 | tee pgtap.log; then
+            grep -E "not ok|Failed|ERROR|error" pgtap.log | head -30 | while IFS= read -r line; do echo "::error title=pgTAP::${line}"; done
+            exit 1
+          fi
+      - name: Lint de funciones SQL
+        run: supabase db lint --level error

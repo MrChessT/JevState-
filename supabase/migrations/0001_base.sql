@@ -100,6 +100,21 @@ grant execute on function app.es_miembro(uuid, public.rol_agencia[]) to anon, au
 grant execute on function app.mis_agencias() to authenticated, service_role;
 grant execute on function app.normalizar(text) to anon, authenticated, service_role;
 
+-- Membresías del usuario actual (para el backoffice). user_id no es legible por columnas, así que
+-- se expone solo lo del propio usuario mediante esta función.
+create or replace function public.mis_membresias()
+returns table (agency_id uuid, agent_id uuid, role public.rol_agencia, display_name text)
+language sql stable security definer
+set search_path = ''
+as $$
+  select a.agency_id, a.id, a.role, a.display_name
+  from public.agents a
+  where a.user_id = (select auth.uid()) and a.active
+  order by a.created_at
+$$;
+revoke all on function public.mis_membresias() from public, anon;
+grant execute on function public.mis_membresias() to authenticated, service_role;
+
 -- Auditoría: quién cambió qué ---------------------------------------------------------------
 
 create table if not exists public.audit_log (

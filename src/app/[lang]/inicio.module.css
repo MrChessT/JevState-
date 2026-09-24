@@ -1,0 +1,16 @@
+.heroe {
+  padding-block: var(--e-8) var(--e-7);
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, var(--marca-suave), transparent 70%),
+    var(--fondo);
+  border-bottom: 1px solid var(--borde);
+}
+.heroe h1 { max-width: 20ch; }
+.subtitulo { font-size: var(--t-lg); color: var(--texto-suave); max-width: 38rem; }
+.acciones { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-5); }
+.seccion { padding-block: var(--e-7) 0; }
+.rejilla { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.rejilla h3 { font-size: var(--t-lg); font-family: var(--fuente-texto); }
+.rejilla p { margin: 0; color: var(--texto-suave); }
+.captacion { display: grid; gap: var(--e-4); align-items: center; }
+@media (min-width: 48rem) { .captacion { grid-template-columns: 2fr 1fr; } }

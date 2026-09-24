@@ -1,7 +1,7 @@
 // Suites de evaluación. Las «sin Jev» corren en cada PR (npm run eval y catalog:compile).
 // Fase 0: el contrato del catálogo. Las baterías de extracción (precios, m², habitaciones, zonas
 // con erratas, planta, proximidad) se añaden con los normalizadores en la fase 1.
-import type { EntryType, Question } from "@typesafe-ai/sdk";
+import type { Question } from "@typesafe-ai/sdk";
 import { checkEnglish, checkKey, NUMERIC_TYPES } from "../src/catalog/schema";
 import { PREGUNTAS } from "../src/asistente/catalogo";
 import { FakeJev } from "../src/jev/fake";
@@ -9,10 +9,10 @@ import { preguntaBooleana, preguntaCandidatos, preguntaEnum, preguntaMotivo, pre
 import type { CaseResult, Suite } from "./framework";
 
 /** Cadenas que ve Jev en una pregunta (instrucciones y criterios), sin las claves de las opciones. */
-function textsOf(value: EntryType | undefined, out: string[] = []): string[] {
+function textsOf(value: unknown, out: string[] = []): string[] {
   if (typeof value === "string") out.push(value);
   else if (Array.isArray(value)) for (const v of value) textsOf(v, out);
-  else if (value && typeof value === "object") for (const v of Object.values(value)) textsOf(v as EntryType, out);
+  else if (value && typeof value === "object") for (const v of Object.values(value)) textsOf(v, out);
   return out;
 }
 
@@ -24,12 +24,12 @@ function checkQuestion(id: string, q: Question, samples: string[] = []): string[
     const keys = Object.keys(q.criteria);
     if (keys.length < 2) errors.push(`${id}: una choice necesita al menos 2 opciones`);
     for (const k of keys) if (!/^c\d+$/.test(k)) errors.push(...checkKey(k, id));
-    for (const t of textsOf(q.criteria as EntryType)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
+    for (const t of textsOf(q.criteria)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
   } else if (q.type === "noul") {
-    for (const t of textsOf((q.criteria ?? null) as EntryType)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
+    for (const t of textsOf(q.criteria ?? null)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
   } else {
     if (q.criteria.length < 2) errors.push(`${id}: un score necesita al menos 2 niveles`);
-    for (const t of textsOf(q.criteria as unknown as EntryType)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
+    for (const t of textsOf(q.criteria)) errors.push(...checkEnglish(strip(t), `${id}.criteria`));
   }
   return errors;
 }

@@ -1,0 +1,31 @@
+# Evaluación con Jev real (sección 8): manual o semanal. Nunca en cada PR (coste y latencia).
+# Requiere el secreto TYPESAFE_API_KEY (o AI_GATEWAY_API_KEY) en el repositorio.
+name: Evaluación con Jev
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1"
+
+jobs:
+  eval-jev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run eval:jev
+      - run: npm run eval:sweep
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultados-eval-jev
+          path: eval/.tmp/
+          retention-days: 30

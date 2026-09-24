@@ -2,7 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(24);
+select plan(26);
 
 -- Datos de prueba ---------------------------------------------------------------------------
 insert into auth.users(id, email) values
@@ -95,6 +95,9 @@ set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000a",
 select ok((select count(*) from audit_log where table_name = 'listings') >= 1, 'admin A: ve la auditoría de su agencia');
 select is((select count(*)::int from audit_log where agency_id = '10000000-0000-0000-0000-00000000000b'), 0, 'admin A: no ve la auditoría de B');
 select ok((select actor from audit_log where table_name = 'listings' and action = 'UPDATE' order by id desc limit 1) = '00000000-0000-0000-0000-00000000000c', 'la auditoría registra quién cambió qué');
+select is((select array_agg(role::text) from mis_membresias()), array['admin'], 'mis_membresias: solo las del usuario actual');
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000e", "role": "authenticated"}';
+select is((select count(*)::int from mis_membresias()), 0, 'mis_membresias: un usuario del portal no tiene ninguna');
 
 select * from finish();
 rollback;

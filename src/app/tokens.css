@@ -1,0 +1,127 @@
+/* Tokens del sistema de diseño. La marca (--marca, --acento y su texto) llega del layout desde
+   src/config/brand.ts; todo lo demás se deriva aquí. Modo claro por defecto, oscuro por sistema o
+   por elección (data-theme). */
+
+:root {
+  color-scheme: light;
+
+  /* Marca (valores por defecto; el layout los sobrescribe) */
+  --marca: #1f4e5f;
+  --marca-texto: #ffffff;
+  --acento: #c2410c;
+  --acento-texto: #ffffff;
+  --marca-fuerte: color-mix(in oklab, var(--marca) 82%, black);
+  --marca-suave: color-mix(in oklab, var(--marca) 10%, var(--fondo));
+  --marca-enlace: var(--marca);
+
+  /* Neutros cálidos */
+  --fondo: #fafaf8;
+  --superficie: #ffffff;
+  --superficie-2: #f3f2ee;
+  --borde: #e2e0da;
+  --borde-fuerte: #c9c6be;
+  --texto: #1b1a17;
+  --texto-suave: #57534b;
+  --texto-tenue: #6f6a60;
+
+  /* Estados */
+  --ok: #166534;
+  --ok-fondo: #ecfdf3;
+  --aviso: #9a3412;
+  --aviso-fondo: #fff4ea;
+  --error: #b42318;
+  --error-fondo: #fef3f2;
+  --info: #1d4ed8;
+  --info-fondo: #eef4ff;
+  --foco: color-mix(in oklab, var(--marca) 70%, #2563eb);
+
+  /* Tipografía: pila del sistema (cero descargas, mejor LCP) y serif editorial para títulos */
+  --fuente-texto: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-titulos: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --fuente-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --t-xs: 0.75rem;
+  --t-sm: 0.875rem;
+  --t-base: 1rem;
+  --t-lg: 1.125rem;
+  --t-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --t-2xl: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --t-3xl: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  --interlineado: 1.55;
+
+  /* Espaciado (base 4 px) */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4rem;
+  --e-9: 6rem;
+
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 14px;
+  --r-pill: 999px;
+  --sombra-1: 0 1px 2px rgb(20 20 20 / 0.06), 0 1px 1px rgb(20 20 20 / 0.04);
+  --sombra-2: 0 6px 24px rgb(20 20 20 / 0.08), 0 2px 6px rgb(20 20 20 / 0.05);
+
+  --ancho: 76rem;
+  --ancho-texto: 42rem;
+
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fondo: #121412;
+    --superficie: #1a1c1a;
+    --superficie-2: #222521;
+    --borde: #33362f;
+    --borde-fuerte: #4a4d45;
+    --texto: #edece7;
+    --texto-suave: #b8b5ab;
+    --texto-tenue: #9d998e;
+    --marca-suave: color-mix(in oklab, var(--marca) 22%, var(--fondo));
+    --marca-enlace: color-mix(in oklab, var(--marca) 45%, white);
+    --ok: #6ee7a0;
+    --ok-fondo: #11281a;
+    --aviso: #fdba74;
+    --aviso-fondo: #2d1a0d;
+    --error: #fda29b;
+    --error-fondo: #2e1413;
+    --info: #9dbbff;
+    --info-fondo: #141d33;
+    --foco: #8fb4ff;
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-2: 0 8px 28px rgb(0 0 0 / 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fondo: #121412;
+  --superficie: #1a1c1a;
+  --superficie-2: #222521;
+  --borde: #33362f;
+  --borde-fuerte: #4a4d45;
+  --texto: #edece7;
+  --texto-suave: #b8b5ab;
+  --texto-tenue: #9d998e;
+  --marca-suave: color-mix(in oklab, var(--marca) 22%, var(--fondo));
+  --marca-enlace: color-mix(in oklab, var(--marca) 45%, white);
+  --ok: #6ee7a0;
+  --ok-fondo: #11281a;
+  --aviso: #fdba74;
+  --aviso-fondo: #2d1a0d;
+  --error: #fda29b;
+  --error-fondo: #2e1413;
+  --info: #9dbbff;
+  --info-fondo: #141d33;
+  --foco: #8fb4ff;
+  --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sombra-2: 0 8px 28px rgb(0 0 0 / 0.45);
+}
