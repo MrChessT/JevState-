@@ -3,6 +3,13 @@
 
 create index if not exists listing_fields_rasgo_idx on public.listing_fields(field_id, listing_id) where status in ('confirmado', 'probable');
 
+-- Posición de la planta en el resumen (el asistente permite «sin bajos»).
+create or replace function public.inmueble_planta(l public.listings) returns text
+language sql stable
+set search_path = ''
+as $$ select f.value #>> '{}' from public.listing_fields f where f.listing_id = l.id and f.field_id = 'planta_tipo' and f.status in ('confirmado', 'probable') $$;
+grant execute on function public.inmueble_planta(public.listings) to anon, authenticated, service_role;
+
 -- Resumen de un inmueble para tarjetas y mapa.
 create or replace function public.inmueble_resumen(l public.listings)
 returns jsonb
@@ -14,7 +21,7 @@ as $$
     'titulo', coalesce((select t.title from public.listing_translations t where t.listing_id = l.id and t.locale = 'es'), l.ref),
     'zonaPath', z.path, 'zonaNombre', z.name, 'municipioNombre', coalesce(m.name, z.name),
     'precio', l.price, 'precioAnterior', (select (f.value #>> '{}')::numeric from public.listing_fields f where f.listing_id = l.id and f.field_id = 'precio_anterior' and f.value is not null),
-    'superficie', l.area_m2, 'habitaciones', l.bedrooms, 'banos', l.bathrooms,
+    'superficie', l.area_m2, 'habitaciones', l.bedrooms, 'banos', l.bathrooms, 'plantaTipo', public.inmueble_planta(l),
     'lat', extensions.st_y(l.location_public::extensions.geometry), 'lon', extensions.st_x(l.location_public::extensions.geometry),
     'foto', (select coalesce(md.url, md.storage_path) from public.listing_media md where md.listing_id = l.id order by md.is_cover desc, md.position limit 1),
     'rasgos', coalesce((select jsonb_agg(jsonb_build_object('campo', f.field_id, 'status', f.status))

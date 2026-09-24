@@ -55,6 +55,7 @@ export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal>
       superficie: num(campos.superficie_construida) ?? num(campos.superficie_util),
       habitaciones: hab,
       banos: num(campos.banos),
+      plantaTipo: (campos.planta_tipo?.value as string | null) ?? null,
       lat: (g.listing.lat as number | undefined) ?? null,
       lon: (g.listing.lon as number | undefined) ?? null,
       foto: `/ficticios/foto/${r.ref}`,
