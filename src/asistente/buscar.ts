@@ -17,6 +17,8 @@ export interface Candidato {
   sobrePresupuesto: number | null;
   /** % frente a la mediana de su zona (negativo = por debajo). */
   frenteZona: number | null;
+  /** Zona con la que se compara: el barrio si tiene muestra suficiente; si no, el municipio. */
+  zonaComparada: string | null;
   deseablesCumplidos: string[];
   deseablesProbables: string[];
   encaje?: number;
@@ -33,6 +35,9 @@ function municipio(path: string) {
   return path.split("/")[0]!;
 }
 
+/** «Casa» sin más incluye chalets y adosados; «piso», áticos y dúplex (sección 4.2: TIPOS). */
+const TIPOS_INCLUIDOS: Record<string, string[]> = { casa: ["casa", "chalet", "adosado"], piso: ["piso", "atico", "duplex"] };
+
 export function filtrar(todos: InmuebleResumen[], f: FichaBusqueda): InmuebleResumen[] {
   const zonas = [...f.zonas];
   const max = f.precioMax ? new Decimal(f.precioMax).mul(1 + f.tolerancia / 100).toNumber() : null;
@@ -42,7 +47,7 @@ export function filtrar(todos: InmuebleResumen[], f: FichaBusqueda): InmuebleRes
     if (max !== null && (i.precio === null || i.precio > max)) return false;
     if (f.precioMin && (i.precio ?? 0) < f.precioMin) return false;
     if (f.habMin !== undefined && (i.habitaciones ?? 0) < f.habMin) return false;
-    if (f.tipos.length && !f.tipos.includes(i.tipo ?? "")) return false;
+    if (f.tipos.length && !f.tipos.some((t) => (TIPOS_INCLUIDOS[t] ?? [t]).includes(i.tipo ?? ""))) return false;
     if (f.descartados.includes(i.ref)) return false;
     for (const [campo, nivel] of Object.entries(f.requisitos)) {
       if (campo === "planta_baja") {
@@ -83,13 +88,18 @@ const PESOS_PRIORIDAD: Record<string, { precio: number; deseables: number; fresc
   defecto: { precio: 1.5, deseables: 1.5, frescura: 0.5, espacio: 1 },
 };
 
+/** Muestra mínima para comparar con la mediana del barrio en vez de la del municipio. */
+const MUESTRA_MINIMA = 5;
+
 export function preordenar(lista: InmuebleResumen[], f: FichaBusqueda, estadisticas: Map<string, EstadisticaZona>): Candidato[] {
   const w = PESOS_PRIORIDAD[f.prioridad ?? ""] ?? PESOS_PRIORIDAD[f.perfil ?? ""] ?? PESOS_PRIORIDAD.defecto!;
   const deseables = Object.entries(f.requisitos).filter(([c, n]) => n === "deseable" && c !== "planta_baja").map(([c]) => c);
   const ahora = Date.now();
   return lista
     .map((i): Candidato => {
-      const est = estadisticas.get(municipio(i.zonaPath));
+      const barrio = estadisticas.get(i.zonaPath);
+      const usarBarrio = i.zonaPath.includes("/") && barrio && barrio.n >= MUESTRA_MINIMA && barrio.medianaM2;
+      const est = usarBarrio ? barrio : estadisticas.get(municipio(i.zonaPath));
       const frente = i.precio && i.superficie && est?.medianaM2 ? new Decimal(i.precio).div(i.superficie).minus(est.medianaM2).div(est.medianaM2).mul(100).toDecimalPlaces(0).toNumber() : null;
       const cumplidos = deseables.filter((c) => i.rasgos.some((r) => r.campo === c && r.status === "confirmado"));
       const probables = deseables.filter((c) => i.rasgos.some((r) => r.campo === c && r.status === "probable"));
@@ -102,14 +112,14 @@ export function preordenar(lista: InmuebleResumen[], f: FichaBusqueda, estadisti
         w.espacio * Math.min(1, (i.superficie ?? 0) / 150) -
         (sobre ?? 0) / 10 +
         Object.entries(f.pesos).reduce((acc, [campo, peso]) => acc + (i.rasgos.some((r) => r.campo === campo) ? peso : 0), 0);
-      return { i, puntos: Math.round(puntos * 1000) / 1000, sobrePresupuesto: sobre, frenteZona: frente, deseablesCumplidos: cumplidos, deseablesProbables: probables };
+      return { i, puntos: Math.round(puntos * 1000) / 1000, sobrePresupuesto: sobre, frenteZona: frente, zonaComparada: frente === null ? null : usarBarrio ? i.zonaNombre : i.municipioNombre, deseablesCumplidos: cumplidos, deseablesProbables: probables };
     })
     .sort((a, b) => b.puntos - a.puntos || a.i.ref.localeCompare(b.i.ref));
 }
 
 export function recomendar(todos: InmuebleResumen[], ficha: FichaBusqueda, n = 12): ResultadoRecomendacion {
   const stats = new Map<string, EstadisticaZona>();
-  for (const m of new Set(todos.map((i) => municipio(i.zonaPath)))) stats.set(m, estadisticaZona(m, todos, ficha.operacion ?? "venta"));
+  for (const m of new Set(todos.flatMap((i) => [municipio(i.zonaPath), i.zonaPath]))) stats.set(m, estadisticaZona(m, todos, ficha.operacion ?? "venta"));
   let efectiva = ficha;
   let lista = filtrar(todos, efectiva);
   const relajaciones: ResultadoRecomendacion["relajaciones"] = [];

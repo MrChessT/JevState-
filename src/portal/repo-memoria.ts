@@ -13,10 +13,10 @@ import { zona } from "@/zonas/buscar";
 import { GeocoderLocal } from "@/zonas/geocodificar";
 import { buscarEnMemoria } from "./buscar-memoria";
 import { estadisticaZona } from "./estadisticas";
+import { esPositivo, RASGOS } from "./rasgos";
 import type { RepositorioPortal } from "./repositorio";
 import type { InmuebleFicha, InmuebleResumen } from "./tipos";
 
-const RASGOS = ["terraza", "ascensor", "garaje", "piscina", "trastero", "aire_acondicionado", "exterior", "amueblado", "vistas"];
 const TITULO: Record<string, string> = { piso: "Piso", atico: "Ático", duplex: "Dúplex", casa: "Casa", chalet: "Chalet", adosado: "Adosado", estudio: "Estudio", local: "Local", terreno: "Terreno", oficina: "Oficina", garaje: "Garaje" };
 
 function num(c: CampoCanonico | undefined): number | null {
@@ -59,10 +59,7 @@ export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal>
       lat: (g.listing.lat as number | undefined) ?? null,
       lon: (g.listing.lon as number | undefined) ?? null,
       foto: `/ficticios/foto/${r.ref}`,
-      rasgos: RASGOS.filter((c) => {
-        const v = campos[c]?.value;
-        return v === true || (typeof v === "string" && v !== "no_tiene");
-      }).map((c) => ({ campo: c, status: campos[c]!.status })),
+      rasgos: RASGOS.filter((c) => campos[c] && campos[c].status !== "no_consta" && esPositivo(c, campos[c].value)).map((c) => ({ campo: c, status: campos[c]!.status })),
       // Fechas escalonadas deterministas para ordenar por «recientes».
       publicadoEn: new Date(Date.UTC(2026, 8, 1) - k * 3_600_000 * 7).toISOString(),
       ficticio: true,

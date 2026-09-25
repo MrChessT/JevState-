@@ -10,6 +10,32 @@ set search_path = ''
 as $$ select f.value #>> '{}' from public.listing_fields f where f.listing_id = l.id and f.field_id = 'planta_tipo' and f.status in ('confirmado', 'probable') $$;
 grant execute on function public.inmueble_planta(public.listings) to anon, authenticated, service_role;
 
+-- Qué valor de cada campo cuenta como «tener el rasgo». Generado desde src/portal/rasgos.ts
+-- (un test comprueba que coinciden).
+create or replace function public.es_rasgo(f public.listing_fields) returns boolean
+language sql immutable
+set search_path = ''
+as $$ select
+    -- rasgos:inicio
+    (f.field_id = 'terraza' and f.value = 'true'::jsonb)
+    or (f.field_id = 'balcon' and f.value = 'true'::jsonb)
+    or (f.field_id = 'ascensor' and f.value = 'true'::jsonb)
+    or (f.field_id = 'garaje' and f.value #>> '{}' in ('incluido', 'opcional'))
+    or (f.field_id = 'piscina' and f.value #>> '{}' in ('privada', 'comunitaria'))
+    or (f.field_id = 'trastero' and f.value = 'true'::jsonb)
+    or (f.field_id = 'aire_acondicionado' and f.value = 'true'::jsonb)
+    or (f.field_id = 'calefaccion' and f.value = 'true'::jsonb)
+    or (f.field_id = 'exterior' and f.value #>> '{}' in ('exterior'))
+    or (f.field_id = 'amueblado' and f.value = 'true'::jsonb)
+    or (f.field_id = 'accesible' and f.value = 'true'::jsonb)
+    or (f.field_id = 'vistas' and f.value #>> '{}' in ('mar', 'montana', 'ciudad', 'jardin'))
+    or (f.field_id = 'luminosidad' and f.value #>> '{}' in ('luminoso', 'muy_luminoso'))
+    or (f.field_id = 'ruido' and f.value #>> '{}' in ('tranquilo', 'muy_tranquilo'))
+    or (f.field_id = 'estado' and f.value #>> '{}' in ('reformado', 'a_estrenar'))
+    -- rasgos:fin
+$$;
+grant execute on function public.es_rasgo(public.listing_fields) to anon, authenticated, service_role;
+
 -- Resumen de un inmueble para tarjetas y mapa.
 create or replace function public.inmueble_resumen(l public.listings)
 returns jsonb
@@ -27,8 +53,7 @@ as $$
     'rasgos', coalesce((select jsonb_agg(jsonb_build_object('campo', f.field_id, 'status', f.status))
                         from public.listing_fields f
                         where f.listing_id = l.id and f.is_public and f.status in ('confirmado', 'probable')
-                          and f.field_id in ('terraza', 'ascensor', 'garaje', 'piscina', 'trastero', 'aire_acondicionado', 'exterior', 'amueblado', 'vistas')
-                          and (f.value = 'true'::jsonb or (jsonb_typeof(f.value) = 'string' and f.value <> '"no_tiene"'::jsonb))), '[]'::jsonb),
+                          and public.es_rasgo(f)), '[]'::jsonb),
     'publicadoEn', coalesce(l.published_at, l.created_at), 'ficticio', l.is_fictitious)
   from public.zones z left join public.zones m on m.id = z.parent_id
   where z.id = l.zone_id
@@ -61,7 +86,7 @@ begin
       and not exists (
         select 1 from unnest(v_con) c(campo)
         where not exists (select 1 from public.listing_fields lf where lf.listing_id = l.id and lf.field_id = c.campo and lf.status in ('confirmado', 'probable')
-                           and (lf.value = 'true'::jsonb or (jsonb_typeof(lf.value) = 'string' and lf.value <> '"no_tiene"'::jsonb))))
+                           and lf.is_public and public.es_rasgo(lf)))
   ), filtrados as (
     select * from base where cardinality(v_tipos) = 0 or property_type = any(v_tipos)
   ), ordenados as (

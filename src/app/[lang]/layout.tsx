@@ -2,13 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { BRAND } from "@/config/brand";
-import { INDEXABLE } from "@/config/secciones";
 import { alternativas, isLocale, LOCALE_TAGS, LOCALES } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
 import { textoSobre } from "@/ui/color";
 import { Cabecera } from "@/ui/layout/cabecera";
 import { Pie } from "@/ui/layout/pie";
 import { SCRIPT_TEMA } from "@/ui/layout/selectores";
+import { WidgetAsistente } from "@/ui/asistente/widget";
+import { INDEXABLE, publicada } from "@/config/secciones";
+import { fuenteTexto, fuenteTitulos } from "@/ui/fuentes";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -47,7 +49,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     "--acento-texto": textoSobre(BRAND.accentColor),
   } as CSSProperties;
   return (
-    <html lang={lang} style={marca} suppressHydrationWarning>
+    <html lang={lang} style={marca} className={`${fuenteTexto.variable} ${fuenteTitulos.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
       </head>
@@ -60,6 +62,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           {children}
         </main>
         <Pie locale={lang} d={d} ficticios={process.env.NEXT_PUBLIC_DATOS_FICTICIOS === "true"} />
+        {publicada("asistente") && <WidgetAsistente locale={lang} textos={{ ...d.asistente, hab: d.tarjeta.hab, mes: d.tarjeta.mes }} />}
       </body>
     </html>
   );

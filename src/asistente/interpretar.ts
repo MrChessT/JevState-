@@ -65,9 +65,11 @@ export function construirPreguntas(e: Extraccion, ctx: ContextoMensaje): { pregu
   if (e.textoLibre) mapa.prioridad = PREGUNTAS.prioridad();
   if (e.perfilDeclarado) mapa.perfil_declarado = PREGUNTAS.perfil_declarado();
   const candidatos = [...(ctx.viendo ? [ctx.viendo] : []), ...ctx.visibles].filter((v, i, a) => a.findIndex((x) => x.ref === v.ref) === i).slice(0, 12);
-  if (candidatos.length && (e.inmuebles.refs.length || e.inmuebles.ordinal !== null || e.inmuebles.deictico || ctx.viendo)) {
-    mapa.inmueble_ref = PREGUNTAS.inmueble_ref(candidatos.map((c, i) => ({ clave: c.ref.toLowerCase().replace(/-/g, "_"), descripcion: `${ctx.viendo?.ref === c.ref ? "The property the user is viewing now" : `Result ${i + (ctx.viendo ? 0 : 1)}`}: ${c.resumen}` })));
+  const hablaDeInmueble = e.inmuebles.refs.length > 0 || e.inmuebles.ordinal !== null || e.inmuebles.deictico || ctx.viendo !== null;
+  if (hablaDeInmueble && (candidatos.length || e.inmuebles.refs.length))
     mapa.campo_pregunta = PREGUNTAS.campo_pregunta(CATALOG.fields.filter((f) => f.public && f.type !== "text").map((f) => ({ clave: f.id, descripcion: f.label.en })));
+  if (candidatos.length && hablaDeInmueble) {
+    mapa.inmueble_ref = PREGUNTAS.inmueble_ref(candidatos.map((c, i) => ({ clave: c.ref.toLowerCase().replace(/-/g, "_"), descripcion: `${ctx.viendo?.ref === c.ref ? "The property the user is viewing now" : `Result ${i + (ctx.viendo ? 0 : 1)}`}: ${c.resumen}` })));
   }
   if (ctx.visibles.length) mapa.feedback_motivo = PREGUNTAS.feedback_motivo();
   if (ctx.ficha) mapa.seguimiento = PREGUNTAS.seguimiento();
@@ -121,7 +123,11 @@ export function interpretarRespuestas(e: Extraccion, ctx: ContextoMensaje, answe
     const g = gateChoice(a, umbral(t, "zona", accion, { literal }));
     reg(z.id, "zona", g.outcome, g.choice, g.confidence);
     if (g.choice === "ninguna") continue;
-    if (g.choice === "varias" || g.outcome === "confirmar") {
+    const top2 = g.ranked.filter((r) => r.option !== "varias" && r.option !== "ninguna").slice(0, 2);
+    // Política de buscar ante la duda: si dos zonas concentran casi toda la probabilidad, se buscan
+    // las dos y se avisa, en vez de preguntar.
+    const ampliable = accion === "buscar" && top2.length === 2 && top2[0]!.probability + top2[1]!.probability >= 0.7;
+    if (g.choice === "varias" || g.outcome === "confirmar" || (g.outcome === "preguntar" && ampliable)) {
       const dos = g.ranked.filter((r) => r.option !== "varias" && r.option !== "ninguna").slice(0, 2).map((r) => desdeClave(r.option));
       zonas.push(...dos);
       ampliadas.push(...dos.slice(1));
@@ -205,16 +211,16 @@ export function interpretarRespuestas(e: Extraccion, ctx: ContextoMensaje, answe
 // Interpretación degradada (sin Jev) -----------------------------------------------------
 
 const PALABRAS_INTENCION: Array<[RegExp, Intencion]> = [
-  [/\b(ignora|olvida (tus|las) (instrucciones|reglas)|system prompt|comision|datos del propietario|ignore (previous|your))\b/, "fuera_de_ambito"],
-  [/\b(visita|visitar|ver (el|la) (piso|casa)|verlo|viewing)\b/, "pedir_visita"],
-  [/\b(contact|llamad|llamen|agente|hablar con)\b/, "contactar_agente"],
-  [/\b(alerta|avisame|avisadme|notif)\b/, "crear_alerta"],
-  [/\b(compar)\b/, "comparar"],
-  [/\b(valor|tasar|cuanto vale mi|vender mi|value my)\b/, "valorar_mi_vivienda"],
-  [/\b(no me (gusta|encaja|convence)|muy (oscuro|caro|pequeno)|demasiado|me gusta)\b/, "feedback_resultado"],
-  [/\b(tiene|cuanto|cual es|hay|does it|how much)\b.*\?|\?$/, "detalle_inmueble"],
-  [/\b(busco|buscamos|quiero|queremos|necesito|piso|casa|chalet|atico|alquil|compr|zona|en venta|looking|want)\b/, "buscar"],
-  [/\b(hola|gracias|buenas|hello|hi|thanks)\b/, "conversar"],
+  [/\b(ignora|olvida (tus|las) (instrucciones|reglas)|system prompt|comision|datos del propietario|ignore (previous|your))\w*\b/, "fuera_de_ambito"],
+  [/\b(visit|visita|visitar|ver (el|la) (piso|casa)|verlo|viewing)\w*\b/, "pedir_visita"],
+  [/\b(contact|llamad|llamen|agente|hablar con)\w*\b/, "contactar_agente"],
+  [/\b(alert|alerta|avisame|avisadme|notif)\w*\b/, "crear_alerta"],
+  [/\b(compar)\w*\b/, "comparar"],
+  [/\b(valor|tasar|cuanto vale mi|vender mi|value my)\w*\b/, "valorar_mi_vivienda"],
+  [/\b(no me (gusta|encaja|convence)|muy (oscuro|caro|pequeno)|demasiado|me gusta)\w*\b/, "feedback_resultado"],
+  [/\b(tiene|cuanto|cual es|hay|does it|how much)\w*\b.*\?|\?$/, "detalle_inmueble"],
+  [/\b(busco|buscamos|quiero|queremos|necesito|piso|casa|chalet|atico|alquil|compr|zona|en venta|looking|want)\w*\b/, "buscar"],
+  [/\b(hola|gracias|buenas|buenos dias|hello|hi|hey|thanks|thank you)\b/, "conversar"],
 ];
 
 export function interpretarSinJev(e: Extraccion, ctx: ContextoMensaje, mensaje: string): Interpretacion {

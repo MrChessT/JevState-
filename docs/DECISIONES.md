@@ -259,3 +259,13 @@ Es la mediana del €/m² de la oferta publicada del municipio (con sus barrios)
 | P-5 | Proveedor de teselas del mapa (MapTiler, Stadia, propio…) | Configurable; se decide en la fase 2 |
 | P-6 | ¿Hoja de Google Sheets para el plano de control? (ID y API key de solo lectura) | CSV en `catalog/source/` |
 | P-7 | Revisión de los campos añadidos (D-024) y de los umbrales por defecto (D-030) | Valores de este documento |
+
+## Fase 3 · Asistente y rediseño
+
+- **D-207** · El estado de la conversación (ficha, visibles, aclaración) viaja con el cliente y se valida con zod en cada mensaje: sin sesiones en memoria que se pierdan entre instancias serverless. La cookie `asistente_sid` solo sirve para el límite de frecuencia.
+- **D-208** · Motor por mensaje: extracción del código → llamada 1 (`asistente.entender`) → puertas → acción del código → llamada 2 (`asistente.juzgar`, encaje) solo con necesidades en texto libre. Máximo 2 llamadas; si Jev falla, modo básico con palabras clave y se avisa. Sin clave de Jev (Jev simulado) el asistente usa directamente el modo básico.
+- **D-209** · Respuestas solo con plantillas es/en (`src/asistente/respuestas.ts`); ningún texto libre generado.
+- **D-210** · Zona dudosa en `buscar`: si las dos zonas más probables suman ≥ 0,7, se buscan las dos y se avisa (chip discontinuo) en vez de preguntar.
+- **D-211** · Rasgos positivos definidos una sola vez (`src/portal/rasgos.ts`) y replicados en SQL (`public.es_rasgo`, test de coincidencia). Corrige que «interior» contara como exterior y «sin vistas» como vistas; añade luminosidad, tranquilidad, estado, balcón, calefacción y accesible.
+- **D-212** · Sin Supabase, producción funciona con los ficticios; solo `PORTAL_DATOS=supabase` exige sus variables.
+- **D-213** · Tipografía Inter + Fraunces con `next/font` (autoalojadas). «Casa» incluye chalet y adosado; «piso», ático y dúplex.

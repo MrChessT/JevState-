@@ -49,7 +49,7 @@ const CAMPO_RASGO: Partial<Record<Rasgo, string>> = {
   terraza: "terraza", balcon: "balcon", garaje: "garaje", garaje_incluido: "garaje", trastero: "trastero", ascensor: "ascensor",
   piscina: "piscina", piscina_comunitaria: "piscina", piscina_privada: "piscina", aire_acondicionado: "aire_acondicionado",
   calefaccion: "calefaccion", amueblado: "amueblado", accesible: "accesible", exterior: "exterior", vistas_mar: "vistas",
-  jardin: "jardin", reformado: "estado", a_estrenar: "estado", luminoso: "luminosidad", muy_luminoso: "luminosidad", tranquilo: "ruido", muy_tranquilo: "ruido",
+  reformado: "estado", a_estrenar: "estado", luminoso: "luminosidad", muy_luminoso: "luminosidad", tranquilo: "ruido", muy_tranquilo: "ruido",
 };
 
 const ORDINALES: Record<string, number> = { primero: 1, primera: 1, segundo: 2, segunda: 2, tercero: 3, tercera: 3, cuarto: 4, cuarta: 4, quinto: 5, quinta: 5, first: 1, second: 2, third: 3, ultimo: -1, ultima: -1, last: -1 };
@@ -95,8 +95,8 @@ export function extraer(mensaje: string): Extraccion {
     habitaciones: dormitorios[0]?.n ?? null,
     operacion: /\b(alquil|alquiler|rent|renta mensual)/.test(p) ? "alquiler" : /\b(compr|venta|vend|buy|purchase)/.test(p) ? "venta" : null,
     inmuebles: { refs, ordinal, deictico: /\b(este|esta|este piso|esta casa|this one|this)\b/.test(p) },
-    textoLibre: p.split(/\s+/).length >= 9 || /\b(porque|para|ya que|necesito|queremos|quiero|somos|tenemos|because|we need)\b/.test(p),
-    sinBajos: /\b(sin|nada de|no (quiero |queremos )?(un )?)bajos?\b|\bno ground floor/.test(p),
+    textoLibre: p.split(/\s+/).length >= 14 || /\b(porque|ya que|somos|tenemos|teletrabaj\w*|trabajo desde casa|because|we are|we have|work from home)\b/.test(p),
+    sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno ground[- ]floor/.test(p),
     perfilDeclarado: /\b(para (vivir|mi familia|los ninos|mis hijos|invertir|alquilarlo|veranear|vacaciones|mis padres)|hijos|ninos|familia|inversion|invertir|segunda residencia|vacaciones|kids|children|family|invest)\b/.test(p),
   };
 }

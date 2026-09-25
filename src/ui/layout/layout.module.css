@@ -1,97 +1,206 @@
 .cabecera {
   position: sticky;
   top: 0;
-  z-index: 20;
-  background: color-mix(in oklab, var(--fondo) 88%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px);
-  border-bottom: 1px solid var(--borde);
+  z-index: 40;
+  background: color-mix(in oklab, var(--fondo) 86%, transparent);
+  backdrop-filter: saturate(1.5) blur(12px);
+  -webkit-backdrop-filter: saturate(1.5) blur(12px);
+  border-bottom: 1px solid color-mix(in oklab, var(--borde) 80%, transparent);
 }
 .barra {
   display: flex;
   align-items: center;
   gap: var(--e-4);
-  min-height: 64px;
+  min-height: 68px;
 }
 .logo {
   display: inline-flex;
   align-items: center;
   gap: var(--e-2);
   font-family: var(--fuente-titulos);
-  font-weight: 700;
-  font-size: var(--t-lg);
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
   color: var(--texto);
   text-decoration: none;
-  margin-right: auto;
   min-width: 0;
+  flex: 0 1 auto;
 }
+.logo:hover { text-decoration: none; }
 .logoTexto {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 16rem;
 }
 .logoMarca {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-2);
-  background: var(--marca);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--marca), color-mix(in oklab, var(--marca) 70%, var(--acento)));
   color: var(--marca-texto);
   display: grid;
   place-items: center;
-  font-size: 15px;
+  font-size: 17px;
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  flex-shrink: 0;
 }
 .nav {
   display: none;
-  gap: var(--e-1);
+  align-items: center;
+  gap: 2px;
+  margin-inline: auto;
 }
 .nav a {
   padding: var(--e-2) var(--e-3);
+  border-radius: var(--r-pill);
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  transition: background var(--dur-1) var(--curva), color var(--dur-1) var(--curva);
+}
+.nav a:hover { background: var(--superficie-2); color: var(--texto); }
+.nav .navAsistente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: var(--e-2);
+  color: var(--marca-enlace);
+  background: var(--marca-suave);
+  font-weight: 600;
+}
+.nav .navAsistente:hover { background: color-mix(in oklab, var(--marca) 18%, var(--fondo)); color: var(--marca-enlace); }
+.herramientas {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin-left: auto;
+}
+.icono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--texto-suave);
+}
+.icono:hover { background: var(--superficie-2); color: var(--texto); }
+.cuenta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--e-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--borde-fuerte);
+  color: var(--texto);
+  font-weight: 600;
+  font-size: var(--t-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.cuenta:hover { background: var(--superficie-2); text-decoration: none; }
+.menu { position: relative; }
+.menu summary {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-2);
+  cursor: pointer;
+  list-style: none;
+  color: var(--texto);
+}
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary:hover { background: var(--superficie-2); }
+.menuPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 14rem;
+  display: grid;
+  padding: var(--e-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-3);
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
+}
+.menuPanel a {
+  padding: var(--e-3) var(--e-3);
   border-radius: var(--r-2);
   color: var(--texto);
   text-decoration: none;
   font-weight: 500;
 }
-.nav a:hover { background: var(--superficie-2); }
-@media (min-width: 60rem) {
+.menuPanel a:hover { background: var(--superficie-2); }
+@media (min-width: 68rem) {
   .nav { display: flex; }
-}
-.herramientas {
-  display: flex;
-  align-items: center;
-  gap: var(--e-2);
+  .menu { display: none; }
+  .herramientas { margin-left: 0; }
 }
 @media (max-width: 40rem) {
   .barra { flex-wrap: wrap; row-gap: var(--e-2); padding-block: var(--e-2); }
-  .logo { flex: 1 1 100%; }
-  .herramientas { flex: 1 1 100%; justify-content: space-between; }
+  .logo { flex: 1 1 auto; }
+  .herramientas { flex: 1 1 100%; }
+  .herramientas > .menu { margin-left: auto; }
+  .cuenta { display: none; }
 }
 .selector {
   min-height: 36px;
   padding: 0 var(--e-2);
   border: 1px solid var(--borde);
-  border-radius: var(--r-2);
+  border-radius: var(--r-pill);
   background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
   font-size: var(--t-sm);
+  cursor: pointer;
 }
 .pie {
-  margin-top: var(--e-8);
-  padding-block: var(--e-6);
-  border-top: 1px solid var(--borde);
-  background: var(--superficie-2);
-  color: var(--texto-suave);
+  margin-top: var(--e-9);
+  padding-block: var(--e-8) var(--e-5);
+  background: color-mix(in oklab, var(--marca) 92%, black);
+  color: color-mix(in oklab, white 78%, var(--marca));
   font-size: var(--t-sm);
 }
-.pieFilas {
+.pie a { color: inherit; text-decoration: none; }
+.pie a:hover { color: #fff; text-decoration: underline; }
+.pieColumnas {
+  display: grid;
+  gap: var(--e-6);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+@media (min-width: 60rem) {
+  .pieColumnas { grid-template-columns: 1.6fr repeat(4, 1fr); }
+}
+.pieMarca { display: grid; gap: var(--e-3); align-content: start; }
+.pieMarca strong {
+  font-family: var(--fuente-titulos);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  color: #fff;
+}
+.pieMarca p { margin: 0; max-width: 22rem; line-height: 1.6; }
+.pie h2 {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 var(--e-3);
+}
+.pie ul { display: grid; gap: var(--e-2); list-style: none; margin: 0; padding: 0; }
+.pieLegal {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--e-4) var(--e-6);
+  gap: var(--e-2) var(--e-5);
   justify-content: space-between;
+  margin-top: var(--e-7);
+  padding-top: var(--e-4);
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+  font-size: var(--t-xs);
 }
-.pie nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-4);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.pie a { color: var(--texto-suave); }
+.pieLegal p { margin: 0; }
+.pieLegal ul { display: flex; flex-wrap: wrap; gap: var(--e-4); }
