@@ -32,9 +32,11 @@ test.describe("portal (fase 2)", () => {
     await page.goto("/venta/murcia");
     await page.locator("article h3 a").first().click();
     await expect(page.getByText("Confirmado").first()).toBeVisible();
-    await expect(page.locator("script[type='application/ld+json']")).toHaveCount(1);
-    const ld = JSON.parse((await page.locator("script[type='application/ld+json']").textContent())!);
-    expect(ld["@type"]).toBe("RealEstateListing");
+    const bloques = await page.locator("script[type='application/ld+json']").allTextContents();
+    const tipos = bloques.map((b) => JSON.parse(b)).flatMap((d) => (d["@graph"] ? d["@graph"].map((g: { "@type": string }) => g["@type"]) : [d["@type"]]));
+    expect(tipos).toEqual(expect.arrayContaining(["RealEstateListing", "BreadcrumbList"]));
+    await expect(page.getByText("No constan en la ficha:").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Preguntar al agente" }).first()).toBeVisible();
   });
 
   test("favoritos y comparador sin cuenta", async ({ page }) => {
