@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
-import { BRAND } from "@/config/brand";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import { alternativas, isLocale, LOCALE_TAGS, LOCALES } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
 import { textoSobre } from "@/ui/color";
@@ -23,10 +23,10 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   const d = await diccionario(lang);
   return {
     metadataBase: new URL(BRAND.siteUrl),
-    title: { default: BRAND.name, template: `%s · ${BRAND.name}` },
+    title: { default: NOMBRE_VISIBLE, template: `%s · ${NOMBRE_VISIBLE}` },
     description: t(d.meta.descripcion),
     alternates: { canonical: alternativas(BRAND.siteUrl)[LOCALE_TAGS[lang].intl], languages: alternativas(BRAND.siteUrl) },
-    openGraph: { siteName: BRAND.name, locale: LOCALE_TAGS[lang].og, type: "website" },
+    openGraph: { siteName: NOMBRE_VISIBLE, locale: LOCALE_TAGS[lang].og, type: "website" },
     robots: INDEXABLE ? { index: true, follow: true } : { index: false, follow: false },
   };
 }

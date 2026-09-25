@@ -24,6 +24,7 @@ const en: Diccionario = {
     temaSistema: "Automatic",
   },
   inicio: {
+    fotoCredito: "Photo: Unsplash",
     antetitulo: "Region of Murcia · {n} listed properties",
     promptEtiqueta: "Describe the home you are looking for",
     promptPlaceholder: "Area, budget, bedrooms, terrace…",

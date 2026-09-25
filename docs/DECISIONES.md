@@ -269,3 +269,5 @@ Es la mediana del €/m² de la oferta publicada del municipio (con sus barrios)
 - **D-211** · Rasgos positivos definidos una sola vez (`src/portal/rasgos.ts`) y replicados en SQL (`public.es_rasgo`, test de coincidencia). Corrige que «interior» contara como exterior y «sin vistas» como vistas; añade luminosidad, tranquilidad, estado, balcón, calefacción y accesible.
 - **D-212** · Sin Supabase, producción funciona con los ficticios; solo `PORTAL_DATOS=supabase` exige sus variables.
 - **D-213** · Tipografía Inter + Fraunces con `next/font` (autoalojadas). «Casa» incluye chalet y adosado; «piso», ático y dúplex.
+- **D-214** · Mientras no haya nombre comercial, se muestra «Inmobiliaria Región de Murcia» con un símbolo propio (`NOMBRE_VISIBLE`, `MARCA_PROVISIONAL` en `brand.ts`). Al rellenar `BRAND.name` cambia en todo el sitio.
+- **D-215** · Fotos de ambiente con licencia Unsplash (uso comercial libre) en `src/config/imagenes.ts`, enlazadas a su CDN, con degradado de marca detrás por si no cargan. No se usan imágenes de Google (tienen derechos de autor). Los inmuebles ficticios conservan sus ilustraciones: una foto real en un anuncio inventado confundiría.

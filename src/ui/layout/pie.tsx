@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BRAND } from "@/config/brand";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import { publicada } from "@/config/secciones";
 import { ruta, type Locale, type Segmento } from "@/i18n/config";
 import { t, type Diccionario } from "@/i18n/diccionario";
@@ -25,7 +25,7 @@ export function Pie({ locale, d, ficticios }: { locale: Locale; d: Diccionario; 
       <div className="contenedor">
         <div className={s.pieColumnas}>
           <div className={s.pieMarca}>
-            <strong>{BRAND.name}</strong>
+            <strong>{NOMBRE_VISIBLE}</strong>
             <p>{d.pie.lema}</p>
             <p>
               {BRAND.contact.address}, {BRAND.contact.city}

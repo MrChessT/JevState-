@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BRAND } from "@/config/brand";
+import { MARCA_PROVISIONAL, NOMBRE_VISIBLE } from "@/config/brand";
+import { Simbolo } from "@/ui/logo";
 import { publicada } from "@/config/secciones";
 import { ruta, type Locale, type Segmento } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
@@ -21,10 +22,14 @@ export function Cabecera({ locale, d }: { locale: Locale; d: Diccionario }) {
     <header className={s.cabecera}>
       <div className={`contenedor ${s.barra}`}>
         <Link href={ruta(locale)} className={s.logo}>
-          <span className={s.logoMarca} aria-hidden="true">
-            {BRAND.name.replace(/[^\p{L}]/gu, "").charAt(0) || "·"}
-          </span>
-          <span className={s.logoTexto}>{BRAND.name}</span>
+          <Simbolo />
+          {MARCA_PROVISIONAL ? (
+            <span className={s.logoTexto}>
+              Inmobiliaria<small>Región de Murcia</small>
+            </span>
+          ) : (
+            <span className={s.logoTexto}>{NOMBRE_VISIBLE}</span>
+          )}
         </Link>
         {enlaces.length > 0 && (
           <nav aria-label={d.nav.principal} className={s.nav}>

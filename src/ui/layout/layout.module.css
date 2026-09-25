@@ -28,10 +28,20 @@
 }
 .logo:hover { text-decoration: none; }
 .logoTexto {
+  display: grid;
+  line-height: 1.05;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 16rem;
+}
+.logoTexto small {
+  font-family: var(--fuente-texto);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
 }
 .logoMarca {
   width: 34px;

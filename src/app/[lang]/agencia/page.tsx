@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BRAND } from "@/config/brand";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import { alternativas, isLocale, LOCALE_TAGS } from "@/i18n/config";
 import { diccionario } from "@/i18n/diccionario";
 import { Tarjeta } from "@/ui/componentes";
@@ -17,7 +17,7 @@ export default async function Agencia({ params }: PageProps<"/[lang]/agencia">) 
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const d = await diccionario(lang);
-  const jsonLd = { "@context": "https://schema.org", "@type": "RealEstateAgent", name: BRAND.name, url: BRAND.siteUrl, telephone: BRAND.contact.phone, email: BRAND.contact.email, address: { "@type": "PostalAddress", streetAddress: BRAND.contact.address, addressLocality: BRAND.contact.city, addressRegion: "Región de Murcia", addressCountry: "ES" } };
+  const jsonLd = { "@context": "https://schema.org", "@type": "RealEstateAgent", name: NOMBRE_VISIBLE, url: BRAND.siteUrl, telephone: BRAND.contact.phone, email: BRAND.contact.email, address: { "@type": "PostalAddress", streetAddress: BRAND.contact.address, addressLocality: BRAND.contact.city, addressRegion: "Región de Murcia", addressCountry: "ES" } };
   return (
     <div className="contenedor texto-largo" style={{ paddingBlock: "var(--e-7)", display: "grid", gap: "var(--e-5)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />

@@ -23,6 +23,7 @@ const es = {
     temaSistema: "Automático",
   },
   inicio: {
+    fotoCredito: "Foto: Unsplash",
     antetitulo: "Región de Murcia · {n} inmuebles publicados",
     promptEtiqueta: "Describe la casa que buscas",
     promptPlaceholder: "Zona, presupuesto, habitaciones, terraza…",

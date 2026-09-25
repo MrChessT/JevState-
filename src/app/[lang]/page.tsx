@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { publicada } from "@/config/secciones";
 import { isLocale, ruta } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
+import { FOTO_ZONA, FOTOS, urlFoto } from "@/config/imagenes";
 import { portal } from "@/portal/datos";
-import { leerFiltros } from "@/portal/filtros";
+import { leerFiltros, urlFicha } from "@/portal/filtros";
 import type { InmuebleResumen } from "@/portal/tipos";
 import { PromptInicio } from "@/ui/asistente/prompt-inicio";
 import { Aviso, BotonEnlace } from "@/ui/componentes";
@@ -55,6 +56,10 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
   return (
     <>
       <section className={s.heroe}>
+        <div className={s.heroeFoto} aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element -- foto de ambiente servida por el CDN de Unsplash */}
+          <img src={urlFoto(FOTOS.portada, 2000)} alt="" fetchPriority="high" decoding="async" />
+        </div>
         <div className={`contenedor ${s.heroeRejilla}`}>
           <div className={s.heroeTexto}>
             {todos.length > 0 && <p className={s.antetitulo}>{t(d.inicio.antetitulo, { n: numero(lang, todos.length) })}</p>}
@@ -69,23 +74,22 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
             ) : null}
           </div>
           {portada && (
-            <div className={s.heroeVisual} aria-hidden="true">
-              <div className={s.visualFoto}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- ilustración decorativa */}
-                <img src={portada.foto!} alt="" width={560} height={420} />
-              </div>
-              <div className={s.visualTarjeta}>
+            <Link href={urlFicha(lang, portada)} className={s.heroeTarjeta}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- miniatura */}
+              <img src={portada.foto!} alt="" width={120} height={90} />
+              <span>
                 <strong>{euros(lang, portada.precio)}</strong>
                 <span>{portada.titulo}</span>
-                <ul>
-                  {confirmados.map((r) => (
-                    <li key={r.campo}>✓ {(d.rasgos as Record<string, string>)[r.campo] ?? r.campo} · {d.confianza.confirmado.toLowerCase()}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+                {confirmados.map((r) => (
+                  <em key={r.campo}>✓ {(d.rasgos as Record<string, string>)[r.campo] ?? r.campo} · {d.confianza.confirmado.toLowerCase()}</em>
+                ))}
+              </span>
+            </Link>
           )}
         </div>
+        <a className={s.credito} href={FOTOS.portada.pagina} rel="noopener" target="_blank">
+          {d.inicio.fotoCredito}
+        </a>
       </section>
 
       {conPortal && (
@@ -156,6 +160,10 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
             {zonas.map((z, k) => (
               <li key={z.path} data-tono={k % 3}>
                 <Link href={ruta(lang, "venta", z.path)} className={s.zona} aria-label={t(d.inicio.verZona, { zona: z.nombre })}>
+                  {FOTO_ZONA[z.path] && (
+                    // eslint-disable-next-line @next/next/no-img-element -- foto de ambiente
+                    <img className={s.zonaFoto} src={urlFoto(FOTO_ZONA[z.path]!, 800)} alt="" loading="lazy" decoding="async" />
+                  )}
                   <span className={s.zonaNombre}>{z.nombre}</span>
                   <span className={s.zonaDatos}>
                     {t(d.inicio.zonaInmuebles, { n: z.n })}
@@ -195,6 +203,8 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
 
       <section className={`contenedor ${s.seccion}`} aria-labelledby="captacion">
         <div className={s.captacion}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- foto de ambiente */}
+          <img className={s.captacionFoto} src={urlFoto(FOTOS.piscina, 1600)} alt="" loading="lazy" decoding="async" />
           <div>
             <h2 id="captacion">{d.inicio.captacionTitulo}</h2>
             <p>{d.inicio.captacionTexto}</p>

@@ -1,7 +1,7 @@
 // Respuestas del asistente con plantillas (sección 4.6): el texto lo compone el código a partir de
 // datos ya decididos. Nada de lo que se dice sale de un modelo que escribe libremente, así que no
 // puede inventar un precio, un metro ni una característica.
-import { BRAND } from "@/config/brand";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import type { Locale } from "@/i18n/config";
 import type { Relajacion } from "./buscar";
 
@@ -141,6 +141,6 @@ export type Plantillas = typeof ES;
 
 /** Sustituye {variables}; {marca} y {email} siempre están disponibles. */
 export function rellenar(texto: string, vars: Vars = {}): string {
-  const all: Vars = { marca: BRAND.name, email: BRAND.contact.email, ...vars };
+  const all: Vars = { marca: NOMBRE_VISIBLE, email: BRAND.contact.email, ...vars };
   return texto.replace(/\{(\w+)\}/g, (m, k: string) => (k in all ? String(all[k]) : m));
 }
