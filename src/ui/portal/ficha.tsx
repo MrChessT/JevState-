@@ -11,6 +11,7 @@ import { BotonFavorito, Compartir } from "./botones";
 import { publicada } from "@/config/secciones";
 import { BotonAbrirAsistente } from "@/ui/asistente/boton-abrir";
 import { RangoPrecio } from "@/ui/visual/rango";
+import { JsonLd, migas } from "@/ui/seo/jsonld";
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, CAMPOS_LEGALES, TablaCampos, textoCampo, textoPct } from "./campos";
 import { euros, metros, numero } from "./formato";
 import { Galeria } from "./galeria";
@@ -30,6 +31,17 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
   return (
     <article className={`contenedor ${s.ficha}`} data-inmueble-viendo={i.ref}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: scriptJsonLd(jsonLdInmueble(i, url)) }} />
+      <JsonLd
+        grafo={[
+          migas([
+            { nombre: d.buscar.inicio, href: ruta(locale) },
+            { nombre: venta ? d.buscar.tituloVenta : d.buscar.tituloAlquiler, href: ruta(locale, opRuta) },
+            { nombre: i.municipioNombre, href: ruta(locale, opRuta, i.zonaPath.split("/")[0]!) },
+            ...(i.zonaPath.includes("/") ? [{ nombre: i.zonaNombre, href: ruta(locale, opRuta, ...i.zonaPath.split("/")) }] : []),
+            { nombre: i.titulo, href: url },
+          ]),
+        ]}
+      />
       <header className={s.fichaCabecera}>
         <nav aria-label="breadcrumb" className={s.migas}>
           <Link href={ruta(locale, opRuta)}>{venta ? d.buscar.tituloVenta : d.buscar.tituloAlquiler}</Link>
@@ -115,7 +127,7 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
           </section>
           <section className={s.seccionFicha} aria-labelledby="ubicacion">
             <h2 id="ubicacion">{d.ficha.ubicacion}</h2>
-            {i.lat !== null && i.lon !== null && <MapaResultados puntos={[{ ref: i.ref, lat: i.lat, lon: i.lon, precio: i.precio }]} etiqueta={d.ficha.ubicacion} formatoPrecio={venta ? "venta" : "alquiler"} />}
+            {i.lat !== null && i.lon !== null && <MapaResultados puntos={[{ ref: i.ref, lat: i.lat, lon: i.lon, precio: i.precio }]} etiqueta={d.ficha.mapaUbicacion} formatoPrecio={venta ? "venta" : "alquiler"} />}
             <p className={s.nota}>{d.ficha.ubicacionAproximada}</p>
             <h3>{d.ficha.alrededores}</h3>
             {i.distancias.length ? (

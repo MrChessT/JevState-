@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { BRAND } from "@/config/brand";
+import type { Metadata } from "next";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
+import { imagenSitio, JsonLd, organizacion, sitioWeb } from "@/ui/seo/jsonld";
 import { notFound } from "next/navigation";
 import { publicada } from "@/config/secciones";
-import { isLocale, ruta } from "@/i18n/config";
+import { alternativas, isLocale, LOCALE_TAGS, ruta } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
 import { FOTO_ZONA, FOTOS, urlFoto } from "@/config/imagenes";
 import { portal } from "@/portal/datos";
@@ -27,6 +29,19 @@ const ICONOS_PROMESA = [
   <path key="1" d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />,
   <path key="2" d="M4 12h16M12 4v16" />,
 ];
+
+export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) return {};
+  const d = await diccionario(lang);
+  const alt = alternativas(BRAND.siteUrl);
+  return {
+    title: { absolute: `${NOMBRE_VISIBLE} · ${d.inicio.titulo}` },
+    description: t(d.meta.descripcion),
+    alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt },
+    openGraph: { title: d.inicio.titulo, description: t(d.meta.descripcion), url: alt[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) },
+  };
+}
 
 export default async function Inicio({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
@@ -55,6 +70,7 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
+      <JsonLd grafo={[organizacion(lang), sitioWeb(lang)]} />
       <section className={s.heroe}>
         <div className={s.heroeFoto} aria-hidden="true">
           <span className={s.heroeFotoImg} style={{ backgroundImage: `url(${urlFoto(FOTOS.portada, 2000)})` }} aria-hidden="true" />
@@ -101,7 +117,7 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
       )}
 
       {todos.length > 0 && (
-        <section className={`contenedor ${s.cifras}`} aria-label={d.inicio.promesasTitulo}>
+        <section className={`contenedor ${s.cifras}`} aria-label={d.inicio.cifrasTitulo}>
           <dl>
             <div>
               <dt>{d.inicio.cifras.venta}</dt>

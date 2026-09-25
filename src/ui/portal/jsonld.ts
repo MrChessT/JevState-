@@ -1,4 +1,4 @@
-import { BRAND } from "@/config/brand";
+import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import type { InmuebleFicha } from "@/portal/tipos";
 
 /** schema.org RealEstateListing + Offer + Place (sección 2.1). Solo datos confirmados o probables. */
@@ -10,8 +10,9 @@ export function jsonLdInmueble(i: InmuebleFicha, url: string): Record<string, un
     name: i.titulo,
     url: `${BRAND.siteUrl}${url}`,
     datePosted: i.publicadoEn,
-    image: i.fotos.map((f) => (f.startsWith("http") ? f : `${BRAND.siteUrl}${f}`)),
-    offers: i.precio ? { "@type": "Offer", price: i.precio, priceCurrency: "EUR", businessFunction: i.operacion === "venta" ? "http://purl.org/goodrelations/v1#Sell" : "http://purl.org/goodrelations/v1#LeaseOut", seller: { "@type": "RealEstateAgent", name: BRAND.name } } : undefined,
+    // Los buscadores no indexan SVG: para las ilustraciones se usa la imagen generada del inmueble.
+    image: [...i.fotos.filter((f) => !f.startsWith("/ficticios/")).map((f) => (f.startsWith("http") ? f : `${BRAND.siteUrl}${f}`)), `${BRAND.siteUrl}/api/og/inmueble/${i.ref}`],
+    offers: i.precio ? { "@type": "Offer", price: i.precio, priceCurrency: "EUR", businessFunction: i.operacion === "venta" ? "http://purl.org/goodrelations/v1#Sell" : "http://purl.org/goodrelations/v1#LeaseOut", seller: { "@id": `${BRAND.siteUrl}/#agencia`, "@type": "RealEstateAgent", name: NOMBRE_VISIBLE } } : undefined,
     about: {
       "@type": "Accommodation",
       ...(fiable("superficie_construida") ? { floorSize: { "@type": "QuantitativeValue", value: Number(fiable("superficie_construida")), unitCode: "MTK" } } : {}),

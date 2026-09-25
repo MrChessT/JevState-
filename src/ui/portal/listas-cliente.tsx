@@ -54,6 +54,7 @@ export function ListaFavoritos({ locale, d }: { locale: Locale; d: Diccionario }
     );
   return (
     <div className={s.lista}>
+      <h2 className="visually-hidden">{d.buscar.listaResultados}</h2>
       {items.map((i) => (
         <Tarjeta key={i.ref} i={i} locale={locale} d={d} />
       ))}

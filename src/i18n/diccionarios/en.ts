@@ -24,6 +24,7 @@ const en: Diccionario = {
     temaSistema: "Automatic",
   },
   inicio: {
+    cifrasTitulo: "Listings in figures",
     fotoCredito: "Photo: Unsplash",
     antetitulo: "Region of Murcia · {n} listed properties",
     promptEtiqueta: "Describe the home you are looking for",
@@ -116,6 +117,12 @@ const en: Diccionario = {
     volver: "Back to home",
   },
   buscar: {
+    metaDescripcion: "{n} properties {operacion} {donde}, from {desde}. Every detail with its source and the price compared with the area. Search with our assistant too.",
+    metaVenta: "for sale",
+    metaAlquiler: "for rent",
+    metaRegion: "in the Region of Murcia",
+    inicio: "Home",
+    listaResultados: "Results",
     operacion: "Operation",
     comprar: "Buy",
     alquilar: "Rent",
@@ -172,6 +179,7 @@ const en: Diccionario = {
     consultar: "Price on request",
   },
   ficha: {
+    mapaUbicacion: "Map of the approximate location",
     datoHab: "bedrooms",
     datoBanos: "bathrooms",
     noConstan: "Not stated in the listing:",

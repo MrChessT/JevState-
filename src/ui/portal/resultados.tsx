@@ -30,6 +30,7 @@ export function Resultados({ f, r, titulo, locale, d }: { f: Filtros; r: Resulta
               </div>
             ) : (
               <div className={s.lista}>
+                <h2 className="visually-hidden">{d.buscar.listaResultados}</h2>
                 {r.items.map((i, k) => (
                   <Tarjeta key={i.ref} i={i} locale={locale} d={d} prioridad={k < 2} />
                 ))}
@@ -37,7 +38,7 @@ export function Resultados({ f, r, titulo, locale, d }: { f: Filtros; r: Resulta
             )}
             <Paginacion f={f} total={r.total} locale={locale} d={d} />
           </div>
-          {r.puntos.length > 0 && <MapaResultados puntos={r.puntos} etiqueta={d.buscar.mapa} formatoPrecio={f.operacion} />}
+          {r.puntos.length > 0 && <MapaResultados puntos={r.puntos} etiqueta={`${d.buscar.mapa} · ${titulo}`} formatoPrecio={f.operacion} />}
         </div>
       </div>
     </div>

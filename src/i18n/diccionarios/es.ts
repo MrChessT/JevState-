@@ -23,6 +23,7 @@ const es = {
     temaSistema: "Automático",
   },
   inicio: {
+    cifrasTitulo: "La oferta en cifras",
     fotoCredito: "Foto: Unsplash",
     antetitulo: "Región de Murcia · {n} inmuebles publicados",
     promptEtiqueta: "Describe la casa que buscas",
@@ -115,6 +116,12 @@ const es = {
     volver: "Volver al inicio",
   },
   buscar: {
+    metaDescripcion: "{n} inmuebles {operacion} {donde}, desde {desde}. Cada dato con su fuente y el precio comparado con la zona. Busca también con nuestro asistente.",
+    metaVenta: "en venta",
+    metaAlquiler: "en alquiler",
+    metaRegion: "en la Región de Murcia",
+    inicio: "Inicio",
+    listaResultados: "Resultados",
     operacion: "Operación",
     comprar: "Comprar",
     alquilar: "Alquilar",
@@ -171,6 +178,7 @@ const es = {
     consultar: "Consultar precio",
   },
   ficha: {
+    mapaUbicacion: "Mapa de la ubicación aproximada",
     datoHab: "habitaciones",
     datoBanos: "baños",
     noConstan: "No constan en la ficha:",

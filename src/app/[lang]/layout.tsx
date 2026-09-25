@@ -26,8 +26,12 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     metadataBase: new URL(BRAND.siteUrl),
     title: { default: NOMBRE_VISIBLE, template: `%s · ${NOMBRE_VISIBLE}` },
     description: t(d.meta.descripcion),
-    alternates: { canonical: alternativas(BRAND.siteUrl)[LOCALE_TAGS[lang].intl], languages: alternativas(BRAND.siteUrl) },
-    openGraph: { siteName: NOMBRE_VISIBLE, locale: LOCALE_TAGS[lang].og, type: "website" },
+    applicationName: NOMBRE_VISIBLE,
+    category: "real estate",
+    formatDetection: { telephone: false, address: false, email: false },
+    // Sin canónica aquí: cada página declara la suya (si no, heredarían la de la portada).
+    openGraph: { siteName: NOMBRE_VISIBLE, locale: LOCALE_TAGS[lang].og, alternateLocale: LOCALES.filter((l) => l !== lang).map((l) => LOCALE_TAGS[l].og), type: "website", images: [{ url: `/api/og/sitio?lang=${lang}`, width: 1200, height: 630, alt: NOMBRE_VISIBLE }] },
+    twitter: { card: "summary_large_image", images: [`/api/og/sitio?lang=${lang}`] },
     robots: INDEXABLE ? { index: true, follow: true } : { index: false, follow: false },
   };
 }
