@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
 import { diccionario } from "@/i18n/diccionario";
+import { FOTOS } from "@/config/imagenes";
+import { Banner } from "@/ui/visual/banner";
 import { ListaFavoritos } from "@/ui/portal/listas-cliente";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/favoritos">): Promise<Metadata> {
@@ -15,10 +17,11 @@ export default async function Pagina({ params }: PageProps<"/[lang]/favoritos">)
   if (!isLocale(lang)) notFound();
   const d = await diccionario(lang);
   return (
-    <div className="contenedor" style={{ paddingBlock: "var(--e-6)", display: "grid", gap: "var(--e-4)" }}>
-      <h1>{d.favoritos.titulo}</h1>
-      <p style={{ color: "var(--texto-suave)" }}>{d.favoritos.local}</p>
-      <ListaFavoritos locale={lang} d={d} />
-    </div>
+    <>
+      <Banner foto={FOTOS.salon} credito={d.inicio.fotoCredito} titulo={d.favoritos.titulo} texto={d.favoritos.local} />
+      <div className="contenedor" style={{ paddingBlock: "var(--e-7) 0" }}>
+        <ListaFavoritos locale={lang} d={d} />
+      </div>
+    </>
   );
 }

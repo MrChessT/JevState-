@@ -65,7 +65,7 @@
 .rasgos li.rasgoProbable { background: var(--aviso-fondo); color: var(--aviso); }
 .rasgos li.rasgoMas { background: transparent; border: 1px solid var(--borde); }
 .tarjetaAcciones { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--borde); gap: var(--e-2); }
-.eurM2 { font-size: var(--t-xs); color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+.eurM2 { white-space: nowrap; font-size: var(--t-xs); color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
 .tarjetaAcciones .enlaceBoton { min-height: 36px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--borde-fuerte); text-decoration: none; font-size: var(--t-sm); }
 .tarjetaAcciones .enlaceBoton[aria-pressed="true"] { background: var(--marca); color: var(--marca-texto); border-color: var(--marca); }
 .fotoFavorito, .distintivos { z-index: 1; }
@@ -155,3 +155,13 @@
 .fichaAccionesCabecera { display: flex; align-items: center; gap: var(--e-3); }
 .fichaPrecioCaja .fichaPrecio { font-size: clamp(1.9rem, 1.5rem + 1vw, 2.4rem); letter-spacing: -0.02em; line-height: 1.1; }
 .fichaTitular { align-items: center; }
+
+.compararCabecera { vertical-align: top; text-align: left; min-width: 13rem; }
+.compararCabecera img { display: block; width: 100%; max-width: 15rem; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 12px; margin-bottom: 8px; }
+.compararCabecera a { display: block; font-weight: 600; color: var(--texto); text-decoration: none; line-height: 1.3; }
+.compararCabecera a:hover { text-decoration: underline; }
+.compararCabecera strong { display: block; margin-top: 4px; font-size: var(--t-lg); }
+.compararCabecera button { margin-top: 6px; padding: 0; border: 0; background: none; color: var(--texto-tenue); font: inherit; font-size: var(--t-xs); text-decoration: underline; cursor: pointer; }
+.compararMejor { background: var(--ok-fondo); color: var(--ok); font-weight: 700; }
+.compararMejor::after { content: " ★"; }
+.compararNoConsta { color: var(--texto-tenue); }

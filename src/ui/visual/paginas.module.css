@@ -1,0 +1,49 @@
+/* Maquetación común de las páginas de sección (zonas, agencia, favoritos, comparar). */
+.pagina { display: grid; gap: var(--e-8); padding-block: var(--e-7) 0; }
+.bloque { display: grid; gap: var(--e-4); }
+.bloque h2 { margin: 0; }
+.nota { margin: var(--e-1) 0 0; color: var(--texto-suave); }
+.subtitulo { font-family: var(--fuente-texto); font-size: var(--t-base) !important; font-weight: 700; color: var(--texto-suave); }
+.enlacesLinea { margin: 0; line-height: 2; font-size: var(--t-sm); color: var(--texto-tenue); }
+.enlacesLinea a { color: var(--texto-suave); }
+
+.tarjetasZona { display: grid; gap: var(--e-3); grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); margin: 0; padding: 0; list-style: none; }
+.tarjetaZona {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  gap: 2px;
+  min-height: 9.5rem;
+  padding: var(--e-4) var(--e-5);
+  border-radius: 18px;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(150deg, var(--marca), color-mix(in oklab, var(--marca) 55%, black));
+  transition: transform var(--dur-2) var(--curva), box-shadow var(--dur-2) var(--curva);
+}
+.tarjetaZona[data-tono="1"] { background: linear-gradient(150deg, color-mix(in oklab, var(--marca) 70%, var(--acento)), color-mix(in oklab, var(--marca) 50%, black)); }
+.tarjetaZona[data-tono="2"] { background: linear-gradient(150deg, color-mix(in oklab, var(--marca) 60%, #6b7f3a), color-mix(in oklab, var(--marca) 45%, black)); }
+.tarjetaZonaFoto { background-size: cover; background-position: center; display: block; }
+.tarjetaZonaFoto { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--curva); }
+.tarjetaZona::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgb(6 18 22 / 0.8), rgb(6 18 22 / 0.1)); }
+.tarjetaZona:hover { transform: translateY(-3px); box-shadow: var(--sombra-2); color: #fff; text-decoration: none; }
+.tarjetaZona:hover .tarjetaZonaFoto { transform: scale(1.06); }
+.tarjetaZona strong { font-family: var(--fuente-titulos); font-size: var(--t-xl); font-weight: 600; }
+.tarjetaZona span { font-size: var(--t-sm); opacity: 0.9; }
+.tarjetaZona em { position: absolute; top: var(--e-3); right: var(--e-3); padding: 3px 10px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.92); color: #0f2a31; font-style: normal; font-size: 12px; font-weight: 700; }
+
+.pasos { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); margin: 0; padding: 0; list-style: none; counter-reset: paso; }
+.pasos li { position: relative; padding: var(--e-5); border-radius: 18px; background: var(--superficie); border: 1px solid var(--borde); counter-increment: paso; }
+.pasos li::before { content: counter(paso, decimal-leading-zero); display: block; margin-bottom: var(--e-2); font-family: var(--fuente-titulos); font-size: var(--t-2xl); color: color-mix(in oklab, var(--marca) 30%, var(--borde)); font-weight: 600; }
+.pasos h3 { font-family: var(--fuente-texto); font-size: var(--t-lg); margin: 0 0 var(--e-2); }
+.pasos p { margin: 0; color: var(--texto-suave); }
+
+.contacto { display: grid; gap: var(--e-5); align-items: center; padding: var(--e-7) var(--e-6); border-radius: 24px; background: var(--superficie); border: 1px solid var(--borde); box-shadow: var(--sombra-2); }
+@media (min-width: 52rem) { .contacto { grid-template-columns: 1.3fr 1fr; } }
+.contacto h2 { margin: 0 0 var(--e-2); }
+.contacto p { margin: 0; color: var(--texto-suave); }
+.contactoDatos { display: grid; gap: var(--e-2); font-size: var(--t-lg); }
+.contactoDatos a { font-weight: 600; }
+.contactoAcciones { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-3); }

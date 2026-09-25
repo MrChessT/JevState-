@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
 import { diccionario } from "@/i18n/diccionario";
+import { FOTOS } from "@/config/imagenes";
+import { Banner } from "@/ui/visual/banner";
 import { TablaComparar } from "@/ui/portal/listas-cliente";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/comparar">): Promise<Metadata> {
@@ -15,10 +17,11 @@ export default async function Pagina({ params }: PageProps<"/[lang]/comparar">) 
   if (!isLocale(lang)) notFound();
   const d = await diccionario(lang);
   return (
-    <div className="contenedor" style={{ paddingBlock: "var(--e-6)", display: "grid", gap: "var(--e-4)" }}>
-      <h1>{d.comparar.titulo}</h1>
-      
-      <TablaComparar locale={lang} d={d} />
-    </div>
+    <>
+      <Banner foto={FOTOS.frenteMar} credito={d.inicio.fotoCredito} titulo={d.comparar.titulo} texto={undefined} />
+      <div className="contenedor" style={{ paddingBlock: "var(--e-7) 0" }}>
+        <TablaComparar locale={lang} d={d} />
+      </div>
+    </>
   );
 }

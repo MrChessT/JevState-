@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
 import type { InmuebleFicha, InmuebleResumen } from "@/portal/tipos";
-import { Aviso } from "@/ui/componentes";
+import { CATALOG } from "@/catalog/index";
+import { ruta } from "@/i18n/config";
+import { urlFicha } from "@/portal/filtros";
+import { EstadoVacio } from "@/ui/visual/vacio";
+
+const MEJOR: Record<string, "min" | "max"> = { precio: "min", superficie_construida: "max", superficie_util: "max", superficie_parcela: "max", habitaciones: "max", banos: "max", gastos_comunidad: "min", ibi: "min" };
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, textoCampo } from "./campos";
 import { euros } from "./formato";
 import { useListaLocal } from "./lista-local";
@@ -34,12 +39,18 @@ function useInmuebles<T>(refs: string[], fichas: boolean): T[] | null {
 export function ListaFavoritos({ locale, d }: { locale: Locale; d: Diccionario }) {
   const { lista } = useListaLocal("favoritos");
   const items = useInmuebles<InmuebleResumen>(lista, false);
-  if (items === null) return null;
+  if (items === null) return <div aria-busy="true" style={{ minHeight: "16rem" }} />;
   if (!items.length)
     return (
-      <Aviso tipo="info">
-        <p>{d.favoritos.vacio}</p>
-      </Aviso>
+      <EstadoVacio
+        icono="corazon"
+        titulo={d.favoritos.vacioTitulo}
+        texto={d.favoritos.vacio}
+        acciones={[
+          { texto: d.favoritos.verVenta, href: ruta(locale, "venta") },
+          { texto: d.favoritos.preguntarAsistente, href: ruta(locale, "asistente") },
+        ]}
+      />
     );
   return (
     <div className={s.lista}>
@@ -51,17 +62,32 @@ export function ListaFavoritos({ locale, d }: { locale: Locale; d: Diccionario }
 }
 
 export function TablaComparar({ locale, d }: { locale: Locale; d: Diccionario }) {
-  const { lista } = useListaLocal("comparar", 3);
+  const { lista, alternar } = useListaLocal("comparar", 3);
   const items = useInmuebles<InmuebleFicha>(lista, true);
-  if (items === null) return null;
+  if (items === null) return <div aria-busy="true" style={{ minHeight: "16rem" }} />;
   if (items.length < 2)
     return (
-      <Aviso tipo="info">
-        <p>{d.comparar.vacio}</p>
-      </Aviso>
+      <EstadoVacio
+        icono="balanza"
+        titulo={d.comparar.vacioTitulo}
+        texto={d.comparar.vacio}
+        acciones={[
+          { texto: d.favoritos.verVenta, href: ruta(locale, "venta") },
+          { texto: d.favoritos.preguntarAsistente, href: ruta(locale, "asistente") },
+        ]}
+      />
     );
-  const filas = [...CAMPOS_CLAVE, ...CAMPOS_CARACTERISTICAS].filter((id) => items.some((i) => textoCampo(id, i.campos[id], locale, d) !== null));
-  const etiqueta = (id: string) => (d.rasgos as Record<string, string>)[id] ?? id.replace(/_/g, " ");
+  const filas = [...CAMPOS_CLAVE, ...CAMPOS_CARACTERISTICAS].filter((id) => id !== "tipo" && items.some((i) => textoCampo(id, i.campos[id], locale, d) !== null));
+  const etiqueta = (id: string) => CATALOG.fields.find((f) => f.id === id)?.label[locale] ?? id.replace(/_/g, " ");
+  // El mejor valor de cada fila numérica se resalta (solo con datos que constan).
+  const mejor = (id: string): string | null => {
+    const dir = MEJOR[id];
+    if (!dir) return null;
+    const vals = items.map((i) => ({ ref: i.ref, v: i.campos[id]?.value })).filter((x): x is { ref: string; v: number } => typeof x.v === "number" || (typeof x.v === "string" && x.v !== "" && !Number.isNaN(Number(x.v)))).map((x) => ({ ref: x.ref, v: Number(x.v) }));
+    if (vals.length < 2) return null;
+    const top = vals.reduce((a, b) => ((dir === "min" ? b.v < a.v : b.v > a.v) ? b : a));
+    return vals.filter((x) => x.v === top.v).length === 1 ? top.ref : null;
+  };
   return (
     <div className={s.desplazable}>
       <table className={s.tablaComparar}>
@@ -70,25 +96,38 @@ export function TablaComparar({ locale, d }: { locale: Locale; d: Diccionario })
           <tr>
             <th scope="col">{d.comparar.campo}</th>
             {items.map((i) => (
-              <th key={i.ref} scope="col">
-                {i.titulo}
-                <br />
-                <small>{euros(locale, i.precio)}</small>
+              <th key={i.ref} scope="col" className={s.compararCabecera}>
+                {i.foto && (
+                  // eslint-disable-next-line @next/next/no-img-element -- miniatura
+                  <img src={i.foto} alt="" width={240} height={160} loading="lazy" />
+                )}
+                <a href={urlFicha(locale, i)}>{i.titulo}</a>
+                <strong>{euros(locale, i.precio)}</strong>
+                <button type="button" onClick={() => alternar(i.ref)}>
+                  {d.tarjeta.quitarComparar}
+                </button>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {filas.map((id) => (
-            <tr key={id}>
-              <th scope="row">{etiqueta(id)}</th>
-              {items.map((i) => {
-                const v = textoCampo(id, i.campos[id], locale, d);
-                const st = i.campos[id]?.status;
-                return <td key={i.ref}>{v === null ? `— ${d.confianza.no_consta.toLowerCase()}` : st === "probable" ? `${v} (${d.confianza.probable.toLowerCase()})` : v}</td>;
-              })}
-            </tr>
-          ))}
+          {filas.map((id) => {
+            const m = mejor(id);
+            return (
+              <tr key={id}>
+                <th scope="row">{etiqueta(id)}</th>
+                {items.map((i) => {
+                  const v = textoCampo(id, i.campos[id], locale, d);
+                  const st = i.campos[id]?.status;
+                  return (
+                    <td key={i.ref} className={m === i.ref ? s.compararMejor : v === null ? s.compararNoConsta : undefined}>
+                      {v === null ? `— ${d.confianza.no_consta.toLowerCase()}` : st === "probable" ? `${v} (${d.confianza.probable.toLowerCase()})` : v}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
