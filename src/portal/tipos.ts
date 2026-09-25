@@ -17,6 +17,8 @@ export interface InmuebleResumen {
   superficie: number | null;
   habitaciones: number | null;
   banos: number | null;
+  /** Posición de la planta (bajo, intermedia, ático…) si consta. */
+  plantaTipo?: string | null;
   lat: number | null;
   lon: number | null;
   foto: string | null;

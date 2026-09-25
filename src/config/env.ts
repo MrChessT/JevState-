@@ -75,7 +75,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     throw new Error(`Configuración no válida:\n${issues.join("\n")}`);
   }
   const cfg = parsed.data;
-  if (cfg.NODE_ENV === "production") {
+  // Sin Supabase el portal funciona con los inmuebles ficticios (demo); con PORTAL_DATOS=supabase
+  // se exige la configuración para no publicar por error una web de demostración.
+  if (cfg.NODE_ENV === "production" && cleaned.PORTAL_DATOS === "supabase") {
     const missing = (["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] as const).filter((key) => !cfg[key]);
     if (missing.length > 0) throw new Error(`Faltan variables obligatorias en producción: ${missing.join(", ")}`);
   }

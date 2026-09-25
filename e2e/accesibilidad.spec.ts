@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 // WCAG 2.2 AA automático en cada página publicada, en claro y en oscuro.
-const PAGINAS = ["/", "/en", "/venta", "/venta/murcia", "/en/rent", "/zonas", "/zonas/cartagena", "/agencia", "/favoritos", "/comparar", "/legal/aviso-legal", "/legal/privacidad", "/en/legal/cookies", "/cuenta/entrar", "/no-existe"];
+const PAGINAS = ["/", "/en", "/venta", "/venta/murcia", "/en/rent", "/zonas", "/zonas/cartagena", "/agencia", "/favoritos", "/comparar", "/asistente", "/en/assistant", "/legal/aviso-legal", "/legal/privacidad", "/en/legal/cookies", "/cuenta/entrar", "/no-existe"];
 const ETIQUETAS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 test("axe: ficha de un inmueble (claro y oscuro)", async ({ page }) => {

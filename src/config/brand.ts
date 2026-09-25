@@ -37,3 +37,10 @@ export const BRAND: Brand = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "http://localhost:3000",
   social: {},
 };
+
+/** true mientras el nombre comercial no esté decidido (sigue el marcador). */
+export const MARCA_PROVISIONAL = BRAND.name.includes("{{");
+
+/** Nombre que se muestra: el comercial o, mientras no exista, uno descriptivo. */
+export const NOMBRE_VISIBLE = MARCA_PROVISIONAL ? "Inmobiliaria Región de Murcia" : BRAND.name;
+

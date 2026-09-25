@@ -29,6 +29,9 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "e2e",
       PORTAL_DATOS: "ficticios",
       NEXT_TELEMETRY_DISABLED: "1",
+      // Asistente sin Jev (modo degradado, determinista) y con margen de frecuencia para las pruebas.
+      JEV_FAKE: "true",
+      RATE_CHAT_PER_MIN_IP: "1000",
     },
   },
 });

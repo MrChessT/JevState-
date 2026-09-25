@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BRAND } from "@/config/brand";
+import { NOMBRE_VISIBLE } from "@/config/brand";
 import { diccionario, t } from "./diccionario";
 import { LOCALES } from "./config";
 
@@ -26,7 +26,7 @@ describe("diccionarios", () => {
   });
 
   it("interpola variables y la marca", () => {
-    expect(t("Hola {nombre}, soy {marca}", { nombre: "Ana" })).toBe(`Hola Ana, soy ${BRAND.name}`);
+    expect(t("Hola {nombre}, soy {marca}", { nombre: "Ana" })).toBe(`Hola Ana, soy ${NOMBRE_VISIBLE}`);
     expect(t("Sin {variable}")).toBe("Sin {variable}");
   });
 });

@@ -29,8 +29,9 @@ describe("loadConfig", () => {
     expect(loadConfig({ TYPESAFE_API_KEY: "  " }).jev.via).toBe("fake");
   });
 
-  it("en producción exige Supabase", () => {
-    expect(() => loadConfig({ NODE_ENV: "production" })).toThrow(/NEXT_PUBLIC_SUPABASE_URL/);
+  it("en producción exige Supabase si los datos son de Supabase; si no, funciona con ficticios", () => {
+    expect(() => loadConfig({ NODE_ENV: "production", PORTAL_DATOS: "supabase" })).toThrow(/NEXT_PUBLIC_SUPABASE_URL/);
+    expect(() => loadConfig({ NODE_ENV: "production" })).not.toThrow();
   });
 
   it("rechaza valores no válidos con un mensaje legible", () => {

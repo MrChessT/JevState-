@@ -25,7 +25,7 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
   const legalesConValor = CAMPOS_LEGALES.filter((id) => i.campos[id]?.value === true);
   const opRuta = venta ? "venta" : "alquiler";
   return (
-    <article className={`contenedor ${s.ficha}`}>
+    <article className={`contenedor ${s.ficha}`} data-inmueble-viendo={i.ref}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: scriptJsonLd(jsonLdInmueble(i, url)) }} />
       <header className={s.fichaCabecera}>
         <nav aria-label="breadcrumb" className={s.migas}>
