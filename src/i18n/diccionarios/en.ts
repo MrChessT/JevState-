@@ -153,6 +153,10 @@ const en: Diccionario = {
   tipos: { piso: "Flat", atico: "Penthouse", duplex: "Duplex", casa: "House", chalet: "Villa", adosado: "Terraced house", estudio: "Studio", local: "Commercial premises", terreno: "Plot", oficina: "Office", garaje: "Parking space", otro: "Other" },
   rasgos: { balcon: "Balcony", calefaccion: "Heating", accesible: "Step-free", luminosidad: "Bright", ruido: "Quiet", estado: "Renovated", terraza: "Terrace", ascensor: "Lift", garaje: "Parking", piscina: "Pool", trastero: "Storage room", aire_acondicionado: "Air conditioning", exterior: "Exterior", amueblado: "Furnished", vistas: "Views" },
   tarjeta: {
+    nuevo: "New",
+    bajada: "Down {pct}%",
+    mas: "+{n}",
+    sinDatos: "No floor area stated",
     hab: "{n} bed.",
     banos: "{n} baths",
     m2: "{n} m²",
@@ -167,6 +171,10 @@ const en: Diccionario = {
     consultar: "Price on request",
   },
   ficha: {
+    datoHab: "bedrooms",
+    datoBanos: "bathrooms",
+    noConstan: "Not stated in the listing:",
+    preguntarAsistente: "Ask the assistant",
     caracteristicas: "Features",
     datosClave: "Key facts",
     descripcion: "Description",
@@ -264,6 +272,10 @@ const en: Diccionario = {
     textoZona: "Properties for sale and rent in {zona}, with prices calculated from the listings on offer.",
   },
   asistente: {
+    siguientes: "Next steps",
+    cuota: "Payment",
+    guardar: "Save to favourites",
+    quitarGuardado: "Remove from favourites",
     titulo: "Assistant",
     tituloLargo: "Tell us what you're looking for",
     subtitulo: "Write as you would to an agent. I'll show you what fits, why, and which details are confirmed.",

@@ -13,31 +13,39 @@ export { textoCampo };
  * Solo campos públicos; lo que no consta se dice y se ofrece preguntar al agente.
  */
 export function TablaCampos({ campos, locale, d, ids, preguntar }: { campos: Record<string, CampoCanonico>; locale: Locale; d: Diccionario; ids: string[]; preguntar?: string }) {
+  const publicos = ids.map((id) => CATALOG.fields.find((x) => x.id === id)).filter((f): f is NonNullable<typeof f> => Boolean(f?.public));
+  const conValor = publicos.filter((f) => textoCampo(f.id, campos[f.id], locale, d) !== null);
+  const sinValor = publicos.filter((f) => textoCampo(f.id, campos[f.id], locale, d) === null);
+  const etiqueta = (f: (typeof publicos)[number]) => f.label[locale === "es" ? "es" : "en"];
   return (
-    <dl className={s.campos}>
-      {ids.map((id) => {
-        const f = CATALOG.fields.find((x) => x.id === id);
-        if (!f?.public) return null;
-        const c = campos[id];
-        const valor = textoCampo(id, c, locale, d);
-        const estado = !c || valor === null ? "no_consta" : c.status;
-        const etiqueta = f.label[locale === "es" ? "es" : "en"];
-        return (
-          <div key={id} className={s.campo}>
-            <dt>{etiqueta}</dt>
-            <dd>
-              <span>{valor ?? "—"}</span>{" "}
-              <EtiquetaConfianza estado={estado} texto={d.confianza[estado]} titulo={estado === "no_consta" ? d.confianza.noConstaAyuda : estado === "probable" ? d.confianza.probableAyuda : undefined} />
-              {estado === "no_consta" && preguntar && (
-                <a className={s.preguntar} href={`${preguntar}${preguntar.includes("?") ? "&" : "?"}campo=${id}#contacto`}>
-                  {d.ficha.noConstaPregunta}
-                </a>
-              )}
-            </dd>
-          </div>
-        );
-      })}
-    </dl>
+    <>
+      {conValor.length > 0 && (
+        <dl className={s.campos}>
+          {conValor.map((f) => {
+            const c = campos[f.id]!;
+            return (
+              <div key={f.id} className={s.campo}>
+                <dt>{etiqueta(f)}</dt>
+                <dd>
+                  <span>{textoCampo(f.id, c, locale, d)}</span>{" "}
+                  <EtiquetaConfianza estado={c.status} texto={d.confianza[c.status]} titulo={c.status === "probable" ? d.confianza.probableAyuda : undefined} />
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      )}
+      {sinValor.length > 0 && (
+        <p className={s.noConstan}>
+          <span className={s.noConstanTitulo}>{d.ficha.noConstan}</span> {sinValor.map((f) => etiqueta(f).toLowerCase()).join(", ")}.{" "}
+          {preguntar && (
+            <a className={s.preguntar} href={`${preguntar}${preguntar.includes("?") ? "&" : "?"}campo=${sinValor.map((f) => f.id).join(",")}#contacto`}>
+              {d.ficha.noConstaPregunta}
+            </a>
+          )}
+        </p>
+      )}
+    </>
   );
 }
 
