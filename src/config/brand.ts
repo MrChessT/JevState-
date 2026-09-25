@@ -34,7 +34,10 @@ export const BRAND: Brand = {
     address: "Calle de ejemplo, 1",
     city: "Murcia",
   },
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "http://localhost:3000",
+  // En Vercel, sin NEXT_PUBLIC_SITE_URL, se usa el dominio de producción del proyecto.
+  siteUrl:
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
   social: {},
 };
 

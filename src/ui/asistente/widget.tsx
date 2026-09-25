@@ -2,7 +2,7 @@
 
 // Botón flotante del asistente en todas las páginas (menos en la propia página del asistente).
 import { usePathname } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
 import s from "./asistente.module.css";
@@ -40,6 +40,13 @@ function suscribir(cb: () => void) {
 export function WidgetAsistente({ locale, textos }: { locale: Locale; textos: Diccionario["asistente"] & { hab: string; mes: string } }) {
   const pathname = usePathname();
   const abierto = useSyncExternalStore(suscribir, leerAbierto, () => false);
+  const lanzador = useRef<HTMLButtonElement>(null);
+  const estabaAbierto = useRef(abierto);
+  // Al cerrar el panel, el foco vuelve al botón que lo abrió (WCAG 2.4.3).
+  useEffect(() => {
+    if (estabaAbierto.current && !abierto) lanzador.current?.focus();
+    estabaAbierto.current = abierto;
+  }, [abierto]);
 
   useEffect(() => {
     const abrir = () => cambiar(true);
@@ -60,7 +67,7 @@ export function WidgetAsistente({ locale, textos }: { locale: Locale; textos: Di
       <ChatAsistente locale={locale} textos={textos} variante="widget" alCerrar={() => cambiar(false)} />
     </div>
   ) : (
-    <button type="button" className={s.lanzador} onClick={() => cambiar(true)} aria-label={textos.abrir}>
+    <button ref={lanzador} type="button" className={s.lanzador} onClick={() => cambiar(true)} aria-label={textos.abrir}>
       <IconoChispa />
       <span>{textos.titulo}</span>
     </button>

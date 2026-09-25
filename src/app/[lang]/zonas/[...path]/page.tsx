@@ -9,6 +9,7 @@ import { leerFiltros } from "@/portal/filtros";
 import { colindantes, zona, ZONAS } from "@/zonas/buscar";
 import { FOTO_ZONA, FOTOS } from "@/config/imagenes";
 import { Banner } from "@/ui/visual/banner";
+import { JsonLd, migas } from "@/ui/seo/jsonld";
 import { RangoPrecio } from "@/ui/visual/rango";
 import { numero } from "@/ui/portal/formato";
 import s from "@/ui/portal/portal.module.css";
@@ -36,6 +37,17 @@ export default async function ZonaPagina({ params }: PageProps<"/[lang]/zonas/[.
   const e = (x: string | null) => (x ? numero(lang, x) : null);
   return (
     <>
+      <JsonLd
+        grafo={[
+          migas([
+            { nombre: d.buscar.inicio, href: ruta(lang) },
+            { nombre: d.zonas.titulo, href: ruta(lang, "zonas") },
+            ...(z.nivel === "barrio" ? [{ nombre: zona(z.municipio)?.nombre ?? z.municipio, href: ruta(lang, "zonas", z.municipio) }] : []),
+            { nombre: z.nombre, href: ruta(lang, "zonas", ...path) },
+          ]),
+          { "@type": "Place", name: z.nombre, containedInPlace: { "@type": "AdministrativeArea", name: "Región de Murcia" }, address: { "@type": "PostalAddress", addressLocality: zona(z.municipio)?.nombre ?? z.nombre, addressRegion: "Región de Murcia", addressCountry: "ES" } },
+        ]}
+      />
       <Banner
         foto={foto}
         credito={d.inicio.fotoCredito}
@@ -70,6 +82,7 @@ export default async function ZonaPagina({ params }: PageProps<"/[lang]/zonas/[.
       )}
       {venta.items.length > 0 && (
         <div className={s.lista}>
+          <h2 className="visually-hidden">{d.buscar.tituloVenta}</h2>
           {venta.items.slice(0, 6).map((i) => (
             <Tarjeta key={i.ref} i={i} locale={lang} d={d} />
           ))}

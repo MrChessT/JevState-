@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { isLocale } from "@/i18n/config";
+import { BRAND } from "@/config/brand";
+import { alternativas, isLocale, LOCALE_TAGS } from "@/i18n/config";
 import { diccionario } from "@/i18n/diccionario";
 import { FOTOS, urlFoto } from "@/config/imagenes";
 import s from "@/ui/asistente/asistente.module.css";
@@ -9,7 +10,8 @@ import { ChatAsistente } from "@/ui/asistente/chat";
 export async function generateMetadata({ params }: PageProps<"/[lang]/asistente">): Promise<Metadata> {
   const { lang } = await params;
   const d = await diccionario(isLocale(lang) ? lang : "es");
-  return { title: d.asistente.titulo, description: d.asistente.subtitulo };
+  const alt = alternativas(BRAND.siteUrl, "asistente");
+  return { title: d.asistente.tituloLargo, description: d.asistente.subtitulo, alternates: { canonical: alt[LOCALE_TAGS[isLocale(lang) ? lang : "es"].intl], languages: alt } };
 }
 
 export default async function Pagina({ params }: PageProps<"/[lang]/asistente">) {
