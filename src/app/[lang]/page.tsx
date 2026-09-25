@@ -57,8 +57,7 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
     <>
       <section className={s.heroe}>
         <div className={s.heroeFoto} aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element -- foto de ambiente servida por el CDN de Unsplash */}
-          <img src={urlFoto(FOTOS.portada, 2000)} alt="" fetchPriority="high" decoding="async" />
+          <span className={s.heroeFotoImg} style={{ backgroundImage: `url(${urlFoto(FOTOS.portada, 2000)})` }} aria-hidden="true" />
         </div>
         <div className={`contenedor ${s.heroeRejilla}`}>
           <div className={s.heroeTexto}>
@@ -161,8 +160,7 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
               <li key={z.path} data-tono={k % 3}>
                 <Link href={ruta(lang, "venta", z.path)} className={s.zona} aria-label={t(d.inicio.verZona, { zona: z.nombre })}>
                   {FOTO_ZONA[z.path] && (
-                    // eslint-disable-next-line @next/next/no-img-element -- foto de ambiente
-                    <img className={s.zonaFoto} src={urlFoto(FOTO_ZONA[z.path]!, 800)} alt="" loading="lazy" decoding="async" />
+                    <span className={s.zonaFoto} style={{ backgroundImage: `url(${urlFoto(FOTO_ZONA[z.path]!, 800)})` }} aria-hidden="true" />
                   )}
                   <span className={s.zonaNombre}>{z.nombre}</span>
                   <span className={s.zonaDatos}>
@@ -203,8 +201,7 @@ export default async function Inicio({ params }: PageProps<"/[lang]">) {
 
       <section className={`contenedor ${s.seccion}`} aria-labelledby="captacion">
         <div className={s.captacion}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- foto de ambiente */}
-          <img className={s.captacionFoto} src={urlFoto(FOTOS.piscina, 1600)} alt="" loading="lazy" decoding="async" />
+          <span className={s.captacionFoto} style={{ backgroundImage: `url(${urlFoto(FOTOS.piscina, 1600)})` }} aria-hidden="true" />
           <div>
             <h2 id="captacion">{d.inicio.captacionTitulo}</h2>
             <p>{d.inicio.captacionTexto}</p>

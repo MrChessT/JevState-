@@ -10,6 +10,7 @@ import { Aviso, BotonEnlace, EtiquetaConfianza } from "@/ui/componentes";
 import { BotonFavorito, Compartir } from "./botones";
 import { publicada } from "@/config/secciones";
 import { BotonAbrirAsistente } from "@/ui/asistente/boton-abrir";
+import { RangoPrecio } from "@/ui/visual/rango";
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, CAMPOS_LEGALES, TablaCampos, textoCampo, textoPct } from "./campos";
 import { euros, metros, numero } from "./formato";
 import { Galeria } from "./galeria";
@@ -137,11 +138,22 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
           </section>
           <section className={s.seccionFicha} aria-labelledby="frente-zona">
             <h2 id="frente-zona">{d.ficha.frenteZona}</h2>
-            <p>
-              {pct !== null && zona.medianaM2 && i.precio && i.superficie
-                ? textoPct(pct, d, { m2: numero(locale, Math.round(i.precio / i.superficie)), zona: i.municipioNombre, mediana: numero(locale, zona.medianaM2), n: zona.n })
-                : t(d.ficha.sinDatosZona, { zona: i.municipioNombre })}
-            </p>
+            {pct !== null && zona.medianaM2 && zona.p25M2 && zona.p75M2 && zona.n >= 3 && i.precio && i.superficie ? (
+              <RangoPrecio
+                valor={i.precio / i.superficie}
+                p25={Number(zona.p25M2)}
+                p75={Number(zona.p75M2)}
+                mediana={Number(zona.medianaM2)}
+                etiquetaValor={`${numero(locale, Math.round(i.precio / i.superficie))} €/m²`}
+                textos={{ barato: d.zonas.barato, caro: d.zonas.caro, descripcion: textoPct(pct, d, { m2: numero(locale, Math.round(i.precio / i.superficie)), zona: i.municipioNombre, mediana: numero(locale, zona.medianaM2), n: zona.n }) }}
+              />
+            ) : (
+              <p>
+                {pct !== null && zona.medianaM2 && i.precio && i.superficie
+                  ? textoPct(pct, d, { m2: numero(locale, Math.round(i.precio / i.superficie)), zona: i.municipioNombre, mediana: numero(locale, zona.medianaM2), n: zona.n })
+                  : t(d.ficha.sinDatosZona, { zona: i.municipioNombre })}
+              </p>
+            )}
           </section>
         </div>
         <aside className={s.lateral}>

@@ -1,0 +1,75 @@
+/* Componentes visuales compartidos: banner con foto, estado vacío, barras y rango de precio. */
+
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--marca) 82%, black), color-mix(in oklab, var(--marca) 58%, var(--acento)));
+}
+.bannerFoto { background-size: cover; background-position: center; display: block; position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(8 20 24 / 0.82), rgb(8 20 24 / 0.35)), linear-gradient(0deg, rgb(8 20 24 / 0.4), transparent 60%);
+}
+.bannerInterior { display: grid; gap: var(--e-3); padding-block: var(--e-8) var(--e-7); }
+.bannerAntetitulo { margin: 0; font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgb(255 255 255 / 0.75); }
+.banner h1 { margin: 0; color: #fff; font-size: clamp(2.2rem, 1.4rem + 3vw, 3.75rem); letter-spacing: -0.025em; max-width: 18ch; }
+.bannerTexto { margin: 0; max-width: 40rem; font-size: var(--t-lg); color: rgb(255 255 255 / 0.88); line-height: 1.6; }
+.bannerAcciones { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-2); }
+.bannerAcciones a { display: inline-flex; align-items: center; min-height: 46px; padding: 0 var(--e-5); border-radius: var(--r-pill); font-weight: 700; text-decoration: none; background: #fff; color: #0f2a31; }
+.bannerAcciones a + a { background: rgb(255 255 255 / 0.12); color: #fff; border: 1px solid rgb(255 255 255 / 0.4); }
+.bannerAcciones a:hover { text-decoration: none; filter: brightness(0.96); }
+.bannerCifras { display: flex; flex-wrap: wrap; gap: var(--e-3); margin: var(--e-4) 0 0; }
+.bannerCifras > div { display: flex; flex-direction: column-reverse; padding: var(--e-3) var(--e-5); border-radius: var(--r-3); background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.22); backdrop-filter: blur(8px); }
+.bannerCifras dd { margin: 0; font-family: var(--fuente-titulos); font-size: var(--t-2xl); font-weight: 600; letter-spacing: -0.02em; color: #fff; font-variant-numeric: tabular-nums; }
+.bannerCifras dt { font-size: var(--t-sm); color: rgb(255 255 255 / 0.8); }
+.bannerCredito { position: absolute; right: var(--e-4); bottom: var(--e-2); font-size: 11px; color: rgb(255 255 255 / 0.6); text-decoration: none; }
+
+/* Estado vacío */
+.vacio { display: grid; justify-items: center; gap: var(--e-3); padding: var(--e-8) var(--e-5); text-align: center; border: 1px dashed var(--borde-fuerte); border-radius: 24px; background: var(--superficie); }
+.vacioIcono { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--marca-suave); color: var(--marca-enlace); }
+.vacio h2 { margin: var(--e-2) 0 0; font-size: var(--t-xl); }
+.vacio p { margin: 0; max-width: 32rem; color: var(--texto-suave); }
+.vacioAcciones { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--e-3); margin-top: var(--e-3); }
+.vacioAcciones a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--e-5); border-radius: var(--r-pill); font-weight: 700; text-decoration: none; background: var(--marca); color: var(--marca-texto); }
+.vacioAcciones a + a { background: transparent; color: var(--texto); border: 1px solid var(--borde-fuerte); }
+
+/* Barras de precio por zona */
+.barras { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.barras li a { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr auto; align-items: center; gap: var(--e-3); color: var(--texto); text-decoration: none; font-size: var(--t-sm); }
+.barras li a:hover .barra { filter: brightness(1.12); }
+.barras li a:hover .barraNombre { text-decoration: underline; }
+.barraNombre { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barraPista { height: 12px; border-radius: var(--r-pill); background: var(--superficie-2); overflow: hidden; }
+.barra { height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, color-mix(in oklab, var(--marca) 65%, white), var(--marca)); transform-origin: left; animation: crecer 700ms var(--curva) both; }
+@keyframes crecer { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .barra { animation: none; } }
+.barraValor { font-variant-numeric: tabular-nums; color: var(--texto-suave); white-space: nowrap; min-width: 8.5rem; text-align: right; }
+.barraValor strong { color: var(--texto); }
+
+/* Rango de precio (p25–p75 con marcador) */
+.rango { display: grid; gap: var(--e-2); }
+.rangoPista { position: relative; height: 14px; border-radius: var(--r-pill); background: linear-gradient(90deg, #d8efe0, #eef2e8 50%, #f7e3d8); margin: 26px 0 6px; }
+:root[data-theme="dark"] .rangoPista { background: linear-gradient(90deg, #1d3a2a, #2a2d27 50%, #3a2519); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rangoPista { background: linear-gradient(90deg, #1d3a2a, #2a2d27 50%, #3a2519); } }
+.rangoBanda { position: absolute; top: 0; bottom: 0; border-radius: var(--r-pill); background: color-mix(in oklab, var(--marca) 28%, transparent); border: 1px solid color-mix(in oklab, var(--marca) 55%, transparent); }
+.rangoMarca { position: absolute; top: -26px; transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; font-size: var(--t-xs); font-weight: 700; white-space: nowrap; }
+.rangoMarca::after { content: ""; width: 3px; height: 30px; border-radius: 2px; background: var(--acento); }
+.rangoEjes { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+.rangoTexto { margin: 0; font-size: var(--t-sm); color: var(--texto-suave); }
+
+/* Barra flotante del comparador */
+.comparador { position: fixed; left: 50%; bottom: max(var(--e-4), env(safe-area-inset-bottom)); z-index: 55; transform: translateX(-50%); display: flex; align-items: center; gap: var(--e-3); padding: 8px 8px 8px 18px; border-radius: var(--r-pill); background: color-mix(in oklab, var(--marca) 88%, black); color: #fff; box-shadow: 0 16px 40px rgb(0 0 0 / 0.28); animation: subir 280ms var(--curva) both; font-size: var(--t-sm); max-width: calc(100vw - 7rem); }
+@keyframes subir { from { opacity: 0; transform: translate(-50%, 12px); } }
+@media (prefers-reduced-motion: reduce) { .comparador { animation: none; } }
+.comparador a { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border-radius: var(--r-pill); background: #fff; color: #0f2a31; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.comparador button { min-height: 38px; padding: 0 12px; border: 0; border-radius: var(--r-pill); background: transparent; color: rgb(255 255 255 / 0.8); font: inherit; cursor: pointer; }
+.comparador button:hover { color: #fff; background: rgb(255 255 255 / 0.1); }
+.comparadorPuntos { display: inline-flex; gap: 4px; }
+.comparadorPuntos i { width: 8px; height: 8px; border-radius: 50%; background: rgb(255 255 255 / 0.3); }
+.comparadorPuntos i[data-lleno] { background: #fff; }
+@media (max-width: 480px) { .comparadorTexto { display: none; } }

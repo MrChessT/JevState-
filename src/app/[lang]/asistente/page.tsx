@@ -19,8 +19,7 @@ export default async function Pagina({ params }: PageProps<"/[lang]/asistente">)
   return (
     <div className={`contenedor ${s.pagina}`}>
       <header className={s.paginaCabecera}>
-        {/* eslint-disable-next-line @next/next/no-img-element -- foto de ambiente */}
-        <img className={s.paginaFoto} src={urlFoto(FOTOS.salon, 1600)} alt="" decoding="async" />
+        <span className={s.paginaFoto} style={{ backgroundImage: `url(${urlFoto(FOTOS.salon, 1600)})` }} aria-hidden="true" />
         <h1>{d.asistente.tituloLargo}</h1>
         <p>{d.asistente.subtitulo}</p>
         <ul className={s.promesas}>

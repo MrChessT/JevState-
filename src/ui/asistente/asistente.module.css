@@ -632,6 +632,7 @@
   background: linear-gradient(90deg, rgb(8 20 24 / 0.8), rgb(8 20 24 / 0.25));
 }
 .paginaFoto {
+  background-size: cover; background-position: center; display: block;
   position: absolute;
   inset: 0;
   z-index: -2;

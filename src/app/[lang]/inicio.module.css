@@ -15,7 +15,10 @@
   inset: 0;
   z-index: -1;
 }
-.heroeFoto img {
+.heroeFotoImg {
+  position: absolute;
+  inset: 0;
+  background-size: cover; background-position: center; display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -30,7 +33,10 @@
     linear-gradient(0deg, rgb(8 20 24 / 0.55), transparent 45%);
 }
 @keyframes acercar { from { transform: scale(1.08); } to { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .heroeFoto img { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .heroeFotoImg {
+  position: absolute;
+  inset: 0;
+  background-size: cover; background-position: center; display: block; animation: none; } }
 .heroeRejilla {
   position: relative;
   display: grid;
@@ -295,3 +301,5 @@
   opacity: 0.35;
   mix-blend-mode: luminosity;
 }
+
+.zonaFoto, .captacionFoto { background-size: cover; background-position: center; display: block; }

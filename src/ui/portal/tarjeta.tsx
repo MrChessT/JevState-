@@ -98,7 +98,7 @@ export function Tarjeta({ i, locale, d, prioridad }: { i: InmuebleResumen; local
         </ul>
         <div className={s.tarjetaAcciones}>
           <span className={s.eurM2}>{m2 ? t(d.tarjeta.eurM2, { n: m2 }) : " "}</span>
-          <BotonComparar refInmueble={i.ref} textos={{ comparar: d.tarjeta.comparar, quitar: d.tarjeta.quitarComparar, maximo: d.comparar.maximo }} />
+          <BotonComparar refInmueble={i.ref} textos={{ comparar: d.tarjeta.comparar, quitar: d.tarjeta.comparando, maximo: d.comparar.maximo }} />
         </div>
       </div>
     </article>

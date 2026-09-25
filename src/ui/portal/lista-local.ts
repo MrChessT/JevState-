@@ -60,5 +60,13 @@ export function useListaLocal(clave: "favoritos" | "comparar", maximo = 200) {
     },
     [clave, maximo],
   );
-  return { lista, alternar };
+  const vaciar = useCallback(() => {
+    try {
+      localStorage.setItem(clave, "[]");
+    } catch {
+      return;
+    }
+    window.dispatchEvent(new Event(EVENTO));
+  }, [clave]);
+  return { lista, alternar, vaciar };
 }
