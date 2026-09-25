@@ -134,4 +134,37 @@ describe("motor del asistente", async () => {
     expect(f.requisitos.terraza).toBe("deseable");
     expect(f.precioMax).toBe(1e5);
   });
+
+  it("acciones de un clic sin Jev: ver más, ordenar, ajustar y cambiar de operación", async () => {
+    const r1 = await responder({ mensaje: "piso en Murcia" }, deps(null));
+    expect(r1.respuesta.sugerencias.some((x) => x.accion.tipo === "mas")).toBe(true);
+    const r2 = await responder({ accion: { tipo: "mas" }, estado: r1.respuesta.estado }, deps(null));
+    expect(r2.respuesta.estado.pagina).toBe(2);
+    expect(r2.respuesta.tarjetas.map((t) => t.i.ref)).not.toContain(r1.respuesta.tarjetas[0]!.i.ref);
+    const r3 = await responder({ accion: { tipo: "orden", valor: "precio_asc" }, estado: r1.respuesta.estado }, deps(null));
+    const precios = r3.respuesta.tarjetas.map((t) => t.i.precio!);
+    expect(precios).toEqual([...precios].sort((a, b) => a - b));
+    const r4 = await responder({ accion: { tipo: "ajustar", cambios: { requisitos: { garaje: "imprescindible" } } }, estado: r1.respuesta.estado }, deps(null));
+    expect(r4.respuesta.tarjetas.every((t) => t.i.rasgos.some((x) => x.campo === "garaje"))).toBe(true);
+    const r5 = await responder({ accion: { tipo: "ajustar", cambios: { operacion: "alquiler" } }, estado: { ...r1.respuesta.estado, ficha: { ...r1.respuesta.estado.ficha!, precioMax: 200000 } } }, deps(null));
+    expect(r5.respuesta.estado.ficha!.precioMax).toBeUndefined();
+    expect(r5.respuesta.tarjetas.every((t) => t.i.operacion !== "venta")).toBe(true);
+  });
+
+  it("hipoteca orientativa calculada por el código, con variantes de un clic", async () => {
+    const i = todos.find((x) => x.operacion === "venta" && x.precio)!;
+    const { respuesta } = await responder({ accion: { tipo: "hipoteca", ref: i.ref } }, deps(null));
+    expect(respuesta.cifras[0]!.valor).toMatch(/€/);
+    expect(respuesta.parrafos.join(" ")).toMatch(/orientativo/);
+    expect(respuesta.sugerencias.length).toBeGreaterThan(1);
+    const sinJev = await responder({ mensaje: "¿qué hipoteca necesitaría para 200.000 €?" }, deps(null));
+    expect(sinJev.respuesta.intencion).toBe("calcular_hipoteca");
+    expect(sinJev.respuesta.cifras.length).toBe(3);
+  });
+
+  it("información de zona con datos de los inmuebles publicados", async () => {
+    const { respuesta } = await responder({ accion: { tipo: "zona", path: "cartagena" } }, deps(null));
+    expect(respuesta.parrafos[0]).toMatch(/Cartagena: \d+ inmuebles/);
+    expect(respuesta.sugerencias[0]!.accion).toMatchObject({ tipo: "ajustar" });
+  });
 });

@@ -143,6 +143,8 @@ export const ACCION_DE_INTENCION: Record<string, Accion | null> = {
   pedir_visita: "pedir_visita",
   contactar_agente: "contactar_agente",
   crear_alerta: "crear_alerta",
+  calcular_hipoteca: null,
+  info_zona: null,
   conversar: null,
   fuera_de_ambito: null,
 };

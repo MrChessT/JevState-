@@ -8,6 +8,7 @@ import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, 
 import type { EstadoAsistente, RespuestaAsistente, TarjetaAsistente } from "@/asistente/motor";
 import type { Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
+import { BotonFavorito } from "@/ui/portal/botones";
 import { euros, numero } from "@/ui/portal/formato";
 import s from "./asistente.module.css";
 
@@ -100,7 +101,7 @@ export function ChatAsistente({ locale, textos, variante, alCerrar }: { locale: 
   }, [g.mensajes, fase]);
 
   const enviar = useCallback(
-    async (cuerpo: { mensaje?: string; opcion?: string; quitar?: string }, eco?: string) => {
+    async (cuerpo: { mensaje?: string; opcion?: string; quitar?: string; accion?: RespuestaAsistente["sugerencias"][number]["accion"] }, eco?: string) => {
       if (fase) return;
       const actual = leer();
       const mensajes: Mensaje[] = eco ? [...actual.mensajes, { id: nuevoId(), rol: "usuario", texto: eco }] : actual.mensajes;
@@ -268,7 +269,7 @@ export function ChatAsistente({ locale, textos, variante, alCerrar }: { locale: 
               {m.texto}
             </div>
           ) : (
-            <Respuesta key={m.id} r={m.r} locale={locale} textos={textos} variante={variante} activa={idx === g.mensajes.length - 1 && !fase} alElegir={(valor, texto) => void enviar({ opcion: valor }, texto)} alDescartar={(ref) => void enviar({ mensaje: `${locale === "es" ? "No me encaja" : "Not for me"}: ${ref}` }, `${textos.noEncaja}: ${ref}`)} />
+            <Respuesta key={m.id} r={m.r} locale={locale} textos={textos} variante={variante} activa={idx === g.mensajes.length - 1 && !fase} alElegir={(valor, texto) => void enviar({ opcion: valor }, texto)} alDescartar={(ref) => void enviar({ mensaje: `${locale === "es" ? "No me encaja" : "Not for me"}: ${ref}` }, `${textos.noEncaja}: ${ref}`)} alAccion={(accion, texto) => void enviar({ accion }, texto)} />
           ),
         )}
         {fase && (
@@ -307,12 +308,24 @@ export function ChatAsistente({ locale, textos, variante, alCerrar }: { locale: 
   );
 }
 
-function Respuesta({ r, locale, textos, variante, activa, alElegir, alDescartar }: { r: RespuestaAsistente; locale: Locale; textos: Textos; variante: "widget" | "pagina"; activa: boolean; alElegir: (valor: string, texto: string) => void; alDescartar: (ref: string) => void }) {
+type Accion = RespuestaAsistente["sugerencias"][number]["accion"];
+
+function Respuesta({ r, locale, textos, variante, activa, alElegir, alDescartar, alAccion }: { r: RespuestaAsistente; locale: Locale; textos: Textos; variante: "widget" | "pagina"; activa: boolean; alElegir: (valor: string, texto: string) => void; alDescartar: (ref: string) => void; alAccion: (a: Accion, texto: string) => void }) {
   return (
     <div className={s.respuesta}>
       {r.parrafos.map((p, i) => (
         <p key={i}>{p}</p>
       ))}
+      {r.cifras.length > 0 && (
+        <dl className={s.cifras}>
+          {r.cifras.map((c) => (
+            <div key={c.etiqueta}>
+              <dt>{c.etiqueta}</dt>
+              <dd>{c.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
       {r.opciones.length > 0 && (
         <div className={s.opciones}>
           {r.opciones.map((o) => (
@@ -352,7 +365,7 @@ function Respuesta({ r, locale, textos, variante, activa, alElegir, alDescartar 
         <ul className={variante === "widget" ? s.carrusel : s.rejilla}>
           {r.tarjetas.map((t) => (
             <li key={t.i.ref}>
-              <MiniTarjeta t={t} locale={locale} textos={textos} alDescartar={activa ? alDescartar : undefined} />
+              <MiniTarjeta t={t} locale={locale} textos={textos} alDescartar={activa ? alDescartar : undefined} alCuota={(ref) => alAccion({ tipo: "hipoteca", ref, anos: 30, entradaPct: 20 }, `${textos.cuota}: ${ref}`)} />
             </li>
           ))}
         </ul>
@@ -366,13 +379,22 @@ function Respuesta({ r, locale, textos, variante, activa, alElegir, alDescartar 
           ))}
         </ul>
       )}
+      {activa && r.sugerencias.length > 0 && (
+        <div className={s.sugerencias} role="group" aria-label={textos.siguientes}>
+          {r.sugerencias.map((x) => (
+            <button key={x.texto} type="button" onClick={() => alAccion(x.accion, x.texto)}>
+              {x.texto}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 const ICONO_PORQUE = { bueno: "✓", probable: "≈", aviso: "!", neutro: "·" } as const;
 
-function MiniTarjeta({ t, locale, textos, alDescartar }: { t: TarjetaAsistente; locale: Locale; textos: Textos; alDescartar?: (ref: string) => void }) {
+function MiniTarjeta({ t, locale, textos, alDescartar, alCuota }: { t: TarjetaAsistente; locale: Locale; textos: Textos; alDescartar?: (ref: string) => void; alCuota: (ref: string) => void }) {
   const i = t.i;
   const alquiler = i.operacion !== "venta";
   const datos = [i.habitaciones ? rellenar(textos.hab, { n: i.habitaciones }) : null, i.superficie ? `${numero(locale, i.superficie)} m²` : null, i.zonaNombre].filter(Boolean).join(" · ");
@@ -383,6 +405,9 @@ function MiniTarjeta({ t, locale, textos, alDescartar }: { t: TarjetaAsistente; 
         {i.foto && <img src={i.foto} alt="" loading="lazy" width={320} height={200} />}
         <span className={s.miniRef}>{i.ref}</span>
       </Link>
+      <div className={s.miniFavorito}>
+        <BotonFavorito refInmueble={i.ref} textos={{ guardar: textos.guardar, quitar: textos.quitarGuardado }} />
+      </div>
       <div className={s.miniCuerpo}>
         <p className={s.miniPrecio}>
           {euros(locale, i.precio) ?? "—"}
@@ -406,6 +431,11 @@ function MiniTarjeta({ t, locale, textos, alDescartar }: { t: TarjetaAsistente; 
           <Link href={t.href} className={s.miniVer}>
             {textos.verFicha}
           </Link>
+          {!alquiler && i.precio && (
+            <button type="button" className={s.miniDescartar} onClick={() => alCuota(i.ref)}>
+              {textos.cuota}
+            </button>
+          )}
           {alDescartar && (
             <button type="button" className={s.miniDescartar} onClick={() => alDescartar(i.ref)}>
               {textos.noEncaja}

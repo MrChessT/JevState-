@@ -215,6 +215,8 @@ const PALABRAS_INTENCION: Array<[RegExp, Intencion]> = [
   [/\b(visit|visita|visitar|ver (el|la) (piso|casa)|verlo|viewing)\w*\b/, "pedir_visita"],
   [/\b(contact|llamad|llamen|agente|hablar con)\w*\b/, "contactar_agente"],
   [/\b(alert|alerta|avisame|avisadme|notif)\w*\b/, "crear_alerta"],
+  [/\b(hipoteca|cuota|financiaci|mortgage|monthly payment)\w*\b|\bpagaria al mes\b/, "calcular_hipoteca"],
+  [/\b(precio medio|precio por metro|m2 en|metro cuadrado en|como es (la zona|el barrio|el pueblo)|que tal es|cuanto cuesta vivir|average price|what is .* like)\b/, "info_zona"],
   [/\b(compar)\w*\b/, "comparar"],
   [/\b(valor|tasar|cuanto vale mi|vender mi|value my)\w*\b/, "valorar_mi_vivienda"],
   [/\b(no me (gusta|encaja|convence)|muy (oscuro|caro|pequeno)|demasiado|me gusta)\w*\b/, "feedback_resultado"],

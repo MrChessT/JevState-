@@ -10,7 +10,7 @@ import { z } from "zod";
 import { CATALOG } from "@/catalog/index";
 import { asScore, gateScore } from "@/gates/gate";
 import type { Thresholds } from "@/gates/thresholds";
-import type { Locale } from "@/i18n/config";
+import { ruta, type Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
 import en from "@/i18n/diccionarios/en";
 import es from "@/i18n/diccionarios/es";
@@ -18,7 +18,8 @@ import { JevError } from "@/jev/errors";
 import type { JevPort } from "@/jev/port";
 import { sinDatosPersonales } from "@/jev/privacidad";
 import { logger } from "@/observability/logger";
-import { urlFicha } from "@/portal/filtros";
+import { calcularHipoteca } from "@/portal/hipoteca";
+import { CARACTERISTICAS_FILTRO, leerFiltros, TIPOS_BUSQUEDA, urlFicha, urlFiltros } from "@/portal/filtros";
 import type { RepositorioPortal } from "@/portal/repositorio";
 import type { InmuebleResumen } from "@/portal/tipos";
 import { euros, numero } from "@/ui/portal/formato";
@@ -41,15 +42,35 @@ export const Aclaracion = z.object({
   mensaje: z.string().max(1000),
   campoPregunta: z.string().max(60).nullable().default(null),
 });
+export const ORDENES_ASISTENTE = ["relevancia", "precio_asc", "precio_desc", "m2_asc", "superficie_desc"] as const;
+export type OrdenAsistente = (typeof ORDENES_ASISTENTE)[number];
+
 export const EstadoAsistente = z.object({
   ficha: FichaBusqueda.nullable().default(null),
   visibles: z.array(Visible).max(24).default([]),
   aclaracion: Aclaracion.nullable().default(null),
+  pagina: z.number().int().min(1).max(50).default(1),
+  orden: z.enum(ORDENES_ASISTENTE).default("relevancia"),
 });
 export type EstadoAsistente = z.infer<typeof EstadoAsistente>;
 export const estadoInicial = (): EstadoAsistente => EstadoAsistente.parse({});
 
+/**
+ * Acciones de un clic (sugerencias y botones de las tarjetas). Las resuelve el código, sin Jev: el
+ * usuario ya ha elegido exactamente qué quiere.
+ */
+export const AccionAsistente = z.discriminatedUnion("tipo", [
+  z.object({ tipo: z.literal("ajustar"), cambios: FichaBusqueda.partial() }),
+  z.object({ tipo: z.literal("mas") }),
+  z.object({ tipo: z.literal("orden"), valor: z.enum(ORDENES_ASISTENTE) }),
+  z.object({ tipo: z.literal("zona"), path: z.string().regex(/^[a-z0-9-]+(\/[a-z0-9-]+)?$/) }),
+  z.object({ tipo: z.literal("hipoteca"), ref: z.string().max(40).optional(), precio: z.number().positive().max(1e8).optional(), anos: z.number().int().min(5).max(40).default(30), entradaPct: z.number().int().min(0).max(80).default(20) }),
+]);
+export type AccionAsistente = z.infer<typeof AccionAsistente>;
+
 export const EntradaAsistente = z.object({
+  /** Acción de un clic (sugerencia o botón de tarjeta). */
+  accion: AccionAsistente.optional(),
   mensaje: z.string().trim().max(1000).default(""),
   /** Opción elegida en una aclaración (chip). */
   opcion: z.string().max(120).optional(),
@@ -77,6 +98,10 @@ export interface RespuestaAsistente {
   opciones: Array<{ valor: string; texto: string }>;
   tabla: { columnas: Array<{ ref: string; href: string }>; filas: Array<{ campo: string; valores: string[] }> } | null;
   enlaces: Array<{ texto: string; href: string }>;
+  /** Siguientes pasos de un clic, generados por el código a partir de la ficha y el resultado. */
+  sugerencias: Array<{ texto: string; accion: z.input<typeof AccionAsistente> }>;
+  /** Datos destacados (hipoteca, zona) para mostrarlos como cifras grandes. */
+  cifras: Array<{ etiqueta: string; valor: string }>;
   degradado: boolean;
   estado: EstadoAsistente;
 }
@@ -216,7 +241,7 @@ export function soloResumen(i: InmuebleResumen): InmuebleResumen {
 }
 
 function vacia(estado: EstadoAsistente, locale: Locale, intencion: RespuestaAsistente["intencion"], parrafos: string[], degradado: boolean): RespuestaAsistente {
-  return { intencion, parrafos, tarjetas: [], total: null, chips: chipsDe(estado.ficha, locale), opciones: [], tabla: null, enlaces: [], degradado, estado };
+  return { intencion, parrafos, tarjetas: [], total: null, chips: chipsDe(estado.ficha, locale), opciones: [], tabla: null, enlaces: [], sugerencias: [], cifras: [], degradado, estado };
 }
 
 // Llamada 2: encaje con las necesidades en texto libre (sección 4.4) --------------------------
@@ -257,25 +282,88 @@ async function valorarEncaje(r: ResultadoRecomendacion, ficha: FichaBusqueda, de
 
 // Acciones -----------------------------------------------------------------------------------
 
-async function buscar(ficha0: FichaBusqueda, estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, extra: { avisos: string[]; degradado: boolean; intencion: RespuestaAsistente["intencion"]; necesidades?: boolean }) {
+const POR_PAGINA = 12;
+const RASGOS_SUGERIBLES = ["terraza", "garaje", "piscina", "ascensor", "trastero"];
+
+function ordenar(lista: Candidato[], orden: OrdenAsistente): Candidato[] {
+  if (orden === "relevancia") return lista;
+  const val = (c: Candidato) => {
+    const i = c.i;
+    if (orden === "precio_asc") return i.precio ?? Infinity;
+    if (orden === "precio_desc") return -(i.precio ?? 0);
+    if (orden === "m2_asc") return i.precio && i.superficie ? i.precio / i.superficie : Infinity;
+    return -(i.superficie ?? 0);
+  };
+  return [...lista].sort((a, b) => val(a) - val(b) || a.i.ref.localeCompare(b.i.ref));
+}
+
+/** URL del buscador clásico con los mismos criterios (solo si caben en sus filtros). */
+function urlPortal(f: FichaBusqueda, locale: Locale): string | null {
+  if (f.zonas.length > 1) return null;
+  const con = Object.entries(f.requisitos).filter(([c, n]) => n !== "rechazo" && (CARACTERISTICAS_FILTRO as readonly string[]).includes(c)).map(([c]) => c);
+  const tipos = f.tipos.filter((t) => (TIPOS_BUSQUEDA as readonly string[]).includes(t));
+  const params: Record<string, string> = {};
+  if (f.precioMax) params.precio_max = String(Math.round(f.precioMax));
+  if (f.precioMin) params.precio_min = String(Math.round(f.precioMin));
+  if (f.habMin) params.hab_min = String(f.habMin);
+  if (tipos.length) params.tipo = tipos.join(",");
+  if (con.length) params.con = con.join(",");
+  return urlFiltros(locale, leerFiltros(f.operacion ?? "venta", f.zonas[0]?.split("/"), params));
+}
+
+function sugerenciasBusqueda(f: FichaBusqueda, total: number, mostrados: number, orden: OrdenAsistente, locale: Locale): RespuestaAsistente["sugerencias"] {
+  const p = PLANTILLAS[locale].sugerencias;
+  const out: RespuestaAsistente["sugerencias"] = [];
+  if (total > mostrados) out.push({ texto: rellenar(p.mas, { n: Math.min(POR_PAGINA, total - mostrados) }), accion: { tipo: "mas" } });
+  if (total > 1 && orden !== "precio_asc") out.push({ texto: p.baratos, accion: { tipo: "orden", valor: "precio_asc" } });
+  if (total > 1 && f.operacion !== "alquiler" && orden !== "m2_asc") out.push({ texto: p.m2, accion: { tipo: "orden", valor: "m2_asc" } });
+  if (f.precioMax && total > 3) {
+    const bajar = Math.round((f.precioMax * 0.85) / 5000) * 5000;
+    if (bajar > 0) out.push({ texto: rellenar(p.bajar, { precio: euros(locale, bajar) ?? "" }), accion: { tipo: "ajustar", cambios: { precioMax: bajar } } });
+  }
+  for (const r of RASGOS_SUGERIBLES.filter((c) => !f.requisitos[c]).slice(0, 2))
+    out.push({ texto: rellenar(p.con, { rasgo: etiquetaCampo(r, locale).toLowerCase() }), accion: { tipo: "ajustar", cambios: { requisitos: { [r]: "imprescindible" } } } });
+  if (f.zonas.length === 1) out.push({ texto: rellenar(p.zona, { zona: nombreZona(f.zonas[0]!) }), accion: { tipo: "zona", path: f.zonas[0]! } });
+  out.push(f.operacion === "alquiler" ? { texto: p.venta, accion: { tipo: "ajustar", cambios: { operacion: "venta" } } } : { texto: p.alquiler, accion: { tipo: "ajustar", cambios: { operacion: "alquiler" } } });
+  return out.slice(0, 6);
+}
+
+async function buscar(
+  ficha0: FichaBusqueda,
+  estado: EstadoAsistente,
+  locale: Locale,
+  deps: DependenciasMotor,
+  extra: { avisos: string[]; degradado: boolean; intencion: RespuestaAsistente["intencion"]; necesidades?: boolean; pagina?: number; orden?: OrdenAsistente },
+) {
   const p = PLANTILLAS[locale];
   deps.progreso?.("buscando");
   // Sin operación indicada se busca en venta, y se muestra como chip para que se pueda cambiar.
   const ficha: FichaBusqueda = { ...ficha0, operacion: ficha0.operacion ?? "venta" };
-  const efectivaBase = ficha;
+  const pagina = extra.pagina ?? 1;
+  const orden = extra.orden ?? "relevancia";
   const todos = await deps.repo.todas();
-  const r = recomendar(todos, efectivaBase, 12);
-  const llamada2 = extra.necesidades ? await valorarEncaje(r, ficha, deps) : { llamadas: 0, decisiones: [] };
+  const r = recomendar(todos, ficha, 10_000);
+  const llamada2 = extra.necesidades && pagina === 1 ? await valorarEncaje(r, ficha, deps) : { llamadas: 0, decisiones: [] };
+  const lista = ordenar(r.candidatos, orden);
+  const desde = (pagina - 1) * POR_PAGINA;
+  const pag = lista.slice(desde, desde + POR_PAGINA);
   const parrafos: string[] = [];
-  if (r.total === 0) parrafos.push(p.sinResultados);
+  if (pagina > 1) parrafos.push(rellenar(p.mas, { m: pag.length, desde: desde + 1, hasta: desde + pag.length, n: r.total }));
+  else if (r.total === 0) parrafos.push(p.sinResultados);
   else if (r.relajaciones.length) parrafos.push(rellenar(p.relajado, { cambios: r.relajaciones.map((x) => p.relajacion[x.tipo]).join(locale === "es" ? " y " : " and "), n: r.total }));
   else if (r.total === 1) parrafos.push(p.resultadosUno);
-  else parrafos.push(rellenar(p.resultados, { n: r.total, m: Math.min(r.total, r.candidatos.length), inmuebles: p.inmuebles[1]! }));
-  if (ficha.zonasAmpliadas.length && !r.relajaciones.some((x) => x.tipo === "colindantes")) parrafos.push(rellenar(p.ampliadas, { zonas: ficha.zonasAmpliadas.map(nombreZona).join(", ") }));
+  else parrafos.push(rellenar(p.resultados, { n: r.total, m: pag.length, inmuebles: p.inmuebles[1]! }));
+  if (pagina === 1 && r.total > 1) {
+    const precios = lista.map((c) => c.i.precio).filter((x): x is number => x !== null);
+    if (precios.length > 1) parrafos.push(`${rellenar(p.rango, { min: euros(locale, Math.min(...precios)) ?? "", max: euros(locale, Math.max(...precios)) ?? "" })} ${p.ordenado[orden]}`);
+  }
+  if (pagina === 1 && ficha.zonasAmpliadas.length && !r.relajaciones.some((x) => x.tipo === "colindantes")) parrafos.push(rellenar(p.ampliadas, { zonas: ficha.zonasAmpliadas.map(nombreZona).join(", ") }));
   if (extra.avisos.includes("presupuesto_dudoso") && ficha.precioMax) parrafos.push(rellenar(p.presupuestoDudoso, { precio: euros(locale, ficha.precioMax) ?? "" }));
   if (extra.degradado) parrafos.push(p.degradado);
-  const tarjetas = r.candidatos.map((c) => ({ i: soloResumen(c.i), href: urlFicha(locale, c.i), porque: porQue(c, r.fichaEfectiva, locale) }));
-  const nuevoEstado: EstadoAsistente = { ficha, visibles: r.candidatos.map((c) => ({ ref: c.i.ref, resumen: resumenParaJev(c.i) })), aclaracion: null };
+  const tarjetas = pag.map((c) => ({ i: soloResumen(c.i), href: urlFicha(locale, c.i), porque: porQue(c, r.fichaEfectiva, locale) }));
+  const visibles = [...(pagina > 1 ? estado.visibles : []), ...pag.map((c) => ({ ref: c.i.ref, resumen: resumenParaJev(c.i) }))].slice(-24);
+  const nuevoEstado: EstadoAsistente = { ficha, visibles, aclaracion: null, pagina, orden };
+  const portal = urlPortal(ficha, locale);
   const respuesta: RespuestaAsistente = {
     intencion: extra.intencion,
     parrafos,
@@ -284,12 +372,78 @@ async function buscar(ficha0: FichaBusqueda, estado: EstadoAsistente, locale: Lo
     chips: chipsDe(ficha, locale),
     opciones: [],
     tabla: null,
-    enlaces: [],
+    enlaces: portal && r.total > 0 ? [{ texto: p.sugerencias.portal, href: portal }] : [],
+    sugerencias: sugerenciasBusqueda(ficha, r.total, desde + pag.length, orden, locale),
+    cifras: [],
     degradado: extra.degradado,
     estado: nuevoEstado,
   };
-  void estado;
   return { respuesta, llamadas: llamada2.llamadas, decisiones: llamada2.decisiones };
+}
+
+// Hipoteca orientativa (el código calcula; Jev solo entiende que se pide).
+const TIPO_INTERES = "3";
+
+async function hipoteca(ref: string | null, precio0: number | null, anos: number, entradaPct: number, estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, degradado: boolean): Promise<RespuestaAsistente> {
+  const p = PLANTILLAS[locale];
+  const base = vacia(estado, locale, "calcular_hipoteca", [], degradado);
+  const i = ref ? (await deps.repo.todas()).find((x) => x.ref === ref) : undefined;
+  if (i && i.operacion !== "venta") return { ...base, parrafos: [rellenar(p.hipotecaAlquiler, { ref: i.ref, precio: euros(locale, i.precio) ?? "—" })] };
+  const precio = i?.precio ?? precio0;
+  if (!precio) return { ...base, parrafos: [p.hipotecaSin] };
+  const h = calcularHipoteca({ precio: String(precio), entradaPct: String(entradaPct), interesAnual: TIPO_INTERES, anos, gastosPct: "10" });
+  const cuota = euros(locale, Math.round(Number(h.cuotaMensual))) ?? "";
+  const que = i ? i.ref : locale === "es" ? "un inmueble" : "a property";
+  const s = p.sugerencias;
+  const accion = (cambios: { anos?: number; entradaPct?: number }) => ({ tipo: "hipoteca" as const, ref: i?.ref, precio: i ? undefined : precio, anos: cambios.anos ?? anos, entradaPct: cambios.entradaPct ?? entradaPct });
+  return {
+    ...base,
+    parrafos: [
+      rellenar(p.hipoteca, { que, precio: euros(locale, precio) ?? "", entrada: entradaPct, anos, tipo: TIPO_INTERES, cuota }),
+      rellenar(p.hipotecaAhorro, { ahorro: euros(locale, Number(h.ahorroNecesario)) ?? "", intereses: euros(locale, Number(h.totalIntereses)) ?? "" }),
+      p.hipotecaAviso,
+    ],
+    cifras: [
+      { etiqueta: locale === "es" ? "Cuota mensual" : "Monthly payment", valor: cuota },
+      { etiqueta: locale === "es" ? "Préstamo" : "Loan", valor: euros(locale, Number(h.prestamo)) ?? "" },
+      { etiqueta: locale === "es" ? "Ahorro necesario" : "Savings needed", valor: euros(locale, Number(h.ahorroNecesario)) ?? "" },
+    ],
+    sugerencias: [
+      ...(anos !== 25 ? [{ texto: s.cuota25, accion: accion({ anos: 25 }) }] : []),
+      ...(anos !== 35 ? [{ texto: s.cuota35, accion: accion({ anos: 35 }) }] : []),
+      ...(entradaPct !== 30 ? [{ texto: s.entrada30, accion: accion({ entradaPct: 30 }) }] : []),
+      ...(entradaPct !== 10 ? [{ texto: s.entrada10, accion: accion({ entradaPct: 10 }) }] : []),
+    ],
+    enlaces: i ? [{ texto: i.titulo, href: urlFicha(locale, i) }] : [],
+  };
+}
+
+async function infoZona(path: string | null, estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, degradado: boolean): Promise<RespuestaAsistente> {
+  const p = PLANTILLAS[locale];
+  const base = vacia(estado, locale, "info_zona", [], degradado);
+  if (!path) return { ...base, parrafos: [p.zonaSin] };
+  const nombre = nombreZona(path);
+  const [v, a] = await Promise.all([deps.repo.estadistica(path, "venta"), deps.repo.estadistica(path, "alquiler")]);
+  if (v.n === 0 && a.n === 0) return { ...base, parrafos: [rellenar(p.zonaSinDatos, { zona: nombre })] };
+  const e = (x: string | null) => (x ? (euros(locale, Number(x)) ?? "—") : "—");
+  const parrafos: string[] = [];
+  if (v.n > 0) parrafos.push(rellenar(p.zona, { zona: nombre, n: v.n, m2: e(v.medianaM2), p25: e(v.p25M2), p75: e(v.p75M2) }));
+  if (a.n > 0) parrafos.push(rellenar(p.zonaAlquiler, { n: a.n, m2: a.medianaM2 ? `${Number(a.medianaM2).toLocaleString(locale === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 })} €` : "—" }));
+  parrafos.push(p.zonaFuente);
+  const s = p.sugerencias;
+  return {
+    ...base,
+    parrafos,
+    cifras: [
+      ...(v.n > 0 ? [{ etiqueta: locale === "es" ? "Mediana venta" : "Median sale", valor: `${e(v.medianaM2)}/m²` }, { etiqueta: locale === "es" ? "En venta" : "For sale", valor: String(v.n) }] : []),
+      ...(a.n > 0 ? [{ etiqueta: locale === "es" ? "En alquiler" : "For rent", valor: String(a.n) }] : []),
+    ],
+    sugerencias: [
+      ...(v.n > 0 ? [{ texto: rellenar(s.buscarZona, { zona: nombre }), accion: { tipo: "ajustar" as const, cambios: { zonas: [path], operacion: "venta" as const } } }] : []),
+      ...(a.n > 0 ? [{ texto: `${s.alquiler} · ${nombre}`, accion: { tipo: "ajustar" as const, cambios: { zonas: [path], operacion: "alquiler" as const } } }] : []),
+    ],
+    enlaces: [{ texto: nombre, href: ruta(locale, "zonas", ...path.split("/")) }],
+  };
 }
 
 async function detalle(ref: string | null, campo: string | null, estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, degradado: boolean): Promise<RespuestaAsistente> {
@@ -367,10 +521,32 @@ const AJUSTES_FEEDBACK: Record<string, Partial<FichaBusqueda>> = {
 };
 
 export async function responder(entrada: EntradaAsistente, deps: DependenciasMotor): Promise<ResultadoMotor> {
-  const { mensaje, opcion, quitar, viendo: refViendo, locale, estado } = EntradaAsistente.parse(entrada);
+  const { mensaje, opcion, quitar, accion, viendo: refViendo, locale, estado } = EntradaAsistente.parse(entrada);
   const p = PLANTILLAS[locale];
   const todos = refViendo || opcion ? await deps.repo.todas() : [];
   const viendo = refViendo ? (todos.find((i) => i.ref === refViendo) ?? null) : null;
+
+  // 0. Acciones de un clic: las resuelve el código, sin Jev.
+  if (accion) {
+    const sin = { avisos: [], degradado: false };
+    const fin = (respuesta: RespuestaAsistente): ResultadoMotor => ({ respuesta, decisiones: [], llamadasJev: 0 });
+    if (accion.tipo === "zona") return fin(await infoZona(accion.path, estado, locale, deps, false));
+    if (accion.tipo === "hipoteca") return fin(await hipoteca(accion.ref ?? null, accion.precio ?? null, accion.anos, accion.entradaPct, estado, locale, deps, false));
+    if (accion.tipo === "ajustar") {
+      const base = estado.ficha ?? fichaVacia();
+      const heredada = heredar(base, accion.cambios);
+      // Cambiar de venta a alquiler (o al revés) invalida el presupuesto: son escalas distintas.
+      const cambiaOperacion = accion.cambios.operacion && accion.cambios.operacion !== (base.operacion ?? "venta");
+      const ficha = FichaBusqueda.parse(cambiaOperacion ? { ...heredada, precioMax: undefined, precioMin: undefined } : heredada);
+      if (!fichaTieneCriterios(ficha)) return fin(vacia(estado, locale, "editar", [p.pedirCriterios], false));
+      return fin((await buscar(ficha, estado, locale, deps, { ...sin, intencion: "editar" })).respuesta);
+    }
+    if (estado.ficha) {
+      if (accion.tipo === "mas") return fin((await buscar(estado.ficha, estado, locale, deps, { ...sin, intencion: "buscar", pagina: estado.pagina + 1, orden: estado.orden })).respuesta);
+      if (accion.tipo === "orden") return fin((await buscar(estado.ficha, estado, locale, deps, { ...sin, intencion: "buscar", orden: accion.valor })).respuesta);
+    }
+    return fin(vacia(estado, locale, "conversar", [p.pedirCriterios], false));
+  }
 
   // 1. Edición de chips: la resuelve el código, sin Jev.
   if (quitar && estado.ficha) {
@@ -475,6 +651,16 @@ async function ejecutar(
       const i = ref ? (await deps.repo.todas()).find((x) => x.ref === ref) : undefined;
       if (i && intencion !== "valorar_mi_vivienda") r.enlaces.push({ texto: i.titulo, href: `${urlFicha(locale, i)}#contacto` });
       return fin(r);
+    }
+    case "calcular_hipoteca": {
+      const ref = interp.inmuebleRef ?? viendo?.ref ?? null;
+      // Aquí «hipoteca» junto a la cifra no la convierte en cuota: se pregunta por el precio a financiar.
+      const cifra = e.cifras.find((c) => c.valor.gte(10_000))?.valor.toNumber() ?? interp.cambios.precioMax ?? null;
+      return fin(await hipoteca(ref, ref ? null : cifra, 30, 20, estado, locale, deps, degradado));
+    }
+    case "info_zona": {
+      const path = interp.cambios.zonas?.[0] ?? e.zonas.map((z) => z.candidatas[0]).find((c) => c && c.score >= 0.9)?.zona.path ?? (estado.ficha?.zonas.length === 1 ? estado.ficha.zonas[0]! : null);
+      return fin(await infoZona(path, estado, locale, deps, degradado));
     }
     case "fuera_de_ambito":
       return fin(vacia(estado, locale, intencion, [rellenar(p.fueraDeAmbito)], degradado));

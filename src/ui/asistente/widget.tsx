@@ -42,6 +42,12 @@ export function WidgetAsistente({ locale, textos }: { locale: Locale; textos: Di
   const abierto = useSyncExternalStore(suscribir, leerAbierto, () => false);
 
   useEffect(() => {
+    const abrir = () => cambiar(true);
+    window.addEventListener("asistente:abrir", abrir);
+    return () => window.removeEventListener("asistente:abrir", abrir);
+  }, []);
+
+  useEffect(() => {
     if (!abierto) return;
     const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && cambiar(false);
     window.addEventListener("keydown", alTeclear);

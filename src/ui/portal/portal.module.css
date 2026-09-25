@@ -6,8 +6,9 @@
 .disposicion { display: grid; gap: var(--e-5); }
 @media (min-width: 64rem) { .disposicion { grid-template-columns: 18rem minmax(0, 1fr); } }
 .columnaResultados { display: grid; gap: var(--e-5); min-width: 0; }
-@media (min-width: 80rem) { .columnaResultados { grid-template-columns: minmax(0, 1fr) minmax(0, 26rem); align-items: start; } }
-.lista { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); align-content: start; }
+@media (min-width: 100rem) { .columnaResultados { grid-template-columns: minmax(0, 1fr) minmax(0, 26rem); align-items: start; } }
+@media (max-width: 99.99rem) { .columnaResultados > :last-child:not(:first-child) { order: -1; } }
+.lista { display: grid; gap: var(--e-5) var(--e-4); grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr)); align-content: start; align-items: stretch; }
 
 .filtros { display: grid; gap: var(--e-3); align-content: start; padding: var(--e-4); background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-3); }
 .filtros label, .buscadorRapido label { display: grid; gap: var(--e-1); font-size: var(--t-sm); font-weight: 600; }
@@ -22,32 +23,60 @@
 .botonBuscar:hover { background: var(--marca-fuerte); }
 .buscadorRapido { display: grid; gap: var(--e-3); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); align-items: end; padding: var(--e-4); background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-3); box-shadow: var(--sombra-2); margin-top: var(--e-5); }
 
-.tarjeta { display: grid; grid-template-rows: auto 1fr; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-3); overflow: hidden; box-shadow: var(--sombra-1); transition: box-shadow var(--dur-2) var(--curva), border-color var(--dur-2) var(--curva); }
-.tarjeta:hover, :global(.resaltada).tarjeta { box-shadow: var(--sombra-2); border-color: var(--marca); }
-.tarjetaFoto { display: block; aspect-ratio: 3 / 2; background: var(--superficie-2); }
-.tarjetaFoto img { width: 100%; height: 100%; object-fit: cover; }
-.tarjetaCuerpo { display: grid; gap: var(--e-1); padding: var(--e-3) var(--e-4) var(--e-4); align-content: start; }
-.precio { font-size: var(--t-xl); font-weight: 700; margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-2); }
-.sufijo { font-size: var(--t-sm); font-weight: 500; color: var(--texto-suave); margin-left: -0.4em; }
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--sombra-1);
+  transition: box-shadow var(--dur-2) var(--curva), border-color var(--dur-2) var(--curva), transform var(--dur-2) var(--curva);
+}
+.tarjeta:hover, :global(.resaltada).tarjeta { box-shadow: 0 18px 40px rgb(20 30 30 / 0.12), 0 2px 6px rgb(20 30 30 / 0.06); border-color: color-mix(in oklab, var(--marca) 45%, var(--borde)); transform: translateY(-3px); }
+@media (prefers-reduced-motion: reduce) { .tarjeta:hover { transform: none; } }
+.tarjetaFoto { position: relative; aspect-ratio: 4 / 3; background: var(--superficie-2); overflow: hidden; flex-shrink: 0; }
+.tarjetaFoto > a { display: block; height: 100%; }
+.tarjetaFoto img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 500ms var(--curva); }
+.tarjeta:hover .tarjetaFoto img { transform: scale(1.04); }
+.distintivos { position: absolute; left: 12px; top: 12px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.distintivos span { padding: 4px 10px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.92); color: #1b1a17; font-size: 12px; font-weight: 700; letter-spacing: 0.01em; box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
+.distintivos .distintivoNuevo { background: var(--marca); color: var(--marca-texto); }
+.distintivos .distintivoBajada { background: var(--acento); color: var(--acento-texto); }
+.fotoFavorito { position: absolute; right: 10px; top: 10px; }
+.fotoFavorito .icono { width: 40px; height: 40px; border: 0; background: rgb(255 255 255 / 0.92); box-shadow: 0 1px 4px rgb(0 0 0 / 0.15); }
+.tarjetaCuerpo { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 12px; flex: 1; }
+.precio { margin: 0; display: flex; align-items: baseline; justify-content: space-between; gap: var(--e-2); font-size: 1.35rem; font-weight: 750; letter-spacing: -0.015em; line-height: 1.2; min-height: 1.7rem; white-space: nowrap; }
+.sufijo { font-size: var(--t-sm); font-weight: 500; color: var(--texto-suave); margin-left: 2px; }
 .antes { font-size: var(--t-sm); font-weight: 500; color: var(--texto-tenue); }
-.tarjetaTitulo { font-family: var(--fuente-texto); font-size: var(--t-base); font-weight: 600; margin: 0; }
+.tarjetaTitulo { font-family: var(--fuente-texto); font-size: 0.975rem; font-weight: 600; line-height: 1.35; margin: 0; min-height: calc(2 * 1.35em); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .tarjetaTitulo a { color: var(--texto); text-decoration: none; }
-.tarjetaTitulo a:hover { text-decoration: underline; }
-.tarjetaTitulo a::after { content: ""; }
-.zona { margin: 0; color: var(--texto-suave); font-size: var(--t-sm); }
+.tarjetaTitulo a::after { content: ""; position: absolute; inset: 0; }
+.tarjeta { position: relative; }
+.tarjetaTitulo a:hover { color: var(--marca-enlace); }
+.zona { margin: 0; color: var(--texto-suave); font-size: var(--t-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.datos { display: flex; gap: var(--e-4); margin: 4px 0 0; padding: 0; list-style: none; font-size: var(--t-sm); color: var(--texto); font-variant-numeric: tabular-nums; }
+.datos li { display: inline-flex; align-items: center; gap: 6px; }
+.datos svg { color: var(--texto-tenue); }
 .porque { margin: 0; font-size: var(--t-sm); }
-.rasgos { list-style: none; margin: var(--e-1) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--e-1); }
-.rasgos li { font-size: var(--t-xs); padding: 2px var(--e-2); border-radius: var(--r-pill); background: var(--superficie-2); }
+.rasgos { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; overflow: hidden; height: 24px; }
+.rasgos li { flex-shrink: 0; font-size: 12px; line-height: 16px; padding: 4px 9px; border-radius: var(--r-pill); background: var(--superficie-2); color: var(--texto-suave); font-weight: 500; }
 .rasgos li.rasgoProbable { background: var(--aviso-fondo); color: var(--aviso); }
-.tarjetaAcciones { display: flex; justify-content: space-between; align-items: center; margin-top: var(--e-2); gap: var(--e-2); flex-wrap: wrap; }
+.rasgos li.rasgoMas { background: transparent; border: 1px solid var(--borde); }
+.tarjetaAcciones { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--borde); gap: var(--e-2); }
+.eurM2 { font-size: var(--t-xs); color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+.tarjetaAcciones .enlaceBoton { min-height: 36px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--borde-fuerte); text-decoration: none; font-size: var(--t-sm); }
+.tarjetaAcciones .enlaceBoton[aria-pressed="true"] { background: var(--marca); color: var(--marca-texto); border-color: var(--marca); }
+.fotoFavorito, .distintivos { z-index: 1; }
 .icono { width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--r-pill); border: 1px solid var(--borde); background: var(--superficie); color: var(--acento); cursor: pointer; }
 .icono[aria-pressed="true"] { background: var(--aviso-fondo); }
 .enlaceBoton { background: none; border: 0; padding: var(--e-2) 0; min-height: 44px; color: var(--marca-enlace); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 0.18em; }
 .enlaceBoton[aria-pressed="true"] { color: var(--texto); }
 .avisoPequeno { font-size: var(--t-xs); color: var(--aviso); }
 
-.mapa { width: 100%; height: 22rem; border-radius: var(--r-3); overflow: hidden; background: var(--superficie-2); border: 1px solid var(--borde); }
-@media (min-width: 80rem) { .mapa { position: sticky; top: 5rem; height: calc(100dvh - 7rem); } }
+.mapa { width: 100%; height: 18rem; border-radius: var(--r-3); overflow: hidden; background: var(--superficie-2); border: 1px solid var(--borde); }
+@media (min-width: 100rem) { .mapa { position: sticky; top: 5rem; height: calc(100dvh - 7rem); } }
 
 .paginacion { display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); padding-block: var(--e-4); }
 .paginacion a { min-height: 44px; display: inline-flex; align-items: center; }
@@ -109,3 +138,20 @@
 .zonas a { display: grid; gap: 2px; padding: var(--e-3) var(--e-4); background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-2); text-decoration: none; color: var(--texto); }
 .zonas a:hover { border-color: var(--marca); }
 .zonas small { color: var(--texto-suave); }
+
+.noConstan { margin: var(--e-3) 0 0; padding: var(--e-3) var(--e-4); border-radius: var(--r-2); background: var(--superficie-2); color: var(--texto-suave); font-size: var(--t-sm); line-height: 1.6; }
+.noConstanTitulo { font-weight: 600; color: var(--texto); }
+
+.fichaTitular { display: grid; gap: var(--e-5); align-items: end; margin-top: var(--e-2); }
+@media (min-width: 60rem) { .fichaTitular { grid-template-columns: minmax(0, 1fr) 20rem; } }
+.fichaTitularTexto h1 { margin: 0 0 var(--e-2); font-size: clamp(1.8rem, 1.3rem + 1.8vw, 2.75rem); letter-spacing: -0.02em; }
+.fichaZona { margin: 0; color: var(--texto-suave); }
+.fichaDatos { display: flex; flex-wrap: wrap; gap: var(--e-2); margin: var(--e-4) 0 0; padding: 0; list-style: none; }
+.fichaDatos li { padding: 8px 14px; border-radius: var(--r-pill); background: var(--superficie); border: 1px solid var(--borde); font-size: var(--t-sm); color: var(--texto-suave); }
+.fichaDatos strong { color: var(--texto); font-size: var(--t-base); }
+.fichaPrecioCaja { display: grid; gap: var(--e-3); padding: var(--e-5); border-radius: 18px; background: var(--superficie); border: 1px solid var(--borde); box-shadow: var(--sombra-2); }
+.fichaPrecioCaja .fichaPrecio { margin: 0; }
+.fichaAntes { margin: -8px 0 0; font-size: var(--t-sm); color: var(--texto-tenue); text-decoration: line-through; }
+.fichaAccionesCabecera { display: flex; align-items: center; gap: var(--e-3); }
+.fichaPrecioCaja .fichaPrecio { font-size: clamp(1.9rem, 1.5rem + 1vw, 2.4rem); letter-spacing: -0.02em; line-height: 1.1; }
+.fichaTitular { align-items: center; }

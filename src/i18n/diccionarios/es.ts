@@ -152,6 +152,10 @@ const es = {
   tipos: { piso: "Piso", atico: "Ático", duplex: "Dúplex", casa: "Casa", chalet: "Chalet", adosado: "Adosado", estudio: "Estudio", local: "Local", terreno: "Terreno", oficina: "Oficina", garaje: "Garaje", otro: "Otro" },
   rasgos: { balcon: "Balcón", calefaccion: "Calefacción", accesible: "Accesible", luminosidad: "Luminoso", ruido: "Tranquilo", estado: "Reformado", terraza: "Terraza", ascensor: "Ascensor", garaje: "Garaje", piscina: "Piscina", trastero: "Trastero", aire_acondicionado: "Aire acondicionado", exterior: "Exterior", amueblado: "Amueblado", vistas: "Vistas" },
   tarjeta: {
+    nuevo: "Nuevo",
+    bajada: "Ha bajado {pct} %",
+    mas: "+{n}",
+    sinDatos: "Sin datos de superficie",
     hab: "{n} hab.",
     banos: "{n} baños",
     m2: "{n} m²",
@@ -166,6 +170,10 @@ const es = {
     consultar: "Consultar precio",
   },
   ficha: {
+    datoHab: "habitaciones",
+    datoBanos: "baños",
+    noConstan: "No constan en la ficha:",
+    preguntarAsistente: "Preguntar al asistente",
     caracteristicas: "Características",
     datosClave: "Datos clave",
     descripcion: "Descripción",
@@ -263,6 +271,10 @@ const es = {
     textoZona: "Inmuebles en venta y alquiler en {zona}, con precios calculados a partir de la oferta publicada.",
   },
   asistente: {
+    siguientes: "Siguientes pasos",
+    cuota: "Cuota",
+    guardar: "Guardar en favoritos",
+    quitarGuardado: "Quitar de favoritos",
     titulo: "Asistente",
     tituloLargo: "Cuéntanos qué buscas",
     subtitulo: "Escribe como hablarías con un agente. Te enseño lo que encaja, por qué, y qué datos están confirmados.",

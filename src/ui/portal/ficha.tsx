@@ -8,6 +8,8 @@ import { urlFicha } from "@/portal/filtros";
 import type { EstadisticaZona, InmuebleFicha, InmuebleResumen } from "@/portal/tipos";
 import { Aviso, BotonEnlace, EtiquetaConfianza } from "@/ui/componentes";
 import { BotonFavorito, Compartir } from "./botones";
+import { publicada } from "@/config/secciones";
+import { BotonAbrirAsistente } from "@/ui/asistente/boton-abrir";
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, CAMPOS_LEGALES, TablaCampos, textoCampo, textoPct } from "./campos";
 import { euros, metros, numero } from "./formato";
 import { Galeria } from "./galeria";
@@ -39,15 +41,45 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
             </>
           )}
         </nav>
-        <h1>{i.titulo}</h1>
-        <p className={s.fichaPrecio}>
-          {euros(locale, i.precio) ?? d.tarjeta.consultar}
-          {!venta && i.precio && <span className={s.sufijo}>{d.tarjeta.mes}</span>}
-        </p>
-        <p className={s.nota}>{t(d.ficha.ref, { ref: i.ref })}</p>
-        <div style={{ display: "flex", gap: "var(--e-3)", alignItems: "center" }}>
-          <BotonFavorito refInmueble={i.ref} textos={{ guardar: d.tarjeta.favorito, quitar: d.tarjeta.quitarFavorito }} />
-          <Compartir url={url} titulo={i.titulo} textos={{ compartir: d.ficha.compartir, copiado: d.ficha.copiado }} />
+        <div className={s.fichaTitular}>
+          <div className={s.fichaTitularTexto}>
+            <h1>{i.titulo}</h1>
+            <p className={s.fichaZona}>{i.zonaNombre === i.municipioNombre ? i.municipioNombre : `${i.zonaNombre}, ${i.municipioNombre}`} · {t(d.ficha.ref, { ref: i.ref })}</p>
+            <ul className={s.fichaDatos}>
+              {i.habitaciones !== null && (
+                <li>
+                  <strong>{i.habitaciones}</strong> {d.ficha.datoHab}
+                </li>
+              )}
+              {i.banos !== null && (
+                <li>
+                  <strong>{i.banos}</strong> {d.ficha.datoBanos}
+                </li>
+              )}
+              {i.superficie !== null && (
+                <li>
+                  <strong>{numero(locale, i.superficie)}</strong> m²
+                </li>
+              )}
+              {i.precio && i.superficie && venta && (
+                <li>
+                  <strong>{numero(locale, Math.round(i.precio / i.superficie))}</strong> €/m²
+                </li>
+              )}
+            </ul>
+          </div>
+          <div className={s.fichaPrecioCaja}>
+            <p className={s.fichaPrecio}>
+              {euros(locale, i.precio) ?? d.tarjeta.consultar}
+              {!venta && i.precio && <span className={s.sufijo}>{d.tarjeta.mes}</span>}
+            </p>
+            {i.precioAnterior && i.precio && i.precioAnterior > i.precio && <p className={s.fichaAntes}>{t(d.tarjeta.rebajado, { precio: euros(locale, i.precioAnterior)! })}</p>}
+            <div className={s.fichaAccionesCabecera}>
+              <BotonFavorito refInmueble={i.ref} textos={{ guardar: d.tarjeta.favorito, quitar: d.tarjeta.quitarFavorito }} />
+              <Compartir url={url} titulo={i.titulo} textos={{ compartir: d.ficha.compartir, copiado: d.ficha.copiado }} />
+            </div>
+            {publicada("asistente") && <BotonAbrirAsistente texto={d.ficha.preguntarAsistente} />}
+          </div>
         </div>
       </header>
 
@@ -71,7 +103,7 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
           </section>
           <section className={s.seccionFicha} aria-labelledby="caracteristicas">
             <h2 id="caracteristicas">{d.ficha.caracteristicas}</h2>
-            <TablaCampos campos={i.campos} locale={locale} d={d} ids={[...CAMPOS_CARACTERISTICAS, ...CAMPOS_LEGALES]} preguntar={url} />
+            <TablaCampos campos={i.campos} locale={locale} d={d} ids={CAMPOS_CARACTERISTICAS} preguntar={url} />
           </section>
           <section className={s.seccionFicha} aria-labelledby="certificado">
             <h2 id="certificado">{d.ficha.certificado}</h2>

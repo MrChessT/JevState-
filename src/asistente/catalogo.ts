@@ -20,6 +20,8 @@ export const INTENCIONES = {
   contactar_agente: "Ask to be contacted by, or to send a message to, an agent, without asking for a visit.",
   crear_alerta: "Ask to be notified when new properties that match a search are listed.",
   feedback_resultado: "React to a property that was shown: say it fits or does not fit, or why.",
+  calcular_hipoteca: "Ask how much the mortgage or the monthly payment would be to buy a property or a given price.",
+  info_zona: "Ask what an area or town is like, or its prices (for example the average price per square metre), without asking for a specific property.",
   conversar: "Greeting, thanks, or a question about the agency or about how the assistant works.",
   fuera_de_ambito: "Unrelated to finding, renting, buying, selling or valuing real estate with this agency.",
 } as const satisfies ChoiceCriteria;
