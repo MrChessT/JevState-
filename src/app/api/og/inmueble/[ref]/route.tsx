@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const q = request.nextUrl.searchParams.get("lang");
   const lang = isLocale(q) ? q : "es";
   const d = await diccionario(lang);
-  const i = (await (await portal()).todas()).find((x) => x.ref === ref);
+  const [i] = await (await portal()).porRefs([ref]);
   if (!i) return new Response("No encontrado", { status: 404 });
   const precio = i.precio ? `${euros(lang, i.precio)}${i.operacion === "venta" ? "" : d.tarjeta.mes}` : undefined;
   const datos = [i.habitaciones ? t(d.tarjeta.hab, { n: i.habitaciones }) : null, i.banos ? t(d.tarjeta.banos, { n: i.banos }) : null, i.superficie ? `${numero(lang, i.superficie)} m²` : null].filter((x): x is string => Boolean(x));

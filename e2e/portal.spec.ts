@@ -18,7 +18,7 @@ test.describe("portal (fase 0)", () => {
 
   test("el selector de idioma mantiene la página y traduce la ruta", async ({ page }) => {
     await page.goto("/legal/privacidad");
-    await page.getByLabel("Idioma").selectOption("en");
+    await page.getByRole("navigation", { name: "Idioma" }).getByRole("link", { name: "English" }).click();
     await expect(page).toHaveURL(/\/en\/legal\/privacy$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy policy");
   });
@@ -32,12 +32,21 @@ test.describe("portal (fase 0)", () => {
     await expect(page.locator("#contenido")).toBeFocused();
   });
 
-  test("tema oscuro elegido se mantiene al recargar", async ({ page }) => {
+  test("tema oscuro elegido se mantiene al recargar, al navegar y al cambiar de idioma", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("Tema").selectOption("oscuro");
+    await page.getByRole("group", { name: "Tema" }).getByRole("button", { name: "Oscuro" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await page.getByRole("navigation", { name: "Idioma" }).getByRole("link", { name: "English" }).click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await page.getByRole("group", { name: "Theme" }).getByRole("button", { name: "Light" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "Español" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await expect(page.getByRole("group", { name: "Tema" }).getByRole("button", { name: "Claro" })).toHaveAttribute("aria-pressed", "true");
   });
 
   test("404 con el diseño del portal y en el idioma de la ruta", async ({ page }) => {

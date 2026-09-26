@@ -1,4 +1,6 @@
 import "server-only";
+import { cache } from "react";
+import type { Filtros } from "./filtros";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseEnv } from "@/lib/supabase/env";
 import { construirRepoFicticio } from "./repo-memoria";
@@ -43,3 +45,9 @@ export function portal(): Promise<RepositorioPortal> {
 }
 
 export const usaFicticios = () => !supabaseEnv() || process.env.PORTAL_DATOS === "ficticios";
+
+// Deduplicación por petición: generateMetadata y la página piden lo mismo; con React cache la
+// consulta se hace una sola vez por render (los argumentos son primitivos para que coincidan).
+const buscarPorClave = cache(async (clave: string) => (await portal()).buscar(JSON.parse(clave) as Filtros));
+export const buscarUnaVez = (f: Filtros) => buscarPorClave(JSON.stringify(f));
+export const fichaUnaVez = cache(async (operacion: "venta" | "alquiler", slug: string) => (await portal()).ficha(operacion, slug));

@@ -186,4 +186,11 @@ describe("motor del asistente", async () => {
     const { respuesta } = await responder({ mensaje: "2 bedroom flat to rent in Cartagena up to 900 a month", locale: "en" }, deps(null));
     expect(respuesta.estado.ficha!.precioMax).toBe(900);
   });
+
+  it("los textos de las respuestas no dejan restos de plantilla ({, }, variables sin rellenar)", async () => {
+    for (const mensaje of ["piso en Murcia hasta 200000", "¿cuánto cuesta el metro cuadrado en Cartagena?", "hipoteca para 150000", "hola"]) {
+      const { respuesta } = await responder({ mensaje }, deps(null));
+      for (const p of respuesta.parrafos) expect(p, mensaje).not.toMatch(/[{}]/);
+    }
+  });
 });

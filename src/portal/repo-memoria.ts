@@ -23,7 +23,11 @@ function num(c: CampoCanonico | undefined): number | null {
   return c && c.value !== null && c.status !== "no_consta" ? Number(c.value) : null;
 }
 
-export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal> {
+/**
+ * Genera las fichas ficticias pasando cada anuncio por el pipeline real (extracción, cascada con el
+ * oráculo, adjudicación). Tarda ~1 s: el portal usa la versión precalculada (ficticios.json).
+ */
+export async function generarFichasFicticias(n = 300): Promise<InmuebleFicha[]> {
   const inmuebles = generarConjunto(n);
   const verdades = new Map(inmuebles.map((i) => [i.ref, i.verdad]));
   const paginas = new Map(inmuebles.filter((i) => i.html).map((i) => [i.ref, i.html!]));
@@ -71,6 +75,25 @@ export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal>
       agente: { nombre: "Equipo comercial", telefono: null, email: null },
     });
   }
+  return fichas.map(compactar);
+}
+
+/** Solo lo que usa la web: el detalle interno del pipeline (adjudicación, notas) no viaja. */
+function compactar(f: InmuebleFicha): InmuebleFicha {
+  const campos = Object.fromEntries(
+    // Lo que no consta no se guarda: la interfaz trata un campo ausente como «no consta».
+    Object.entries(f.campos).filter(([, c]) => c.status !== "no_consta" && c.value !== null).map(([k, c]) => [k, { value: c.value, confidence: Math.round(c.confidence * 1000) / 1000, status: c.status, evidenceIds: c.evidenceIds.slice(0, 1), method: c.method, catalogVersion: c.catalogVersion }]),
+  );
+  return { ...f, campos };
+}
+
+/** Repositorio de ficticios: precalculado (instantáneo) para 300; generado al vuelo para otros tamaños (tests). */
+export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal> {
+  const fichas = n === 300 ? ((await import("./ficticios.json")).default as unknown as InmuebleFicha[]) : await generarFichasFicticias(n);
+  return repoDesdeFichas(fichas);
+}
+
+export function repoDesdeFichas(fichas: InmuebleFicha[]): RepositorioPortal {
   const resumenes: InmuebleResumen[] = fichas;
   return {
     async buscar(f) {
@@ -93,6 +116,12 @@ export async function construirRepoFicticio(n = 300): Promise<RepositorioPortal>
     },
     async todas() {
       return resumenes;
+    },
+    async porRefs(refs) {
+      return refs.map((r) => resumenes.find((x) => x.ref === r)).filter((x): x is InmuebleResumen => Boolean(x));
+    },
+    async fichasPorRef(refs) {
+      return refs.slice(0, 3).map((r) => fichas.find((x) => x.ref === r)).filter((x): x is InmuebleFicha => Boolean(x));
     },
   };
 }

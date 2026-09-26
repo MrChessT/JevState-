@@ -73,3 +73,5 @@
 .comparadorPuntos i { width: 8px; height: 8px; border-radius: 50%; background: rgb(255 255 255 / 0.3); }
 .comparadorPuntos i[data-lleno] { background: #fff; }
 @media (max-width: 480px) { .comparadorTexto { display: none; } }
+.vacioAcciones button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--e-5); border-radius: var(--r-pill); font: inherit; font-weight: 700; border: 0; background: var(--marca); color: var(--marca-texto); cursor: pointer; }
+.vacioAcciones button + a { background: transparent; color: var(--texto); border: 1px solid var(--borde-fuerte); }

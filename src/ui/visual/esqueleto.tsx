@@ -18,3 +18,18 @@ export function EsqueletoListado() {
     </div>
   );
 }
+
+/** Solo la rejilla de tarjetas (favoritos mientras cargan). */
+export function EsqueletoTarjetas({ n = 3 }: { n?: number }) {
+  return (
+    <div className={s.rejilla} aria-busy="true">
+      {Array.from({ length: n }, (_, k) => (
+        <div key={k} className={s.tarjeta}>
+          <div className={`${s.bloque} ${s.foto}`} />
+          <div className={`${s.bloque} ${s.linea}`} style={{ width: "45%" }} />
+          <div className={`${s.bloque} ${s.linea}`} style={{ width: "80%" }} />
+        </div>
+      ))}
+    </div>
+  );
+}
