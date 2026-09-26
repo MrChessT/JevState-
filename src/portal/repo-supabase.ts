@@ -1,8 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { estadisticaZona } from "./estadisticas";
 import { POR_PAGINA } from "./filtros";
 import type { RepositorioPortal, ResultadoBusqueda } from "./repositorio";
-import type { InmuebleFicha, InmuebleResumen } from "./tipos";
+import type { EstadisticaZona, InmuebleFicha, InmuebleResumen } from "./tipos";
 
 /** Portal contra Supabase con la clave anónima: RLS limita a publicados y campos públicos. */
 export function repoSupabase(db: SupabaseClient): RepositorioPortal {
@@ -31,20 +30,18 @@ export function repoSupabase(db: SupabaseClient): RepositorioPortal {
       return (await buscar({ operacion: "venta", tipos: [], con: [], orden: "recientes", pagina: 1 })).items.slice(0, n);
     },
     async estadistica(path, operacion) {
-      // Con volumen real se pasa a una vista materializada; con una agencia basta calcularlo aquí.
-      const r = await rpc<ResultadoBusqueda>("buscar_inmuebles", { f: { operacion, zona: path, porPagina: 48, pagina: 1 } });
-      return estadisticaZona(path, r.items.map(resumen), operacion);
+      // Calculada en SQL con toda la muestra de la zona (estadistica_zona, migración 0011).
+      return rpc<EstadisticaZona>("estadistica_zona", { p_path: path, p_operacion: operacion });
     },
     async todas() {
-      const out: InmuebleResumen[] = [];
-      for (const operacion of ["venta", "alquiler"] as const) {
-        for (let pagina = 1; pagina < 200; pagina++) {
-          const r = await rpc<ResultadoBusqueda>("buscar_inmuebles", { f: { operacion, porPagina: 48, pagina } });
-          out.push(...r.items.map(resumen));
-          if (r.items.length < 48) break;
-        }
-      }
-      return out;
+      // Una sola llamada (inmuebles_publicados, migración 0011).
+      return (await rpc<InmuebleResumen[]>("inmuebles_publicados", {})).map(resumen);
+    },
+    async porRefs(refs) {
+      return refs.length ? (await rpc<InmuebleResumen[]>("inmuebles_por_ref", { p_refs: refs.slice(0, 50) })).map(resumen) : [];
+    },
+    async fichasPorRef(refs) {
+      return refs.length ? (await rpc<InmuebleFicha[]>("fichas_por_ref", { p_refs: refs.slice(0, 3) })).map((r) => ({ ...r, ...resumen(r) })) : [];
     },
   };
 }

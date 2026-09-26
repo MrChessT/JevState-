@@ -20,6 +20,10 @@ export interface RepositorioPortal {
   similares(i: InmuebleResumen, n?: number): Promise<InmuebleResumen[]>;
   destacados(n?: number): Promise<InmuebleResumen[]>;
   estadistica(path: string, operacion: "venta" | "alquiler"): Promise<EstadisticaZona>;
-  /** Refs publicadas (sitemap). */
+  /** Toda la oferta publicada (sitemap, asistente, portada). */
   todas(): Promise<InmuebleResumen[]>;
+  /** Resúmenes por referencia, en el orden pedido (favoritos). */
+  porRefs(refs: string[]): Promise<InmuebleResumen[]>;
+  /** Fichas completas por referencia (comparador, máximo 3). */
+  fichasPorRef(refs: string[]): Promise<InmuebleFicha[]>;
 }

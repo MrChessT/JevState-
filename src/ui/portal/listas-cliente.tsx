@@ -7,7 +7,9 @@ import type { InmuebleFicha, InmuebleResumen } from "@/portal/tipos";
 import { campo as campoCatalogo } from "@/catalog/publico";
 import { ruta } from "@/i18n/config";
 import { urlFicha } from "@/portal/urls";
+import { EsqueletoTarjetas } from "@/ui/visual/esqueleto";
 import { EstadoVacio } from "@/ui/visual/vacio";
+import { EstadoVacioCliente } from "@/ui/visual/vacio-cliente";
 
 const MEJOR: Record<string, "min" | "max"> = { precio: "min", superficie_construida: "max", superficie_util: "max", superficie_parcela: "max", habitaciones: "max", banos: "max", gastos_comunidad: "min", ibi: "min" };
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, textoCampo } from "./campos";
@@ -16,30 +18,61 @@ import { useListaLocal } from "./lista-local";
 import s from "./portal.module.css";
 import { Tarjeta } from "./tarjeta";
 
-function useInmuebles<T>(refs: string[], fichas: boolean): T[] | null {
-  const [items, setItems] = useState<T[] | null>(null);
+type Carga<T> = { estado: "cargando" } | { estado: "error" } | { estado: "ok"; items: T[]; clave: string };
+
+function useInmuebles<T extends { ref: string }>(refs: string[], fichas: boolean): { carga: Carga<T>; reintentar: () => void } {
+  const [carga, setCarga] = useState<Carga<T>>({ estado: "cargando" });
+  const [intento, setIntento] = useState(0);
   const clave = refs.join(",");
   useEffect(() => {
     let vivo = true;
     if (!clave) {
-      queueMicrotask(() => vivo && setItems([]));
+      queueMicrotask(() => vivo && setCarga({ estado: "ok", items: [], clave }));
       return;
     }
+    queueMicrotask(() => vivo && setCarga({ estado: "cargando" }));
     fetch(`/api/inmuebles?refs=${encodeURIComponent(clave)}${fichas ? "&fichas=1" : ""}`)
-      .then((r) => r.json() as Promise<{ items: T[] }>)
-      .then((r) => vivo && setItems(r.items))
-      .catch(() => vivo && setItems([]));
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json() as Promise<{ items: T[] }>;
+      })
+      .then((r) => vivo && setCarga({ estado: "ok", items: r.items, clave }))
+      .catch(() => vivo && setCarga({ estado: "error" }));
     return () => {
       vivo = false;
     };
-  }, [clave, fichas]);
-  return items;
+  }, [clave, fichas, intento]);
+  return { carga, reintentar: () => setIntento((n) => n + 1) };
+}
+
+/** Quita de la lista local las referencias que ya no están publicadas (vendidas o retiradas). */
+function useLimpiarRetirados(refs: string[], carga: Carga<{ ref: string }>, quitar: (ref: string) => void) {
+  useEffect(() => {
+    // Solo con la respuesta de ESTA lista (no la de una lista anterior que aún se esté mostrando).
+    if (carga.estado !== "ok" || carga.clave !== refs.join(",")) return;
+    const vivas = new Set(carga.items.map((i) => i.ref));
+    for (const r of refs) if (!vivas.has(r)) quitar(r);
+  }, [carga, refs, quitar]);
+}
+
+function ErrorCarga({ locale, reintentar }: { locale: Locale; reintentar: () => void }) {
+  const es = locale === "es";
+  return (
+    <EstadoVacioCliente icono="nube" titulo={es ? "No hemos podido cargar tus inmuebles" : "We couldn't load your properties"} texto={es ? "Comprueba tu conexión y vuelve a intentarlo. Tu lista sigue guardada en este navegador." : "Check your connection and try again. Your list is still saved in this browser."}>
+      <button type="button" onClick={reintentar}>
+        {es ? "Reintentar" : "Try again"}
+      </button>
+    </EstadoVacioCliente>
+  );
 }
 
 export function ListaFavoritos({ locale, d }: { locale: Locale; d: Diccionario }) {
-  const { lista } = useListaLocal("favoritos");
-  const items = useInmuebles<InmuebleResumen>(lista, false);
-  if (items === null) return <div aria-busy="true" style={{ minHeight: "16rem" }} />;
+  const { lista, alternar } = useListaLocal("favoritos");
+  const { carga, reintentar } = useInmuebles<InmuebleResumen>(lista, false);
+  useLimpiarRetirados(lista, carga, alternar);
+  if (carga.estado === "cargando") return <EsqueletoTarjetas n={Math.max(1, Math.min(lista.length, 6))} />;
+  if (carga.estado === "error") return <ErrorCarga locale={locale} reintentar={reintentar} />;
+  const items = carga.items;
   if (!items.length)
     return (
       <EstadoVacio
@@ -64,8 +97,11 @@ export function ListaFavoritos({ locale, d }: { locale: Locale; d: Diccionario }
 
 export function TablaComparar({ locale, d }: { locale: Locale; d: Diccionario }) {
   const { lista, alternar } = useListaLocal("comparar", 3);
-  const items = useInmuebles<InmuebleFicha>(lista, true);
-  if (items === null) return <div aria-busy="true" style={{ minHeight: "16rem" }} />;
+  const { carga, reintentar } = useInmuebles<InmuebleFicha>(lista, true);
+  useLimpiarRetirados(lista, carga, alternar);
+  if (carga.estado === "cargando") return <div aria-busy="true" style={{ minHeight: "16rem" }} />;
+  if (carga.estado === "error") return <ErrorCarga locale={locale} reintentar={reintentar} />;
+  const items = carga.items;
   if (items.length < 2)
     return (
       <EstadoVacio

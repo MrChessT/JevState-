@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { BRAND } from "@/config/brand";
 import { alternativas, isLocale, LOCALE_TAGS, ruta, type Locale } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
-import { portal } from "@/portal/datos";
+import { buscarUnaVez, fichaUnaVez, portal } from "@/portal/datos";
 import { esSlugFicha, leerFiltros, tieneFiltros, urlFicha } from "@/portal/filtros";
 import { zona } from "@/zonas/buscar";
 import { imagenSitio, JsonLd, listaInmuebles, migas } from "@/ui/seo/jsonld";
@@ -29,7 +29,7 @@ export async function metadataOperacion(operacion: "venta" | "alquiler", { param
   const d = await diccionario(lang);
   const { zona: z, slug } = partes(segs);
   if (slug) {
-    const i = await (await portal()).ficha(operacion, slug);
+    const i = await fichaUnaVez(operacion, slug);
     if (!i) return {};
     const url = urlFicha(lang, i);
     const alt = Object.fromEntries((["es", "en"] as Locale[]).map((l) => [LOCALE_TAGS[l].intl, `${BRAND.siteUrl}${urlFicha(l, i)}`]));
@@ -50,7 +50,7 @@ export async function metadataOperacion(operacion: "venta" | "alquiler", { param
   const nz = nombreZona(z);
   const titulo = nz ? `${base} ${t(d.buscar.en, { zona: nz })}` : base;
   const alt = alternativas(BRAND.siteUrl, operacion, ...z);
-  const r = await (await portal()).buscar(f);
+  const r = await buscarUnaVez(f);
   const precios = r.items.map((x) => x.precio).filter((x): x is number => x !== null);
   const descripcion = r.total
     ? t(d.buscar.metaDescripcion, { n: r.total, operacion: operacion === "venta" ? d.buscar.metaVenta : d.buscar.metaAlquiler, donde: nz ? t(d.buscar.en, { zona: nz }) : d.buscar.metaRegion, desde: euros(lang, Math.min(...(precios.length ? precios : [0]))) ?? "" })
@@ -67,13 +67,13 @@ export async function PaginaOperacion({ operacion, props }: { operacion: "venta"
   const { zona: z, slug } = partes(segs);
   if (z.length && !zona(z.join("/"))) notFound();
   if (slug) {
-    const i = await repo.ficha(operacion, slug);
+    const i = await fichaUnaVez(operacion, slug);
     if (!i || (z.length && z.join("/") !== i.zonaPath)) notFound();
     const [est, similares] = await Promise.all([repo.estadistica(i.zonaPath.split("/")[0]!, operacion), repo.similares(i)]);
     return <Ficha i={i} zona={est} similares={similares} locale={lang} d={d} />;
   }
   const f = leerFiltros(operacion, z, await props.searchParams);
-  const r = await repo.buscar(f);
+  const r = await buscarUnaVez(f);
   const nz = nombreZona(z);
   const base = operacion === "venta" ? d.buscar.tituloVenta : d.buscar.tituloAlquiler;
   const rastro = [{ nombre: d.buscar.inicio, href: ruta(lang) }, { nombre: base, href: ruta(lang, operacion) }, ...z.map((_, k) => ({ nombre: zona(z.slice(0, k + 1).join("/"))?.nombre ?? z[k]!, href: ruta(lang, operacion, ...z.slice(0, k + 1)) }))];

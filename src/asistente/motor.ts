@@ -366,7 +366,7 @@ async function buscar(
   else parrafos.push(rellenar(p.resultados, { n: r.total, m: pag.length, inmuebles: p.inmuebles[1]! }));
   if (pagina === 1 && r.total > 1) {
     const precios = lista.map((c) => c.i.precio).filter((x): x is number => x !== null);
-    if (precios.length > 1) parrafos.push(`${rellenar(p.rango, { min: euros(locale, Math.min(...precios)) ?? "", max: euros(locale, Math.max(...precios)) ?? "" })}} ${p.ordenado[orden]}`);
+    if (precios.length > 1) parrafos.push(`${rellenar(p.rango, { min: euros(locale, Math.min(...precios)) ?? "", max: euros(locale, Math.max(...precios)) ?? "" })} ${p.ordenado[orden]}`);
   }
   if (pagina === 1 && ficha.zonasAmpliadas.length && !r.relajaciones.some((x) => x.tipo === "colindantes")) parrafos.push(rellenar(p.ampliadas, { zonas: ficha.zonasAmpliadas.map(nombreZona).join(", ") }));
   if (extra.avisos.includes("presupuesto_dudoso") && ficha.precioMax) parrafos.push(rellenar(p.presupuestoDudoso, { precio: euros(locale, ficha.precioMax) ?? "" }));
@@ -398,7 +398,7 @@ const TIPO_INTERES = "3";
 async function hipoteca(ref: string | null, precio0: number | null, anos: number, entradaPct: number, estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, degradado: boolean): Promise<RespuestaAsistente> {
   const p = PLANTILLAS[locale];
   const base = vacia(estado, locale, "calcular_hipoteca", [], degradado);
-  const i = ref ? (await deps.repo.todas()).find((x) => x.ref === ref) : undefined;
+  const i = ref ? (await deps.repo.porRefs([ref]))[0] : undefined;
   if (i && i.operacion !== "venta") return { ...base, parrafos: [rellenar(p.hipotecaAlquiler, { ref: i.ref, precio: euros(locale, i.precio) ?? "—" })] };
   const precio = i?.precio ?? precio0;
   if (!precio) return { ...base, parrafos: [p.hipotecaSin] };
@@ -463,7 +463,7 @@ async function detalle(ref: string | null, campo: string | null, estado: EstadoA
   const d = DICCIONARIOS[locale];
   const base = vacia(estado, locale, "detalle_inmueble", [], degradado);
   if (!ref) return { ...base, parrafos: [p.detalleSin] };
-  const resumen = (await deps.repo.todas()).find((i) => i.ref === ref);
+  const resumen = (await deps.repo.porRefs([ref]))[0];
   if (!resumen) return { ...base, parrafos: [p.detalleSin] };
   const op = resumen.operacion === "venta" ? "venta" : "alquiler";
   const ficha = await deps.repo.ficha(op, resumen.slug);
@@ -483,10 +483,10 @@ const CAMPOS_COMPARAR = ["precio", "superficie_construida", "habitaciones", "ban
 async function comparar(refs: string[], estado: EstadoAsistente, locale: Locale, deps: DependenciasMotor, degradado: boolean): Promise<RespuestaAsistente> {
   const p = PLANTILLAS[locale];
   const d = DICCIONARIOS[locale];
-  const todos = await deps.repo.todas();
-  const elegidos = [...new Set(refs)].map((r) => todos.find((i) => i.ref === r)).filter((i): i is InmuebleResumen => Boolean(i)).slice(0, 3);
+  // Una consulta con las fichas completas de las referencias pedidas (sin descargar toda la oferta).
+  const fichas = await deps.repo.fichasPorRef([...new Set(refs)].slice(0, 3));
+  const elegidos = fichas;
   if (elegidos.length < 2) return vacia(estado, locale, "comparar", [p.compararFaltan], degradado);
-  const fichas = await Promise.all(elegidos.map((i) => deps.repo.ficha(i.operacion === "venta" ? "venta" : "alquiler", i.slug)));
   const filas = CAMPOS_COMPARAR.map((campo) => ({
     campo: CATALOG.fields.find((f) => f.id === campo)?.label[locale] ?? campo,
     valores: fichas.map((f) => (f ? (textoCampo(campo, f.campos[campo], locale, d) ?? "—") : "—")),
@@ -535,8 +535,7 @@ const AJUSTES_FEEDBACK: Record<string, Partial<FichaBusqueda>> = {
 export async function responder(entrada: EntradaAsistente, deps: DependenciasMotor): Promise<ResultadoMotor> {
   const { mensaje, opcion, quitar, accion, viendo: refViendo, locale, estado } = EntradaAsistente.parse(entrada);
   const p = PLANTILLAS[locale];
-  const todos = refViendo || opcion ? await deps.repo.todas() : [];
-  const viendo = refViendo ? (todos.find((i) => i.ref === refViendo) ?? null) : null;
+  const viendo = refViendo ? ((await deps.repo.porRefs([refViendo]))[0] ?? null) : null;
 
   // 0. Acciones de un clic: las resuelve el código, sin Jev.
   if (accion) {
@@ -675,7 +674,7 @@ async function ejecutar(
     case "valorar_mi_vivienda": {
       const r = vacia(estado, locale, intencion, [rellenar(p.noDisponible[intencion])], degradado);
       const ref = interp.inmuebleRef ?? viendo?.ref;
-      const i = ref ? (await deps.repo.todas()).find((x) => x.ref === ref) : undefined;
+      const i = ref ? (await deps.repo.porRefs([ref]))[0] : undefined;
       if (i && intencion !== "valorar_mi_vivienda") r.enlaces.push({ texto: i.titulo, href: `${urlFicha(locale, i)}#contacto` });
       return fin(r);
     }

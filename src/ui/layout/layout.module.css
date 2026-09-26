@@ -214,3 +214,8 @@
 }
 .pieLegal p { margin: 0; }
 .pieLegal ul { display: flex; flex-wrap: wrap; gap: var(--e-4); }
+/* Controles segmentados (idioma y tema) */
+.segmentado { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--borde); border-radius: var(--r-pill); background: var(--superficie); }
+.segmentado a, .segmentado button { display: inline-grid; place-items: center; min-width: 32px; height: 30px; padding: 0 8px; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--texto-suave); font: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; transition: background var(--dur-1) var(--curva), color var(--dur-1) var(--curva); }
+.segmentado a:hover, .segmentado button:hover { color: var(--texto); background: var(--superficie-2); text-decoration: none; }
+.segmentado a[aria-current="true"], .segmentado button[aria-pressed="true"] { background: var(--marca); color: var(--marca-texto); }

@@ -14,7 +14,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run lint && npm run typecheck && npm test && npm run eval && npm run build",
+    "check": "npm run lint && npm run typecheck && npm test && npm run eval && tsx scripts/precalcular-ficticios.ts --check && npm run build",
     "catalog:compile": "tsx scripts/catalog-compile.ts",
     "catalog:docs": "tsx scripts/catalog-docs.ts",
     "eval": "tsx eval/run.ts",
@@ -29,7 +29,8 @@
     "ingestar": "tsx --env-file-if-exists=.env.local scripts/ingestar.ts",
     "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
     "poi:importar": "tsx --env-file-if-exists=.env.local scripts/poi-importar.ts",
-    "ficticios": "tsx scripts/generar-ficticios.ts"
+    "ficticios": "tsx scripts/generar-ficticios.ts",
+    "ficticios:precalcular": "tsx scripts/precalcular-ficticios.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
