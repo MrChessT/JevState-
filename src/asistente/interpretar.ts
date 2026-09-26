@@ -230,6 +230,7 @@ export function interpretarSinJev(e: Extraccion, ctx: ContextoMensaje, mensaje: 
   let intencion: Intencion = PALABRAS_INTENCION.find(([re]) => re.test(p))?.[1] ?? (e.zonas.length || e.cifras.length || e.requisitos.length ? "buscar" : "conversar");
   if (intencion === "detalle_inmueble" && !ctx.viendo && !e.inmuebles.refs.length && e.inmuebles.ordinal === null && (e.zonas.length || e.cifras.length)) intencion = "buscar";
   if (intencion === "buscar" && ctx.ficha && !e.zonas.length && !e.cifras.length) intencion = "refinar";
+  if (e.relativo && ctx.ficha) intencion = "refinar";
   const accion = ACCION_DE_INTENCION[intencion] ?? null;
   const cambios: Partial<FichaBusqueda> = {};
   if (e.operacion) cambios.operacion = e.operacion;

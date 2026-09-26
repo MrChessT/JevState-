@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import { t, type Diccionario } from "@/i18n/diccionario";
-import { urlFicha } from "@/portal/filtros";
+import { urlFicha } from "@/portal/urls";
 import type { InmuebleResumen } from "@/portal/tipos";
 import { BotonComparar, BotonFavorito } from "./botones";
 import { euros, numero } from "./formato";

@@ -167,4 +167,23 @@ describe("motor del asistente", async () => {
     expect(respuesta.parrafos[0]).toMatch(/Cartagena: \d+ inmuebles/);
     expect(respuesta.sugerencias[0]!.accion).toMatchObject({ tipo: "ajustar" });
   });
+
+  it("«algo más barato» baja el presupuesto y ordena por precio; sin resultados propone aflojar", async () => {
+    const r1 = await responder({ mensaje: "piso en Murcia hasta 200000" }, deps(null));
+    const r2 = await responder({ mensaje: "algo más barato", estado: r1.respuesta.estado }, deps(null));
+    expect(r2.respuesta.estado.ficha!.precioMax).toBe(170000);
+    const precios = r2.respuesta.tarjetas.map((t) => t.i.precio!);
+    expect(precios).toEqual([...precios].sort((a, b) => a - b));
+    const vacio = await responder({ mensaje: "estudio amueblado en alquiler en Cartagena hasta 300 al mes" }, deps(null));
+    expect(vacio.respuesta.total).toBe(0);
+    expect(vacio.respuesta.sugerencias.map((x) => x.accion.tipo)).toEqual(expect.arrayContaining(["quitar"]));
+    const q = vacio.respuesta.sugerencias.find((x) => x.accion.tipo === "quitar")!;
+    const r3 = await responder({ accion: q.accion, estado: vacio.respuesta.estado }, deps(null));
+    expect(r3.respuesta.chips.length).toBeLessThan(vacio.respuesta.chips.length);
+  });
+
+  it("en inglés, «up to 900 a month» es un alquiler de 900 €, no 900.000 €", async () => {
+    const { respuesta } = await responder({ mensaje: "2 bedroom flat to rent in Cartagena up to 900 a month", locale: "en" }, deps(null));
+    expect(respuesta.estado.ficha!.precioMax).toBe(900);
+  });
 });
