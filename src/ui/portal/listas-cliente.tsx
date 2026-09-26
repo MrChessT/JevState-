@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
 import type { InmuebleFicha, InmuebleResumen } from "@/portal/tipos";
-import { CATALOG } from "@/catalog/index";
+import { campo as campoCatalogo } from "@/catalog/publico";
 import { ruta } from "@/i18n/config";
-import { urlFicha } from "@/portal/filtros";
+import { urlFicha } from "@/portal/urls";
 import { EstadoVacio } from "@/ui/visual/vacio";
 
 const MEJOR: Record<string, "min" | "max"> = { precio: "min", superficie_construida: "max", superficie_util: "max", superficie_parcela: "max", habitaciones: "max", banos: "max", gastos_comunidad: "min", ibi: "min" };
@@ -79,7 +79,7 @@ export function TablaComparar({ locale, d }: { locale: Locale; d: Diccionario })
       />
     );
   const filas = [...CAMPOS_CLAVE, ...CAMPOS_CARACTERISTICAS].filter((id) => id !== "tipo" && items.some((i) => textoCampo(id, i.campos[id], locale, d) !== null));
-  const etiqueta = (id: string) => CATALOG.fields.find((f) => f.id === id)?.label[locale] ?? id.replace(/_/g, " ");
+  const etiqueta = (id: string) => campoCatalogo(id)?.label[locale] ?? id.replace(/_/g, " ");
   // El mejor valor de cada fila numérica se resalta (solo con datos que constan).
   const mejor = (id: string): string | null => {
     const dir = MEJOR[id];

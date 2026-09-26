@@ -78,9 +78,6 @@ export function tieneFiltros(f: Filtros): boolean {
 }
 
 /** URL de la ficha: /venta/murcia/el-carmen/piso-3-hab-ref-fic-0001 */
-export function urlFicha(locale: Locale, i: { operacion: string; zonaPath: string; slug: string }): string {
-  const op = i.operacion === "venta" ? "venta" : "alquiler";
-  return ruta(locale, op, ...i.zonaPath.split("/"), i.slug);
-}
+export { urlFicha } from "./urls";
 
 export const esSlugFicha = (s: string | undefined) => Boolean(s && /-ref-[a-z0-9-]+$/.test(s));

@@ -4,4 +4,4 @@
 import { Fraunces, Inter } from "next/font/google";
 
 export const fuenteTexto = Inter({ subsets: ["latin"], display: "swap", variable: "--fuente-inter" });
-export const fuenteTitulos = Fraunces({ subsets: ["latin"], display: "swap", variable: "--fuente-fraunces", axes: ["opsz", "SOFT"] });
+export const fuenteTitulos = Fraunces({ subsets: ["latin"], display: "swap", variable: "--fuente-fraunces", weight: ["500", "600"] });

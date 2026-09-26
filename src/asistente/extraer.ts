@@ -29,6 +29,8 @@ export interface Extraccion {
   /** El mensaje tiene texto libre de motivos (para prioridad y encaje). */
   textoLibre: boolean;
   perfilDeclarado: boolean;
+  /** Petición relativa a la búsqueda anterior («más barato», «más grande»): la resuelve el código. */
+  relativo: "barato" | "grande" | null;
   /** «sin bajos», «nada de bajos»: rechazo de la planta baja. */
   sinBajos: boolean;
 }
@@ -65,7 +67,7 @@ export function extraer(mensaje: string): Extraccion {
     if (c.valor.lt(50) && !/^\s*(k|mil|€|eur)/.test(tras)) continue;
     // «unos 250» en compra = 250 mil (se ofrece como alternativa; decide Jev con presupuesto_ok).
     let valor = c.valor;
-    if (c.valor.lt(2000) && /^\s*(mil|k)\b/.test(tras) === false && !/\/\s*mes|al mes|mensual|alquiler/.test(p) && c.valor.gte(50) && c.valor.lt(1000)) valor = c.valor.mul(1000);
+    if (c.valor.lt(2000) && /^\s*(mil|k)\b/.test(tras) === false && !/\/\s*mes|al mes|mensual|alquil|\ba month\b|per month|\/month|monthly|\brent/.test(p) && c.valor.gte(50) && c.valor.lt(1000)) valor = c.valor.mul(1000);
     const pista = /(hasta|maximo|max\.?|como mucho|no mas de|menos de|up to|max|under|below)\s*$/.test(antes)
       ? "maximo"
       : /(desde|minimo|mas de|a partir de|from|at least)\s*$/.test(antes)
@@ -96,6 +98,7 @@ export function extraer(mensaje: string): Extraccion {
     operacion: /\b(alquil|alquiler|rent|renta mensual)/.test(p) ? "alquiler" : /\b(compr|venta|vend|buy|purchase)/.test(p) ? "venta" : null,
     inmuebles: { refs, ordinal, deictico: /\b(este|esta|este piso|esta casa|this one|this)\b/.test(p) },
     textoLibre: p.split(/\s+/).length >= 14 || /\b(porque|ya que|somos|tenemos|teletrabaj\w*|trabajo desde casa|because|we are|we have|work from home)\b/.test(p),
+    relativo: /\b(mas barat|menos car|mas economic|cheaper|less expensive)/.test(p) ? "barato" : /\b(mas grande|mas amplio|mas espacio|mas habitaciones|bigger|larger|more space)/.test(p) ? "grande" : null,
     sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno ground[- ]floor/.test(p),
     perfilDeclarado: /\b(para (vivir|mi familia|los ninos|mis hijos|invertir|alquilarlo|veranear|vacaciones|mis padres)|hijos|ninos|familia|inversion|invertir|segunda residencia|vacaciones|kids|children|family|invest)\b/.test(p),
   };

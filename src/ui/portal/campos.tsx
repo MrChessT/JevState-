@@ -1,4 +1,4 @@
-import { CATALOG } from "@/catalog/index";
+import { campo as campoCatalogo } from "@/catalog/publico";
 import type { Locale } from "@/i18n/config";
 import { t, type Diccionario } from "@/i18n/diccionario";
 import type { CampoCanonico } from "@/sde/cascada/canonico";
@@ -13,7 +13,7 @@ export { textoCampo };
  * Solo campos públicos; lo que no consta se dice y se ofrece preguntar al agente.
  */
 export function TablaCampos({ campos, locale, d, ids, preguntar }: { campos: Record<string, CampoCanonico>; locale: Locale; d: Diccionario; ids: string[]; preguntar?: string }) {
-  const publicos = ids.map((id) => CATALOG.fields.find((x) => x.id === id)).filter((f): f is NonNullable<typeof f> => Boolean(f?.public));
+  const publicos = ids.map((id) => campoCatalogo(id)).filter((f): f is NonNullable<typeof f> => Boolean(f?.public));
   const conValor = publicos.filter((f) => textoCampo(f.id, campos[f.id], locale, d) !== null);
   const sinValor = publicos.filter((f) => textoCampo(f.id, campos[f.id], locale, d) === null);
   const etiqueta = (f: (typeof publicos)[number]) => f.label[locale === "es" ? "es" : "en"];
