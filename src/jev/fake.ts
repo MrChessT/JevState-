@@ -9,7 +9,7 @@
 // caso degradado que hay que cubrir.
 import type { ChoiceResponse, EntryType, NoulResponse, Question, Questions, ScoreResponse } from "@typesafe-ai/sdk";
 import { JevError } from "./errors";
-import type { JevAnswer, JevHealth, JevPort, JevRequest, JevResult } from "./port";
+import type { JevAnswer, JevDiagnostico, JevHealth, JevPort, JevRequest, JevResult } from "./port";
 
 /** Confianza que devuelve el SDK para una distribución: lo seguro que está frente al azar. */
 export function confidenceOf(probabilities: number[]): number {
@@ -116,6 +116,10 @@ export class FakeJev implements JevPort {
     }
     const inputTokens = Math.ceil(JSON.stringify({ s: request.state, q: request.questions }).length / 4);
     return { model: this.model, answers, usage: { input_tokens: inputTokens, output_tokens: Object.keys(answers).length }, cached: false, latencyMs: this.options.latencyMs ?? 0 };
+  }
+
+  async diagnostico(): Promise<JevDiagnostico> {
+    return { ok: true, latencyMs: 0, error: null };
   }
 
   async health(): Promise<JevHealth> {

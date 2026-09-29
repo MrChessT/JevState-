@@ -38,9 +38,18 @@ export interface JevHealth {
   via: "typesafe" | "ai-gateway" | "fake";
 }
 
+/** Resultado de una llamada real de prueba (diagnóstico público de /api/salud?jev=1). */
+export interface JevDiagnostico {
+  ok: boolean;
+  latencyMs: number | null;
+  /** Código del fallo y primera línea del mensaje, sin credenciales. */
+  error: { codigo: string; detalle: string } | null;
+}
+
 /** Puerto único hacia Jev. El resto del código nunca importa el SDK directamente. */
 export interface JevPort {
   readonly model: string;
   ask(request: JevRequest): Promise<JevResult>;
   health(): Promise<JevHealth>;
+  diagnostico(): Promise<JevDiagnostico>;
 }

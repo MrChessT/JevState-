@@ -6,6 +6,8 @@ import { getRuntime } from "@/server/runtime";
 
 export const dynamic = "force-dynamic";
 
+let diagnosticoCache: { hasta: number; datos: ReturnType<ReturnType<typeof getRuntime>["jev"]["diagnostico"]> } | null = null;
+
 function autorizado(request: NextRequest, token: string | undefined): boolean {
   const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   if (!token || given.length !== token.length) return false;
@@ -32,6 +34,28 @@ export async function GET(request: NextRequest) {
     jev: { via: config.jev.via, modelo: jev.model },
     supabase: Boolean(config.NEXT_PUBLIC_SUPABASE_URL && config.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   };
+  // Diagnóstico público de Jev (?jev=1): una llamada real mínima, reutilizada 5 minutos, que
+  // dice por qué el asistente estaría en modo básico. Nunca muestra claves ni tokens.
+  if (request.nextUrl.searchParams.get("jev") === "1") {
+    const ahora = Date.now();
+    if (!diagnosticoCache || diagnosticoCache.hasta < ahora) {
+      diagnosticoCache = { hasta: ahora + 5 * 60_000, datos: jev.diagnostico() };
+    }
+    let tokenOidc: boolean | null = null;
+    if (config.jev.oidc) {
+      try {
+        const { getVercelOidcTokenSync } = await import("@vercel/oidc");
+        tokenOidc = Boolean(getVercelOidcTokenSync());
+      } catch {
+        tokenOidc = false;
+      }
+    }
+    body.diagnostico = {
+      autenticacion: config.jev.via === "fake" ? "sin configurar (Jev simulado: modo básico)" : config.jev.oidc ? "OIDC de Vercel (sin clave guardada)" : "clave en variable de entorno",
+      tokenOidcEnLaPeticion: tokenOidc,
+      prueba: await diagnosticoCache.datos,
+    };
+  }
   if (autorizado(request, config.METRICS_TOKEN)) {
     body.jev = { ...(body.jev as object), salud: await jev.health() };
     body.metricas = metrics.snapshot();
