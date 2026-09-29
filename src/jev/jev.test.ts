@@ -83,6 +83,17 @@ describe("JevClient (SDK real con transporte simulado)", () => {
     expect(metrics.snapshot().jev.errors).toBe(1);
   });
 
+  it("tras un 403 (p. ej. sin créditos) pausa las llamadas; el diagnóstico prueba de verdad y da el motivo", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ error: { message: "Free tier users do not have access to this model" } }), { status: 403, headers: { "content-type": "application/json" } }));
+    const { jev } = client(fetchImpl);
+    await expect(jev.ask({ purpose: "eval", state: "a", questions, catalogVersion: "v1" })).rejects.toMatchObject({ code: "auth" });
+    await expect(jev.ask({ purpose: "eval", state: "b", questions, catalogVersion: "v1" })).rejects.toMatchObject({ code: "auth" });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const d = await jev.diagnostico();
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(d).toMatchObject({ ok: false, error: { codigo: "auth" } });
+  });
+
   it("timeout → timeout", async () => {
     const { jev } = client(
       (_url, init) =>

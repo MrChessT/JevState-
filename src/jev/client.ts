@@ -1,11 +1,13 @@
 // Adaptador real de JevPort sobre @typesafe-ai/sdk 0.6.0. Firmas comprobadas en
 // node_modules/@typesafe-ai/sdk/dist/index.d.mts (ver docs/DECISIONES.md, D-003).
-import { TypeSafeClient, type EntryType, type Fetch, type Questions } from "@typesafe-ai/sdk";
+import { noul, TypeSafeClient, type EntryType, type Fetch, type Questions } from "@typesafe-ai/sdk";
 import type { Metrics } from "@/observability/metrics";
 import type { Cache } from "./cache";
 import { JevError, toJevError } from "./errors";
-import type { JevAnswer, JevHealth, JevPort, JevRequest, JevResult } from "./port";
+import type { JevAnswer, JevDiagnostico, JevHealth, JevPort, JevRequest, JevResult } from "./port";
 import { stableHash } from "./stable";
+
+const PAUSA_TRAS_AUTH_MS = 5 * 60_000;
 
 /** Clave de caché: hash estable de (modelo + versión del catálogo + state + preguntas). */
 export function cacheKey(model: string, catalogVersion: string, state: EntryType, questions: Questions): string {
@@ -58,9 +60,14 @@ export class JevClient implements JevPort {
     return this.#client;
   }
 
+  /** Tras un fallo de autenticación o de cuota no se reintenta durante un rato (cada mensaje perdería tiempo). */
+  #bloqueadoHasta = 0;
+  #motivoBloqueo = "";
+
   async ask(request: JevRequest): Promise<JevResult> {
     const { purpose, state, questions, catalogVersion, signal } = request;
     if (signal?.aborted) throw new JevError("aborted", "Petición a Jev cancelada");
+    if (Date.now() < this.#bloqueadoHasta) throw new JevError("auth", `Jev en pausa tras un error de acceso: ${this.#motivoBloqueo}`);
     const t0 = performance.now();
     const key = cacheKey(this.options.model, catalogVersion, state, questions);
     const hit = this.options.cache.get(key);
@@ -89,7 +96,27 @@ export class JevClient implements JevPort {
     } catch (err) {
       const jevError = toJevError(err);
       if (jevError.code !== "aborted") this.options.metrics.recordJevError(jevError.code);
+      if (jevError.code === "auth") {
+        this.#bloqueadoHasta = Date.now() + PAUSA_TRAS_AUTH_MS;
+        this.#motivoBloqueo = jevError.message.split("\n")[0]!.slice(0, 160);
+      }
       throw jevError;
+    }
+  }
+
+  /** Una pregunta mínima real (sin caché): confirma clave, red, modelo y cuota de punta a punta. */
+  async diagnostico(): Promise<JevDiagnostico> {
+    const t0 = performance.now();
+    try {
+      // El diagnóstico siempre prueba de verdad (y, si va bien, levanta la pausa).
+      const client = await this.client();
+      await client.systemOne({ state: { message: "ping" }, questions: { ok: noul("Is state.message the word ping?", { true: "Yes.", false: "No." }) } }, { timeout: 8000, retry: { maxRetries: 0 } });
+      this.#bloqueadoHasta = 0;
+      return { ok: true, latencyMs: Math.round(performance.now() - t0), error: null };
+    } catch (err) {
+      const e = toJevError(err);
+      const detalle = (err instanceof Error ? err.message : String(err)).split("\n")[0]!.replace(/(Bearer\s+|key[=:]\s*)[\w.-]+/gi, "$1***").slice(0, 240);
+      return { ok: false, latencyMs: null, error: { codigo: e.code, detalle } };
     }
   }
 
