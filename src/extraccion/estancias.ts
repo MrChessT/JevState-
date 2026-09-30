@@ -5,7 +5,7 @@ export interface Recuento extends Tramo {
   n: number;
 }
 
-const DORMITORIOS = /^\s*(habitaciones|habitacion|habs?\.?|dormitorios?|dorms?\.?|cuartos|alcobas|bedrooms?|beds?\b|hab\b)/;
+const DORMITORIOS = /^\s*(h?a[bv]ita[cs]i?on(es)?|habs?\.?|dormitorios?|dorms?\.?|cuartos|alcobas|bedrooms?|beds?\b|hab\b)/;
 const BANOS = /^\s*(banos?|baños?|bathrooms?|baths?|wc\b)/;
 const ASEOS = /^\s*(aseos?|toilets?)/;
 

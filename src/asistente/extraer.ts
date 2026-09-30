@@ -33,6 +33,8 @@ export interface Extraccion {
   relativo: "barato" | "grande" | null;
   /** «sin bajos», «nada de bajos»: rechazo de la planta baja. */
   sinBajos: boolean;
+  /** «algo barato» en una búsqueda nueva: se ordena por precio. */
+  pideBarato: boolean;
   /** Cosas pedidas que las fichas no recogen (se dice, no se ignora en silencio). */
   noFiltrables: NoFiltrable[];
   /** Lugares mencionados fuera de la Región de Murcia (se avisa). */
@@ -119,6 +121,7 @@ export function extraer(mensaje: string): Extraccion {
     textoLibre: p.split(/\s+/).length >= 14 || /\b(porque|ya que|somos|tenemos|teletrabaj\w*|trabajo desde casa|because|we are|we have|work from home)\b/.test(p),
     relativo: /\b(mas barat|menos car|mas economic|cheaper|less expensive)/.test(p) ? "barato" : /\b(mas grande|mas amplio|mas espacio|mas habitaciones|bigger|larger|more space)/.test(p) ? "grande" : null,
     sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno sea (un )?(piso )?bajo\b|\bque no (este|sea) en (un |la )?(planta )?baja\b|\bno ground[- ]floor/.test(p),
+    pideBarato: /\b(barat[oa]s?|economic[oa]s?|cheap|affordable)\b/.test(p),
     noFiltrables: NO_FILTRABLES.filter(([re]) => re.test(p)).map(([, k]) => k),
     fueraRegion: FUERA_REGION.filter(([re]) => re.test(p)).map(([, n]) => n),
     perfilDeclarado: /\b(para (vivir|mi familia|los ninos|mis hijos|invertir|alquilarlo|veranear|vacaciones|mis padres)|hijos|ninos|familia|inversion|invertir|segunda residencia|vacaciones|kids|children|family|invest)\b/.test(p),

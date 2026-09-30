@@ -3,7 +3,7 @@ import { DEFAULT_THRESHOLDS } from "@/gates/thresholds";
 import { JevError } from "@/jev/errors";
 import { FakeJev } from "@/jev/fake";
 import { construirRepoFicticio } from "@/portal/repo-memoria";
-import { quitarChip, responder, type DependenciasMotor } from "./motor";
+import { ordenEscrita, quitarChip, responder, type DependenciasMotor } from "./motor";
 
 describe("motor del asistente", async () => {
   const repo = await construirRepoFicticio(300);
@@ -49,6 +49,28 @@ describe("motor del asistente", async () => {
     const c = await responder({ mensaje: "piso en el centro de Murcia que no sea un bajo, con buena luz" }, deps(null));
     expect(c.respuesta.chips.map((x) => x.clave)).toEqual(expect.arrayContaining(["zona:murcia/centro", "req:planta_baja"]));
     expect(c.respuesta.chips.some((x) => x.clave.includes("luminosidad"))).toBe(true);
+  });
+
+  it("órdenes escritas sobre la lista: ver más y ordenar, sin Jev", async () => {
+    expect(ordenEscrita("enséñame más")).toBe("mas");
+    expect(ordenEscrita("show me more")).toBe("mas");
+    expect(ordenEscrita("ordénalos por precio")).toBe("precio_asc");
+    expect(ordenEscrita("ordena por los más caros")).toBe("precio_desc");
+    expect(ordenEscrita("ordénalos por tamaño")).toBe("superficie_desc");
+    expect(ordenEscrita("más barato en Murcia con terraza")).toBeNull();
+    const a = await responder({ mensaje: "piso en Murcia" }, deps(null));
+    const b = await responder({ mensaje: "ordénalos por precio", estado: a.respuesta.estado }, deps(null));
+    const precios = b.respuesta.tarjetas.map((t) => t.i.precio!);
+    expect(precios).toEqual([...precios].sort((x, y) => x - y));
+    const c = await responder({ mensaje: "enséñame más", estado: a.respuesta.estado }, deps(null));
+    expect(c.respuesta.estado.pagina).toBe(2);
+  });
+
+  it("entiende «2 avitaciones» y ordena por precio cuando se pide algo barato", async () => {
+    const r = await responder({ mensaje: "kiero un piso barato en cartajena con 2 avitaciones" }, deps(null));
+    expect(r.respuesta.chips.map((c) => c.clave)).toEqual(expect.arrayContaining(["habMin"]));
+    const precios = r.respuesta.tarjetas.map((t) => t.i.precio!);
+    expect(precios).toEqual([...precios].sort((x, y) => x - y));
   });
 
   it("sin Jev funciona en modo degradado y lo dice", async () => {

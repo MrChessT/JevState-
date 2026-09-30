@@ -534,6 +534,19 @@ const AJUSTES_FEEDBACK: Record<string, Partial<FichaBusqueda>> = {
   estado: { prioridad: "estado" },
 };
 
+/** Orden corta escrita sobre los resultados visibles (hasta 7 palabras); null si no lo es. */
+export function ordenEscrita(mensaje: string): OrdenAsistente | "mas" | null {
+  const p = mensaje.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!.,]/g, " ").trim();
+  if (p.split(/\s+/).length > 7) return null;
+  if (/^(y\s+)?((ensena|muestra|pon|dame|saca|ver)(me|nos)?\s+)?(mas|otros|otras|siguientes)(\s+(resultados|opciones|pisos|casas|inmuebles))?(\s+por favor)?$|^(show|see|give)\s+(me\s+)?more(\s+\w+)?$|^more(\s+\w+)?$|^next$/.test(p)) return "mas";
+  if (!/\b(ordena\w*|ordenar|primero\s+los|sort|order)\b/.test(p)) return null;
+  if (/\b(caro|caros|mayor precio|most expensive|highest price)\b/.test(p)) return "precio_desc";
+  if (/\b(precio|barato|baratos|cheapest|price)\b/.test(p)) return "precio_asc";
+  if (/\b(m2|metro|metros|precio por metro|per m2)\b/.test(p) && /\b(metro|m2)\b/.test(p) && /\bprecio\b/.test(p)) return "m2_asc";
+  if (/\b(tamano|grande|grandes|superficie|metros|size|biggest|largest)\b/.test(p)) return "superficie_desc";
+  return null;
+}
+
 export async function responder(entrada: EntradaAsistente, deps: DependenciasMotor): Promise<ResultadoMotor> {
   const { mensaje, opcion, quitar, accion, viendo: refViendo, locale, estado } = EntradaAsistente.parse(entrada);
   const p = PLANTILLAS[locale];
@@ -592,6 +605,14 @@ export async function responder(entrada: EntradaAsistente, deps: DependenciasMot
   }
 
   if (!mensaje) return { respuesta: vacia(estado, locale, "conversar", [p.saludo], false), decisiones: [], llamadasJev: 0 };
+
+  // 2b. Órdenes cortas sobre la lista que ya se ve («enséñame más», «ordénalos por precio»): el código.
+  const orden = estado.ficha ? ordenEscrita(mensaje) : null;
+  if (orden && estado.ficha) {
+    const sin = { avisos: [], degradado: false };
+    const r = orden === "mas" ? await buscar(estado.ficha, estado, locale, deps, { ...sin, intencion: "buscar", pagina: estado.pagina + 1, orden: estado.orden }) : await buscar(estado.ficha, estado, locale, deps, { ...sin, intencion: "buscar", orden });
+    return { respuesta: r.respuesta, decisiones: [], llamadasJev: 0 };
+  }
 
   // 3. Mensaje normal: extracción → llamada 1 → puertas.
   const e = extraer(mensaje);
@@ -655,7 +676,7 @@ async function ejecutar(
         return finAvisos({ ...vacia({ ...estado, aclaracion: { campo: "zona", opciones, mensaje, campoPregunta: null } }, locale, "aclarar", [rellenar(p.aclararZona, { literal: interp.aclarar.pregunta })], degradado), opciones });
       }
       if (!fichaTieneCriterios(ficha)) return finAvisos(vacia(estado, locale, intencion, [p.pedirCriterios, ...(degradado ? [p.degradado] : [])], degradado));
-      const r = await buscar(ficha, estado, locale, deps, { avisos: interp.avisos, degradado, intencion, necesidades: Boolean(ficha.necesidades) && llamadas < 2 });
+      const r = await buscar(ficha, estado, locale, deps, { avisos: interp.avisos, degradado, intencion, necesidades: Boolean(ficha.necesidades) && llamadas < 2, ...(e.pideBarato ? { orden: "precio_asc" as const } : {}) });
       return finAvisos(r.respuesta, r.llamadas, r.decisiones);
     }
     case "detalle_inmueble": {
@@ -721,7 +742,7 @@ async function ejecutar(
       return fin(vacia(estado, locale, intencion, [rellenar(p.fueraDeAmbito)], degradado));
     default: {
       const plano = mensaje.toLowerCase();
-      const texto = /gracias|thank/.test(plano) ? p.gracias : /como funcion|how do you work|quien eres|who are you|que haces|what do you do/.test(plano.normalize("NFD").replace(/[̀-ͯ]/g, "")) ? rellenar(p.sobreAsistente) : rellenar(p.saludo);
+      const texto = /gracias|thank/.test(plano) ? p.gracias : /como funcion|how do you work|quien eres|who are you|que haces|what do you do|que puedes hacer|que sabes hacer|en que me (puedes )?ayudar|what can you do|how can you help|^ayuda$|^help$/.test(plano.normalize("NFD").replace(/[̀-ͯ]/g, "")) ? rellenar(p.sobreAsistente) : rellenar(p.saludo);
       return fin(vacia(estado, locale, "conversar", [texto], degradado));
     }
   }
