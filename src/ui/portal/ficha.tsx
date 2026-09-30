@@ -14,7 +14,9 @@ import { RangoPrecio } from "@/ui/visual/rango";
 import { JsonLd, migas } from "@/ui/seo/jsonld";
 import { CAMPOS_CARACTERISTICAS, CAMPOS_CLAVE, CAMPOS_LEGALES, TablaCampos, textoCampo, textoPct } from "./campos";
 import { euros, metros, numero } from "./formato";
+import { FormularioContacto } from "./formulario-contacto";
 import { Galeria } from "./galeria";
+import { campo as campoCatalogo } from "@/catalog/publico";
 import { CalculadoraHipoteca } from "./hipoteca";
 import { jsonLdInmueble, scriptJsonLd } from "./jsonld";
 import { MapaResultados } from "./mapa";
@@ -172,6 +174,13 @@ export function Ficha({ i, zona, similares, locale, d }: { i: InmuebleFicha; zon
           <section className={s.panel} id="contacto" aria-labelledby="contacto-titulo">
             <h2 id="contacto-titulo">{d.ficha.contacto}</h2>
             <p className={s.nota}>{d.ficha.contactoTexto}</p>
+            <FormularioContacto
+              refInmueble={i.ref}
+              locale={locale}
+              textos={d.formContacto}
+              privacidadHref={ruta(locale, "legal", "privacidad")}
+              etiquetasCampo={Object.fromEntries([...CAMPOS_CLAVE, ...CAMPOS_CARACTERISTICAS].map((id) => [id, campoCatalogo(id)?.label[locale] ?? id]))}
+            />
             <BotonEnlace href={`tel:${(i.agente?.telefono ?? BRAND.contact.phone).replace(/\s/g, "")}`} variante="secundario">
               {d.ficha.llamar} · {i.agente?.telefono ?? BRAND.contact.phone}
             </BotonEnlace>

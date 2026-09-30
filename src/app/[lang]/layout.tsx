@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
-import { alternativas, isLocale, LOCALE_TAGS, LOCALES, ruta } from "@/i18n/config";
+import { isLocale, LOCALE_TAGS, LOCALES, ruta } from "@/i18n/config";
 import { diccionario, t } from "@/i18n/diccionario";
 import { textoSobre } from "@/ui/color";
 import { Cabecera } from "@/ui/layout/cabecera";

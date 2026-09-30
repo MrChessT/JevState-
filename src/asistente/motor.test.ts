@@ -29,6 +29,18 @@ describe("motor del asistente", async () => {
     expect(respuesta.estado.visibles.length).toBe(respuesta.tarjetas.length);
   });
 
+  it("pedir visita prepara un borrador con fecha y franja, sin enviar nada", async () => {
+    const ref = todos[0]!.ref;
+    const { respuesta } = await responder({ mensaje: "quiero visitarlo el sábado por la tarde", viendo: ref }, deps(null));
+    expect(respuesta.intencion).toBe("pedir_visita");
+    expect(respuesta.parrafos.join(" ")).toMatch(/no se envía nada sin tu confirmación/);
+    const href = respuesta.enlaces[0]!.href;
+    expect(href).toMatch(/visita=1/);
+    expect(href).toMatch(/fecha=\d{4}-\d{2}-\d{2}/);
+    expect(href).toMatch(/franja=tarde/);
+    expect(href).toMatch(/origen=asistente#contacto$/);
+  });
+
   it("sin Jev funciona en modo degradado y lo dice", async () => {
     const { respuesta, llamadasJev } = await responder({ mensaje: "piso en Cartagena hasta 200000" }, deps(null));
     expect(llamadasJev).toBe(0);

@@ -1,0 +1,15 @@
+.cabecera { display: grid; gap: var(--e-2); }
+.cabecera h1 { margin: 0; }
+.suave { color: var(--texto-suave); font-size: var(--t-sm); margin: 0; }
+.resumen { font-weight: 600; margin: 0; }
+.filtros { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.filtros a { padding: var(--e-1) var(--e-3); border: 1px solid var(--borde); border-radius: 999px; text-decoration: none; color: var(--texto); font-size: var(--t-sm); }
+.filtros a[aria-current="page"] { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
+.desplazable { overflow-x: auto; border: 1px solid var(--borde); border-radius: var(--r-3); }
+.tabla { width: 100%; border-collapse: collapse; background: var(--superficie); font-size: var(--t-sm); }
+.tabla th, .tabla td { text-align: left; padding: var(--e-3); border-bottom: 1px solid var(--borde); vertical-align: top; }
+.tabla tr[data-estado="nuevo"] td:first-child { box-shadow: inset 3px 0 0 var(--marca); }
+.mensaje { margin: var(--e-1) 0 0; max-width: 32ch; white-space: pre-line; color: var(--texto-suave); }
+.estadoForm { display: flex; gap: var(--e-2); align-items: center; }
+.estadoForm select, .estadoForm button { min-height: 40px; border-radius: var(--r-2); border: 1px solid var(--borde-fuerte); background: var(--superficie); color: var(--texto); font: inherit; padding: 0 var(--e-2); }
+.estadoForm button { cursor: pointer; font-weight: 600; }
