@@ -124,8 +124,9 @@ describe("motor del asistente", async () => {
     const conDistancias = todos.find((i) => i.operacion === "venta");
     const c = await responder({ mensaje: "¿qué tiene cerca?", viendo: conDistancias!.ref }, deps(null));
     expect(c.respuesta.parrafos[0]).toMatch(/Lo más cercano a|Aún no tengo los alrededores/);
-    const v = await responder({ mensaje: "piso con vistas en Cartagena" }, deps(null));
-    expect(v.respuesta.chips.some((x) => x.clave === "req:vistas")).toBe(true);
+    const v = await responder({ mensaje: "piso en planta alta con vistas en Cartagena" }, deps(null));
+    expect(v.respuesta.chips.map((x) => x.clave)).toEqual(expect.arrayContaining(["req:vistas", "req:planta_baja"]));
+    expect(v.respuesta.parrafos.join(" ")).toMatch(/He quitado los bajos/);
   });
 
   it("sin Jev funciona en modo degradado y lo dice", async () => {

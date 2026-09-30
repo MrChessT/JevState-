@@ -42,6 +42,8 @@ export interface Extraccion {
   m2Min: number | null;
   /** Baños mínimos («2 baños»). */
   banosMin: number | null;
+  /** «planta alta», «último piso»: se quitan los bajos y se avisa de que la planta exacta está en cada ficha. */
+  plantaAlta: boolean;
   /** «algo barato» en una búsqueda nueva: se ordena por precio. */
   pideBarato: boolean;
   /** Cosas pedidas que las fichas no recogen (se dice, no se ignora en silencio). */
@@ -166,9 +168,10 @@ export function extraer(mensaje: string): Extraccion {
     inmuebles: { refs, ordinal, deictico: /\b(este|esta|este piso|esta casa|this one|this)\b/.test(p) },
     textoLibre: p.split(/\s+/).length >= 14 || /\b(porque|ya que|somos|tenemos|teletrabaj\w*|trabajo desde casa|because|we are|we have|work from home)\b/.test(p),
     relativo: /\b(mas barat|menos car|mas economic|cheaper|less expensive)/.test(p) ? "barato" : /\b(mas grande|mas amplio|mas espacio|mas habitaciones|bigger|larger|more space)/.test(p) ? "grande" : null,
+    plantaAlta: /\b(planta alta|plantas altas|piso alto|pisos altos|ultima planta|ultimo piso|en altura|high floor|top floor|upper floor)\b/.test(p),
     m2Min: superficieMinima(p),
     banosMin: extraerBanos(mensaje)[0]?.n ?? null,
-    sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno sea (un )?(piso )?bajo\b|\bque no (este|sea) en (un |la )?(planta )?baja\b|\bno ground[- ]floor/.test(p),
+    sinBajos: /\b(planta alta|plantas altas|piso alto|pisos altos|ultima planta|ultimo piso|en altura|high floor|top floor|upper floor)\b/.test(p) || /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno sea (un )?(piso )?bajo\b|\bque no (este|sea) en (un |la )?(planta )?baja\b|\bno ground[- ]floor/.test(p),
     pideBarato: /\b(barat[oa]s?|economic[oa]s?|cheap|affordable)\b/.test(p),
     noFiltrables: NO_FILTRABLES.filter(([re]) => re.test(p)).map(([, k]) => k),
     fueraRegion: FUERA_REGION.filter(([re]) => re.test(p)).map(([, n]) => n),

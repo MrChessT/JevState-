@@ -517,7 +517,10 @@ async function detalle(ref: string | null, campo: string | null, estado: EstadoA
     };
   }
   if (tema === "cerca") {
-    if (!ficha.distancias.length) return { ...base, parrafos: [rellenar(p.cercaSin, { ref })], enlaces };
+    if (!ficha.distancias.length) {
+      const municipioPath = ficha.zonaPath.split("/")[0]!;
+      return { ...base, parrafos: [rellenar(p.cercaSin, { ref })], enlaces, sugerencias: [{ texto: rellenar(p.cercaZona, { zona: ficha.municipioNombre }), accion: { tipo: "zona", path: municipioPath } }] };
+    }
     const cats = d.ficha.categorias as Record<string, string>;
     const lineas = [...ficha.distancias].sort((a, b) => a.minutos - b.minutos).slice(0, 6).map((x) => rellenar(p.cercaLinea, { cat: cats[x.categoria] ?? x.categoria, nombre: x.nombre ? ` (${x.nombre})` : "", min: x.minutos, m: numero(locale, x.metros) }));
     return { ...base, parrafos: [rellenar(p.cerca, { ref }), ...lineas, p.cercaAviso], enlaces };
@@ -804,6 +807,7 @@ async function ejecutar(
       const avisar = (r: RespuestaAsistente): RespuestaAsistente => {
         const extra: string[] = [];
         if (e.fueraRegion.length) extra.push(rellenar(p.fueraRegion, { lugares: e.fueraRegion.join(locale === "es" ? " y " : " and "), queda: e.fueraRegion.length > 1 ? (locale === "es" ? "quedan" : "are") : locale === "es" ? "queda" : "is" }));
+        if (e.plantaAlta) extra.push(p.plantaAlta);
         if (e.noFiltrables.length) extra.push(rellenar(p.noFiltrable, { cosas: e.noFiltrables.map((k) => p.noFiltrables[k]).join(locale === "es" ? " ni " : " or ") }));
         if (extra.length) r.parrafos.splice(Math.min(1, r.parrafos.length), 0, ...extra);
         return r;
