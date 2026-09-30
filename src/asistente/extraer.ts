@@ -33,6 +33,10 @@ export interface Extraccion {
   relativo: "barato" | "grande" | null;
   /** «sin bajos», «nada de bajos»: rechazo de la planta baja. */
   sinBajos: boolean;
+  /** Cosas pedidas que las fichas no recogen (se dice, no se ignora en silencio). */
+  noFiltrables: NoFiltrable[];
+  /** Lugares mencionados fuera de la Región de Murcia (se avisa). */
+  fueraRegion: string[];
 }
 
 const TIPOS: Array<[RegExp, string]> = [
@@ -53,6 +57,21 @@ const CAMPO_RASGO: Partial<Record<Rasgo, string>> = {
   calefaccion: "calefaccion", amueblado: "amueblado", accesible: "accesible", exterior: "exterior", vistas_mar: "vistas",
   reformado: "estado", a_estrenar: "estado", luminoso: "luminosidad", muy_luminoso: "luminosidad", tranquilo: "ruido", muy_tranquilo: "ruido",
 };
+
+export type NoFiltrable = "jardin" | "mascotas" | "chimenea";
+const NO_FILTRABLES: Array<[RegExp, NoFiltrable]> = [
+  [/\bjardin(es)?\b|\bgardens?\b/, "jardin"],
+  [/\bmascotas?\b|\bperros?\b|\bgatos?\b|\bpets?\b|\bpet[- ]friendly\b|\bdogs?\b|\bcats?\b/, "mascotas"],
+  [/\bchimeneas?\b|\bfireplaces?\b/, "chimenea"],
+];
+
+/** Destinos habituales cercanos que NO son de la Región de Murcia (clave normalizada → nombre). */
+const FUERA_REGION: Array<[RegExp, string]> = [
+  [/\btorrevieja\b/, "Torrevieja"], [/\borihuela\b/, "Orihuela"], [/\bpilar de la horadada\b/, "Pilar de la Horadada"], [/\bguardamar\b/, "Guardamar"],
+  [/\bsanta pola\b/, "Santa Pola"], [/\belche\b/, "Elche"], [/\balicante\b/, "Alicante"], [/\bbenidorm\b/, "Benidorm"], [/\bcalpe\b/, "Calpe"],
+  [/\balmeria\b/, "Almería"], [/\bmojacar\b/, "Mojácar"], [/\bpulpi\b/, "Pulpí"], [/\bgarrucha\b/, "Garrucha"],
+  [/\bvalencia\b/, "Valencia"], [/\bmadrid\b/, "Madrid"], [/\bmalaga\b/, "Málaga"], [/\bmarbella\b/, "Marbella"], [/\bbarcelona\b/, "Barcelona"], [/\bgranada\b/, "Granada"], [/\balbacete\b/, "Albacete"],
+];
 
 const ORDINALES: Record<string, number> = { primero: 1, primera: 1, segundo: 2, segunda: 2, tercero: 3, tercera: 3, cuarto: 4, cuarta: 4, quinto: 5, quinta: 5, first: 1, second: 2, third: 3, ultimo: -1, ultima: -1, last: -1 };
 
@@ -99,7 +118,9 @@ export function extraer(mensaje: string): Extraccion {
     inmuebles: { refs, ordinal, deictico: /\b(este|esta|este piso|esta casa|this one|this)\b/.test(p) },
     textoLibre: p.split(/\s+/).length >= 14 || /\b(porque|ya que|somos|tenemos|teletrabaj\w*|trabajo desde casa|because|we are|we have|work from home)\b/.test(p),
     relativo: /\b(mas barat|menos car|mas economic|cheaper|less expensive)/.test(p) ? "barato" : /\b(mas grande|mas amplio|mas espacio|mas habitaciones|bigger|larger|more space)/.test(p) ? "grande" : null,
-    sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno ground[- ]floor/.test(p),
+    sinBajos: /\b(sin|nada de|ni|no (quiero |queremos )?(un )?)\s*(pisos? )?bajos?\b|\bno sea (un )?(piso )?bajo\b|\bque no (este|sea) en (un |la )?(planta )?baja\b|\bno ground[- ]floor/.test(p),
+    noFiltrables: NO_FILTRABLES.filter(([re]) => re.test(p)).map(([, k]) => k),
+    fueraRegion: FUERA_REGION.filter(([re]) => re.test(p)).map(([, n]) => n),
     perfilDeclarado: /\b(para (vivir|mi familia|los ninos|mis hijos|invertir|alquilarlo|veranear|vacaciones|mis padres)|hijos|ninos|familia|inversion|invertir|segunda residencia|vacaciones|kids|children|family|invest)\b/.test(p),
   };
 }

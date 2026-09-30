@@ -144,7 +144,9 @@ export function detectarZonas(texto: string, opciones: { umbral?: number } = {})
       const cands = buscarZonas(q, { limite: 6, minimo: umbral });
       if (!cands.length) continue;
       const mejor = cands[0]!;
-      if (COMUNES.has(q) && !(/^\p{Lu}/u.test(ventana[0]!.original) || PREPOSICIONES.has(palabras[i - 1]?.k ?? ""))) continue;
+      // «centro de Murcia»: la palabra común seguida de «de/del» + lugar también cuenta.
+      const sigue = palabras[i + n]?.k ?? "";
+      if (COMUNES.has(q) && !(/^\p{Lu}/u.test(ventana[0]!.original) || PREPOSICIONES.has(palabras[i - 1]?.k ?? "") || sigue === "de" || sigue === "del")) continue;
       const cercanas = cands.filter((c) => c.score >= mejor.score - 0.08);
       propuestas.push({ literal: texto.slice(ventana[0]!.inicio, ventana[n - 1]!.fin), inicio: ventana[0]!.inicio, fin: ventana[n - 1]!.fin, candidatas: cercanas, score: mejor.score, n });
     }
@@ -153,5 +155,17 @@ export function detectarZonas(texto: string, opciones: { umbral?: number } = {})
   propuestas.sort((a, b) => b.score - a.score || b.n - a.n);
   const elegidas: MencionZona[] = [];
   for (const p of propuestas) if (!elegidas.some((e) => p.inicio < e.fin && p.fin > e.inicio)) elegidas.push({ literal: p.literal, inicio: p.inicio, fin: p.fin, candidatas: p.candidatas });
-  return elegidas.sort((a, b) => a.inicio - b.inicio);
+  elegidas.sort((a, b) => a.inicio - b.inicio);
+  // «centro de Murcia», «El Palmar de Murcia»: un barrio seguido de «de/del» + su municipio es una
+  // sola zona (el barrio de ese municipio), no dos.
+  for (let i = 0; i + 1 < elegidas.length; i++) {
+    const a = elegidas[i]!;
+    const b = elegidas[i + 1]!;
+    if (!/^\s+(de|del)\s+$/i.test(texto.slice(a.fin, b.inicio))) continue;
+    const municipio = b.candidatas.find((c) => c.zona.nivel === "municipio")?.zona.municipio;
+    const delMunicipio = municipio ? a.candidatas.filter((c) => c.zona.nivel === "barrio" && c.zona.municipio === municipio) : [];
+    if (!delMunicipio.length) continue;
+    elegidas.splice(i, 2, { literal: texto.slice(a.inicio, b.fin), inicio: a.inicio, fin: b.fin, candidatas: delMunicipio });
+  }
+  return elegidas;
 }

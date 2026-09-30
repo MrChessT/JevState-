@@ -41,6 +41,16 @@ describe("motor del asistente", async () => {
     expect(href).toMatch(/origen=asistente#contacto$/);
   });
 
+  it("dice lo que no puede filtrar y los lugares fuera de la Región, en vez de ignorarlos", async () => {
+    const a = await responder({ mensaje: "alquiler en Molina de Segura que admita mascotas, con jardín" }, deps(null));
+    expect(a.respuesta.parrafos.join(" ")).toMatch(/No puedo filtrar por jardín ni si admiten mascotas/);
+    const b = await responder({ mensaje: "2 bedroom flat near the beach in Torrevieja under 180k", locale: "en" }, deps(null));
+    expect(b.respuesta.parrafos.join(" ")).toMatch(/Torrevieja is outside it/);
+    const c = await responder({ mensaje: "piso en el centro de Murcia que no sea un bajo, con buena luz" }, deps(null));
+    expect(c.respuesta.chips.map((x) => x.clave)).toEqual(expect.arrayContaining(["zona:murcia/centro", "req:planta_baja"]));
+    expect(c.respuesta.chips.some((x) => x.clave.includes("luminosidad"))).toBe(true);
+  });
+
   it("sin Jev funciona en modo degradado y lo dice", async () => {
     const { respuesta, llamadasJev } = await responder({ mensaje: "piso en Cartagena hasta 200000" }, deps(null));
     expect(llamadasJev).toBe(0);

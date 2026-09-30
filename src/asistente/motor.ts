@@ -442,7 +442,7 @@ async function infoZona(path: string | null, estado: EstadoAsistente, locale: Lo
   const num = (x: string | null) => (x ? numero(locale, Math.round(Number(x))) : "—");
   const parrafos: string[] = [];
   if (v.n > 0) parrafos.push(rellenar(p.zona, { zona: nombre, n: v.n, m2: e(v.medianaM2), p25: num(v.p25M2), p75: num(v.p75M2) }));
-  if (a.n > 0) parrafos.push(rellenar(p.zonaAlquiler, { n: a.n, m2: a.medianaM2 ? `${Number(a.medianaM2).toLocaleString(locale === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 })} €` : "—" }));
+  if (a.n > 0) parrafos.push(a.medianaM2 ? rellenar(p.zonaAlquiler, { n: a.n, m2: `${Number(a.medianaM2).toLocaleString(locale === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 })} €` }) : rellenar(p.zonaAlquilerPocos, { n: a.n }));
   parrafos.push(p.zonaFuente);
   const s = p.sugerencias;
   return {
@@ -628,6 +628,15 @@ async function ejecutar(
   switch (intencion) {
     case "buscar":
     case "refinar": {
+      // Lo que se pidió y no se puede aplicar se dice (nunca se ignora en silencio).
+      const avisar = (r: RespuestaAsistente): RespuestaAsistente => {
+        const extra: string[] = [];
+        if (e.fueraRegion.length) extra.push(rellenar(p.fueraRegion, { lugares: e.fueraRegion.join(locale === "es" ? " y " : " and "), queda: e.fueraRegion.length > 1 ? (locale === "es" ? "quedan" : "are") : locale === "es" ? "queda" : "is" }));
+        if (e.noFiltrables.length) extra.push(rellenar(p.noFiltrable, { cosas: e.noFiltrables.map((k) => p.noFiltrables[k]).join(locale === "es" ? " ni " : " or ") }));
+        if (extra.length) r.parrafos.splice(Math.min(1, r.parrafos.length), 0, ...extra);
+        return r;
+      };
+      const finAvisos = (r: RespuestaAsistente, extra?: number, mas?: DecisionAsistente[]) => fin(avisar(r), extra, mas);
       const sigue = intencion === "refinar" || interp.seguimiento;
       const necesidades = e.textoLibre ? sinDatosPersonales(mensaje).slice(0, 300) : undefined;
       let ficha = heredar(sigue && estado.ficha ? estado.ficha : fichaVacia(), { ...interp.cambios, necesidades });
@@ -639,15 +648,15 @@ async function ejecutar(
         const r = await buscar(ficha, estado, locale, deps, { avisos: interp.avisos, degradado, intencion, orden });
         const pr = PLANTILLAS[locale];
         r.respuesta.parrafos.unshift(e.relativo === "grande" ? pr.relativoGrande : ficha.precioMax !== antes ? rellenar(pr.relativoBarato, { precio: euros(locale, ficha.precioMax!) ?? "" }) : pr.relativoBaratoSin);
-        return fin(r.respuesta, r.llamadas, r.decisiones);
+        return finAvisos(r.respuesta, r.llamadas, r.decisiones);
       }
       if (interp.aclarar?.campo === "zona" && !ficha.zonas.length) {
         const opciones = interp.aclarar.opciones;
-        return fin({ ...vacia({ ...estado, aclaracion: { campo: "zona", opciones, mensaje, campoPregunta: null } }, locale, "aclarar", [rellenar(p.aclararZona, { literal: interp.aclarar.pregunta })], degradado), opciones });
+        return finAvisos({ ...vacia({ ...estado, aclaracion: { campo: "zona", opciones, mensaje, campoPregunta: null } }, locale, "aclarar", [rellenar(p.aclararZona, { literal: interp.aclarar.pregunta })], degradado), opciones });
       }
-      if (!fichaTieneCriterios(ficha)) return fin(vacia(estado, locale, intencion, [p.pedirCriterios, ...(degradado ? [p.degradado] : [])], degradado));
+      if (!fichaTieneCriterios(ficha)) return finAvisos(vacia(estado, locale, intencion, [p.pedirCriterios, ...(degradado ? [p.degradado] : [])], degradado));
       const r = await buscar(ficha, estado, locale, deps, { avisos: interp.avisos, degradado, intencion, necesidades: Boolean(ficha.necesidades) && llamadas < 2 });
-      return fin(r.respuesta, r.llamadas, r.decisiones);
+      return finAvisos(r.respuesta, r.llamadas, r.decisiones);
     }
     case "detalle_inmueble": {
       if (!interp.inmuebleRef && interp.aclarar?.campo === "inmueble") {
