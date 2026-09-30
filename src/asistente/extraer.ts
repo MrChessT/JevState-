@@ -106,16 +106,20 @@ export function extraer(mensaje: string): Extraccion {
     const tras = p.slice(c.fin, c.fin + 14);
     const antes = p.slice(Math.max(0, c.inicio - 22), c.inicio);
     if (/^\s*(m2|m²|metros|hab|dorm|bano|baño|min|km|%)/.test(tras) || dormitorios.some((d) => d.inicio === c.inicio)) continue;
-    if (c.valor.lt(50) && !/^\s*(k|mil|€|eur)/.test(tras)) continue;
+    // «3,500» / «250,000» (coma y tres cifras): en una conversación de pisos son miles al estilo
+    // inglés, no 3,5 ni 250. El parser lo marca como ambiguo y ofrece la alternativa.
+    const miles = /^\d{1,3},\d{3}$/.test(c.literal.trim()) ? c.alternativas.find((a) => a.gt(c.valor)) : undefined;
+    const base = miles ?? c.valor;
+    if (base.lt(50) && !/^\s*(k|mil|€|eur)/.test(tras)) continue;
     // «unos 250» en compra = 250 mil (se ofrece como alternativa; decide Jev con presupuesto_ok).
-    let valor = c.valor;
-    if (c.valor.lt(2000) && /^\s*(mil|k)\b/.test(tras) === false && !/\/\s*mes|al mes|mensual|alquil|\ba month\b|per month|\/month|monthly|\brent/.test(p) && c.valor.gte(50) && c.valor.lt(1000)) valor = c.valor.mul(1000);
+    let valor = base;
+    if (base.lt(2000) && /^\s*(mil|k)\b/.test(tras) === false && !/\/\s*mes|al mes|mensual|alquil|\ba month\b|per month|\/month|monthly|\brent/.test(p) && base.gte(50) && base.lt(1000)) valor = base.mul(1000);
     // Ahorros: la palabra va pegada a la cifra («40.000 ahorrados», «ahorros de 40.000», «30.000 para la entrada»).
     const ahorros =
       /^\s*(€|euros?|mil|k)?\s*(ahorrad\w*|de ahorros|en ahorros|ahorros|para la entrada|de entrada\b(?! del)|saved|in savings|savings|for (the|a) deposit)/.test(tras.length < 22 ? p.slice(c.fin, c.fin + 26) : tras) ||
       /(ahorros de|ahorrado|ahorrados|tengo ahorrad\w*|savings of|deposit of|saved)\s*$/.test(antes);
     // Un ingreso mensual de 15.000 € o más es muy improbable: esas cifras son ahorros o precio.
-    const ingresos = c.valor.lt(15000) && /\b(cobr|gan[oa]|ganamos|ingres|sueldo|salario|nomina|earn|income|salary|net)\w*/.test(p.slice(Math.max(0, c.inicio - 30), c.inicio + 1)) || /^\s*(€|euros?)?\s*(netos?\s*)?(al mes|mensuales)\s*(de sueldo|de nomina|limpios|netos|entre)/.test(tras);
+    const ingresos = base.lt(15000) && /\b(cobr|gan[oa]|ganamos|ingres|sueldo|salario|nomina|earn|income|salary|net)\w*/.test(p.slice(Math.max(0, c.inicio - 30), c.inicio + 1)) || /^\s*(€|euros?)?\s*(netos?\s*)?(al mes|mensuales)\s*(de sueldo|de nomina|limpios|netos|entre)/.test(tras);
     const pista = ingresos
       ? "ingresos"
       : ahorros

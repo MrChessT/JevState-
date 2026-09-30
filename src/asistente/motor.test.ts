@@ -97,6 +97,11 @@ describe("motor del asistente", async () => {
     expect(r.respuesta.parrafos.join(" ")).toMatch(/los ahorros/);
     expect(r.respuesta.estado.ficha).toMatchObject({ precioMax: 133_000, operacion: "venta" });
     expect(r.respuesta.cifras.length).toBe(3);
+    // Miles al estilo inglés: «3,500» son 3.500 €, no 3,5 €; «250,000» son 250.000 €.
+    const en = await responder({ mensaje: "we have 60k saved and earn 3,500 a month, what can we afford in Murcia?", locale: "en" }, deps(null));
+    expect(en.respuesta.parrafos[0]).toMatch(/With €60,000 saved and €3,500 a month/);
+    const p = await responder({ mensaje: "flat in Murcia up to 250,000 euros", locale: "en" }, deps(null));
+    expect(p.respuesta.estado.ficha?.precioMax).toBe(250_000);
   });
 
   it("órdenes escritas: quitar un filtro, cambiar a alquiler, el más barato y guardar", async () => {
