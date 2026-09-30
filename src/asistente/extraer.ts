@@ -49,8 +49,8 @@ const TIPOS: Array<[RegExp, string]> = [
   [/\b(adosados?|pareados?|townhouses?|bungalows?)\b/, "adosado"],
   [/\b(casas?|houses?)\b/, "casa"],
   [/\b(estudios?|lofts?|studios?)\b/, "estudio"],
-  [/\b(locales?|shops?)\b/, "local"],
-  [/\b(terrenos?|parcelas?|solares?|plots?)\b/, "terreno"],
+  [/\b(local(es)?( comercial(es)?)?|shops?|commercial premises)\b/, "local"],
+  [/\b(terrenos?|parcelas?|solar(es)?|plots?|land)\b/, "terreno"],
 ];
 
 const CAMPO_RASGO: Partial<Record<Rasgo, string>> = {
@@ -60,11 +60,12 @@ const CAMPO_RASGO: Partial<Record<Rasgo, string>> = {
   reformado: "estado", a_estrenar: "estado", luminoso: "luminosidad", muy_luminoso: "luminosidad", tranquilo: "ruido", muy_tranquilo: "ruido",
 };
 
-export type NoFiltrable = "jardin" | "mascotas" | "chimenea";
+export type NoFiltrable = "jardin" | "mascotas" | "chimenea" | "licencia_turistica";
 const NO_FILTRABLES: Array<[RegExp, NoFiltrable]> = [
   [/\bjardin(es)?\b|\bgardens?\b/, "jardin"],
   [/\bmascotas?\b|\bperros?\b|\bgatos?\b|\bpets?\b|\bpet[- ]friendly\b|\bdogs?\b|\bcats?\b/, "mascotas"],
   [/\bchimeneas?\b|\bfireplaces?\b/, "chimenea"],
+  [/\blicencia (turistica|vacacional)\b|\bvivienda de uso turistico\b|\bvut\b|\btourist licen[cs]e\b|\bholiday rental licen[cs]e\b/, "licencia_turistica"],
 ];
 
 /** Destinos habituales cercanos que NO son de la Región de Murcia (clave normalizada → nombre). */

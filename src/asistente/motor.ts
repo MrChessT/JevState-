@@ -351,21 +351,25 @@ async function buscar(
   deps.progreso?.("buscando");
   // Sin operación indicada se busca en venta, y se muestra como chip para que se pueda cambiar.
   const ficha: FichaBusqueda = { ...ficha0, operacion: ficha0.operacion ?? "venta" };
-  const pagina = extra.pagina ?? 1;
+  const paginaPedida = extra.pagina ?? 1;
   const orden = extra.orden ?? "relevancia";
   const todos = await deps.repo.todas();
   const r = recomendar(todos, ficha, 10_000);
-  const llamada2 = extra.necesidades && pagina === 1 ? await valorarEncaje(r, ficha, deps) : { llamadas: 0, decisiones: [] };
+  const llamada2 = extra.necesidades && paginaPedida === 1 ? await valorarEncaje(r, ficha, deps) : { llamadas: 0, decisiones: [] };
   const lista = ordenar(r.candidatos, orden);
+  // «Ver más» cuando ya se ha visto todo: se dice, no se enseña una página vacía.
+  const agotado = paginaPedida > 1 && (paginaPedida - 1) * POR_PAGINA >= lista.length;
+  const pagina = agotado ? estado.pagina : paginaPedida;
   const desde = (pagina - 1) * POR_PAGINA;
   const pag = lista.slice(desde, desde + POR_PAGINA);
   const parrafos: string[] = [];
-  if (pagina > 1) parrafos.push(rellenar(p.mas, { m: pag.length, desde: desde + 1, hasta: desde + pag.length, n: r.total }));
+  if (agotado) parrafos.push(rellenar(p.masAgotado, { n: r.total }));
+  else if (pagina > 1) parrafos.push(rellenar(p.mas, { m: pag.length, desde: desde + 1, hasta: desde + pag.length, n: r.total }));
   else if (r.total === 0) parrafos.push(p.sinResultados);
   else if (r.relajaciones.length) parrafos.push(rellenar(p.relajado, { cambios: r.relajaciones.map((x) => p.relajacion[x.tipo]).join(locale === "es" ? " y " : " and "), n: r.total }));
   else if (r.total === 1) parrafos.push(p.resultadosUno);
   else parrafos.push(rellenar(p.resultados, { n: r.total, m: pag.length, inmuebles: p.inmuebles[1]! }));
-  if (pagina === 1 && r.total > 1) {
+  if (!agotado && pagina === 1 && r.total > 1) {
     const precios = lista.map((c) => c.i.precio).filter((x): x is number => x !== null);
     if (precios.length > 1) parrafos.push(`${rellenar(p.rango, { min: euros(locale, Math.min(...precios)) ?? "", max: euros(locale, Math.max(...precios)) ?? "" })} ${p.ordenado[orden]}`);
   }

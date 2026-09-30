@@ -73,6 +73,16 @@ describe("motor del asistente", async () => {
     expect(precios).toEqual([...precios].sort((x, y) => x - y));
   });
 
+  it("«local», «solar» y «ver más» al final de la lista", async () => {
+    const a = await responder({ mensaje: "busco un local comercial en Murcia" }, deps(null));
+    expect(a.respuesta.chips.map((c) => c.clave)).toEqual(expect.arrayContaining(["tipo:local"]));
+    const b = await responder({ mensaje: "piso en Lorca" }, deps(null));
+    const c = await responder({ mensaje: "enséñame más", estado: b.respuesta.estado }, deps(null));
+    if ((b.respuesta.total ?? 0) <= 12) expect(c.respuesta.parrafos[0]).toMatch(/Ya te he enseñado/);
+    const d = await responder({ mensaje: "apartamento en Mazarrón con licencia turística" }, deps(null));
+    expect(d.respuesta.parrafos.join(" ")).toMatch(/licencia turística/);
+  });
+
   it("sin Jev funciona en modo degradado y lo dice", async () => {
     const { respuesta, llamadasJev } = await responder({ mensaje: "piso en Cartagena hasta 200000" }, deps(null));
     expect(llamadasJev).toBe(0);

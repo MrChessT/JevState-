@@ -51,7 +51,7 @@ const ES = {
   revisarEnviar: "Revisar y enviar la solicitud",
   franjasTexto: { manana: "por la mañana", tarde: "por la tarde", indiferente: "" },
   noFiltrable: "No puedo filtrar por {cosas}: las fichas no recogen ese dato. Pregúntalo al agente desde la ficha que te interese.",
-  noFiltrables: { jardin: "jardín", mascotas: "si admiten mascotas", chimenea: "chimenea" },
+  noFiltrables: { jardin: "jardín", mascotas: "si admiten mascotas", chimenea: "chimenea", licencia_turistica: "licencia turística" },
   fueraRegion: "Solo tengo inmuebles en la Región de Murcia, y {lugares} {queda} fuera.",
   inyeccion: "No puedo hacer eso. Solo te ayudo a buscar y conocer los inmuebles publicados, con los datos públicos de cada ficha.",
   fueraDeAmbito: "Solo puedo ayudarte con inmuebles de {marca} en la Región de Murcia: buscar, preguntar por una ficha o comparar.",
@@ -82,6 +82,7 @@ const ES = {
   relativoBaratoSin: "Te enseño primero los más baratos.",
   relativoGrande: "Te enseño primero los más grandes.",
   mas: "Aquí tienes {m} más ({desde}–{hasta} de {n}).",
+  masAgotado: "Ya te he enseñado los {n} que hay con estos criterios. Si quieres ver otros, quita algún filtro o cambia la zona.",
   ordenado: { relevancia: "Ordenados por lo que me has pedido.", precio_asc: "Ordenados de más barato a más caro.", precio_desc: "Ordenados de más caro a más barato.", m2_asc: "Ordenados por el mejor precio por metro.", superficie_desc: "Ordenados de más grande a más pequeño." },
   sugerencias: {
     mas: "Ver {n} más", baratos: "Más baratos primero", m2: "Mejor €/m²", grandes: "Más grandes", bajar: "Hasta {precio}", con: "Con {rasgo}", masHab: "{n}+ habitaciones",
@@ -148,7 +149,7 @@ const EN: typeof ES = {
   revisarEnviar: "Review and send the request",
   franjasTexto: { manana: "in the morning", tarde: "in the afternoon", indiferente: "" },
   noFiltrable: "I can't filter by {cosas}: the listings don't record it. Ask the agent from the listing you're interested in.",
-  noFiltrables: { jardin: "garden", mascotas: "whether pets are allowed", chimenea: "fireplace" },
+  noFiltrables: { jardin: "garden", mascotas: "whether pets are allowed", chimenea: "fireplace", licencia_turistica: "tourist licence" },
   fueraRegion: "I only have properties in the Region of Murcia, and {lugares} {queda} outside it.",
   inyeccion: "I can't do that. I only help you search and learn about the listed properties, using each listing's public data.",
   fueraDeAmbito: "I can only help with {marca} properties in the Region of Murcia: searching, asking about a listing or comparing.",
@@ -178,6 +179,7 @@ const EN: typeof ES = {
   relativoBaratoSin: "Here are the cheapest first.",
   relativoGrande: "Here are the largest first.",
   mas: "Here are {m} more ({desde}–{hasta} of {n}).",
+  masAgotado: "I've already shown you all {n} that match. To see others, remove a filter or change the area.",
   ordenado: { relevancia: "Ranked by what you asked for.", precio_asc: "Sorted from cheapest to most expensive.", precio_desc: "Sorted from most expensive to cheapest.", m2_asc: "Sorted by best price per m².", superficie_desc: "Sorted from largest to smallest." },
   sugerencias: {
     mas: "See {n} more", baratos: "Cheapest first", m2: "Best €/m²", grandes: "Largest", bajar: "Up to {precio}", con: "With {rasgo}", masHab: "{n}+ bedrooms",
