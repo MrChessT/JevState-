@@ -38,8 +38,12 @@ function municipio(path: string) {
 /** «Casa» sin más incluye chalets y adosados; «piso», áticos y dúplex (sección 4.2: TIPOS). */
 const TIPOS_INCLUIDOS: Record<string, string[]> = { casa: ["casa", "chalet", "adosado"], piso: ["piso", "atico", "duplex"] };
 
+/** Municipios de la Región de Murcia con costa (Mediterráneo y Mar Menor). */
+export const MUNICIPIOS_COSTA = ["aguilas", "lorca", "mazarron", "cartagena", "la-union", "los-alcazares", "san-javier", "san-pedro-del-pinatar"] as const;
+
 export function filtrar(todos: InmuebleResumen[], f: FichaBusqueda): InmuebleResumen[] {
-  const zonas = [...f.zonas];
+  // «Cerca de la playa» sin zona: solo municipios con costa (aún no hay distancias a la playa).
+  const zonas = f.zonas.length ? [...f.zonas] : f.proximidad.playa ? [...MUNICIPIOS_COSTA] : [];
   const max = f.precioMax ? new Decimal(f.precioMax).mul(1 + f.tolerancia / 100).toNumber() : null;
   return todos.filter((i) => {
     if (f.operacion && (f.operacion === "venta" ? i.operacion !== "venta" : i.operacion === "venta")) return false;

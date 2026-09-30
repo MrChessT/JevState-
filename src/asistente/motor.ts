@@ -370,7 +370,8 @@ async function buscar(
   }
   if (pagina === 1 && ficha.zonasAmpliadas.length && !r.relajaciones.some((x) => x.tipo === "colindantes")) parrafos.push(rellenar(p.ampliadas, { zonas: ficha.zonasAmpliadas.map(nombreZona).join(", ") }));
   if (extra.avisos.includes("presupuesto_dudoso") && ficha.precioMax) parrafos.push(rellenar(p.presupuestoDudoso, { precio: euros(locale, ficha.precioMax) ?? "" }));
-  if (extra.degradado) parrafos.push(p.degradado);
+  // El aviso de modo básico se da una vez (primera búsqueda); después basta la etiqueta del chat.
+  if (extra.degradado && !estado.ficha) parrafos.push(p.degradado);
   const tarjetas = pag.map((c) => ({ i: soloResumen(c.i), href: urlFicha(locale, c.i), porque: porQue(c, r.fichaEfectiva, locale) }));
   const visibles = [...(pagina > 1 ? estado.visibles : []), ...pag.map((c) => ({ ref: c.i.ref, resumen: resumenParaJev(c.i) }))].slice(-24);
   const nuevoEstado: EstadoAsistente = { ficha, visibles, aclaracion: null, pagina, orden };
