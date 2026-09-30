@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ASSISTANT_CATALOG_VERSION } from "@/asistente/version";
 import { CATALOG_VERSION } from "@/catalog/index";
@@ -46,7 +47,11 @@ export default async function Admin({ params }: PageProps<"/[lang]/admin">) {
         {secciones.map((s) => (
           <Tarjeta key={s}>
             <h2 style={{ fontSize: "var(--t-lg)" }}>{d.admin.secciones[s]}</h2>
-            <p style={{ color: "var(--texto-suave)", margin: 0 }}>{d.admin.proximamente}</p>
+            {s === "crm" ? (
+              <Link href={ruta(lang, "admin", "crm")}>{d.admin.abrir} →</Link>
+            ) : (
+              <p style={{ color: "var(--texto-suave)", margin: 0 }}>{d.admin.proximamente}</p>
+            )}
           </Tarjeta>
         ))}
       </div>

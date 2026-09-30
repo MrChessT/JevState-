@@ -165,3 +165,29 @@
 .compararMejor { background: var(--ok-fondo); color: var(--ok); font-weight: 700; }
 .compararMejor::after { content: " ★"; }
 .compararNoConsta { color: var(--texto-tenue); }
+
+/* Formulario de contacto / visita (fase 5) */
+.contactoForm { display: grid; gap: var(--e-3); }
+.contactoCampo { display: grid; gap: var(--e-1); font-size: var(--t-sm); font-weight: 600; min-width: 0; }
+.contactoCampo input, .contactoCampo select, .contactoCampo textarea { width: 100%; min-height: 44px; padding: var(--e-2); border: 1px solid var(--borde-fuerte); border-radius: var(--r-2); background: var(--superficie); color: var(--texto); font: inherit; font-weight: 400; }
+.contactoCampo textarea { resize: vertical; min-height: 6rem; }
+.contactoCampo [aria-invalid="true"] { border-color: var(--error, #b42318); }
+.contactoDos { display: grid; gap: var(--e-3); grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+.contactoTipo { display: flex; gap: var(--e-2); border: 0; padding: 0; margin: 0; flex-wrap: wrap; }
+.contactoTipo legend { font-size: var(--t-sm); font-weight: 600; margin-bottom: var(--e-1); }
+.contactoTipo label { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: 44px; padding: 0 var(--e-3); border: 1px solid var(--borde-fuerte); border-radius: var(--r-2); cursor: pointer; font-size: var(--t-sm); font-weight: 500; }
+.contactoTipo label[data-activo] { border-color: var(--marca); background: var(--marca-suave); }
+.contactoTipo label:focus-within { outline: 2px solid var(--marca-enlace); outline-offset: 2px; }
+.contactoTipo input { accent-color: var(--marca); }
+.contactoConsentimiento { display: flex; gap: var(--e-2); align-items: flex-start; font-size: var(--t-sm); color: var(--texto-suave); }
+.contactoConsentimiento input { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--marca); }
+.campoError { color: var(--error, #b42318); font-size: var(--t-xs); font-weight: 500; margin: 0; }
+.contactoEnviar { min-height: 48px; border: 0; border-radius: var(--r-2); background: var(--marca); color: var(--marca-texto); font: inherit; font-weight: 600; cursor: pointer; }
+.contactoEnviar:hover { background: var(--marca-fuerte); }
+.contactoEnviar:disabled { opacity: 0.7; cursor: progress; }
+.contactoBorrador { margin: 0; padding: var(--e-2) var(--e-3); border-left: 3px solid var(--marca); background: var(--marca-suave); font-size: var(--t-sm); border-radius: var(--r-1, 4px); }
+.contactoOk { display: grid; gap: var(--e-2); padding: var(--e-3); border-radius: var(--r-2); background: var(--marca-suave); }
+.contactoOk p { margin: 0; }
+.contactoOkTitulo { font-weight: 700; font-size: var(--t-lg); }
+.enlaceBoton { justify-self: start; background: none; border: 0; padding: 0; color: var(--marca-enlace); text-decoration: underline; cursor: pointer; font: inherit; }
+.trampa { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }

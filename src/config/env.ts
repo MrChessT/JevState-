@@ -41,6 +41,14 @@ const EnvSchema = z.object({
   FEATURE_VACACIONAL: bool.default(false),
 
   METRICS_TOKEN: z.string().min(16).optional(),
+
+  // Conversión (fase 5): emails transaccionales con Resend. Sin clave, los emails no se envían
+  // (se registran en el log) y el contacto se guarda igualmente.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().min(3).optional(),
+  /** Buzón de la agencia que recibe los contactos (por defecto, el de la marca). */
+  EMAIL_AGENCIA: z.email().optional(),
+  RATE_CONTACTO_PER_HOUR_IP: z.coerce.number().int().positive().default(8),
 });
 
 export type RawEnv = z.infer<typeof EnvSchema>;

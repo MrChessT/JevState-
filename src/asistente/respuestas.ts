@@ -40,11 +40,16 @@ const ES = {
   feedbackAjuste: "Entendido, lo quito y {ajuste}.",
   feedbackAjustes: { luz: "priorizo los más luminosos", precio: "priorizo los de mejor precio", tamano: "priorizo los más amplios", estado: "priorizo los que están en mejor estado", zona: "lo tengo en cuenta", distribucion: "lo tengo en cuenta", otro: "te enseño otras opciones", gustado: "" },
   noDisponible: {
-    pedir_visita: "Las visitas por el asistente llegan en la próxima fase. Mientras tanto, desde la ficha del inmueble puedes contactar con el agente.",
-    contactar_agente: "El contacto por el asistente llega en la próxima fase. Mientras tanto, puedes escribir a {email}.",
     crear_alerta: "Las alertas llegan en la próxima fase. De momento puedes guardar esta búsqueda en favoritos.",
     valorar_mi_vivienda: "La valoración de tu vivienda llega en una próxima fase. Si quieres vender o alquilar, escríbenos a {email}.",
   },
+  visitaBorrador: "He preparado la solicitud de visita a {titulo} (ref. {ref}) para {cuando}. Revisa tus datos y pulsa «Enviar»: no se envía nada sin tu confirmación.",
+  visitaSinFecha: "He preparado la solicitud de visita a {titulo} (ref. {ref}). Elige el día en el formulario y pulsa «Enviar»: no se envía nada sin tu confirmación.",
+  contactoBorrador: "He preparado un mensaje para el agente de {titulo} (ref. {ref}). Añade tu email o teléfono y pulsa «Enviar»: no se envía nada sin tu confirmación.",
+  contactoGeneral: "Puedo preparar la solicitud para el agente de un inmueble concreto. Dime su referencia o ábrelo desde los resultados. También puedes escribir a {email} o llamar al {telefono}.",
+  visitaElegir: "¿Qué inmueble quieres visitar? Elige uno de estos o dime su referencia:",
+  revisarEnviar: "Revisar y enviar la solicitud",
+  franjasTexto: { manana: "por la mañana", tarde: "por la tarde", indiferente: "" },
   inyeccion: "No puedo hacer eso. Solo te ayudo a buscar y conocer los inmuebles publicados, con los datos públicos de cada ficha.",
   fueraDeAmbito: "Solo puedo ayudarte con inmuebles de {marca} en la Región de Murcia: buscar, preguntar por una ficha o comparar.",
   error: "Algo ha fallado al preparar la respuesta. Vuelve a intentarlo en unos segundos.",
@@ -128,11 +133,16 @@ const EN: typeof ES = {
   feedbackAjuste: "Got it, I've removed it and {ajuste}.",
   feedbackAjustes: { luz: "I'm prioritising brighter ones", precio: "I'm prioritising better-priced ones", tamano: "I'm prioritising roomier ones", estado: "I'm prioritising ones in better condition", zona: "I'll take that into account", distribucion: "I'll take that into account", otro: "here are other options", gustado: "" },
   noDisponible: {
-    pedir_visita: "Booking viewings through the assistant arrives in the next phase. Meanwhile, you can contact the agent from the listing.",
-    contactar_agente: "Contact through the assistant arrives in the next phase. Meanwhile, you can write to {email}.",
     crear_alerta: "Alerts arrive in the next phase. For now you can save properties to your favourites.",
     valorar_mi_vivienda: "Home valuations arrive in a later phase. If you want to sell or let, write to {email}.",
   },
+  visitaBorrador: "I've prepared a viewing request for {titulo} (ref. {ref}) on {cuando}. Check your details and press “Send”: nothing is sent without your confirmation.",
+  visitaSinFecha: "I've prepared a viewing request for {titulo} (ref. {ref}). Pick the day in the form and press “Send”: nothing is sent without your confirmation.",
+  contactoBorrador: "I've prepared a message for the agent of {titulo} (ref. {ref}). Add your email or phone and press “Send”: nothing is sent without your confirmation.",
+  contactoGeneral: "I can prepare a request for the agent of a specific property. Tell me its reference or open it from the results. You can also write to {email} or call {telefono}.",
+  visitaElegir: "Which property would you like to visit? Pick one of these or tell me its reference:",
+  revisarEnviar: "Review and send the request",
+  franjasTexto: { manana: "in the morning", tarde: "in the afternoon", indiferente: "" },
   inyeccion: "I can't do that. I only help you search and learn about the listed properties, using each listing's public data.",
   fueraDeAmbito: "I can only help with {marca} properties in the Region of Murcia: searching, asking about a listing or comparing.",
   error: "Something went wrong while preparing the answer. Please try again in a few seconds.",
@@ -187,6 +197,6 @@ export type Plantillas = typeof ES;
 
 /** Sustituye {variables}; {marca} y {email} siempre están disponibles. */
 export function rellenar(texto: string, vars: Vars = {}): string {
-  const all: Vars = { marca: NOMBRE_VISIBLE, email: BRAND.contact.email, ...vars };
+  const all: Vars = { marca: NOMBRE_VISIBLE, email: BRAND.contact.email, telefono: BRAND.contact.phone, ...vars };
   return texto.replace(/\{(\w+)\}/g, (m, k: string) => (k in all ? String(all[k]) : m));
 }

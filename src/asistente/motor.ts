@@ -18,6 +18,7 @@ import { JevError } from "@/jev/errors";
 import type { JevPort } from "@/jev/port";
 import { sinDatosPersonales } from "@/jev/privacidad";
 import { logger } from "@/observability/logger";
+import { preferenciaVisita } from "@/crm/solicitud";
 import { calcularHipoteca } from "@/portal/hipoteca";
 import { CARACTERISTICAS_FILTRO, leerFiltros, TIPOS_BUSQUEDA, urlFicha, urlFiltros } from "@/portal/filtros";
 import type { RepositorioPortal } from "@/portal/repositorio";
@@ -670,7 +671,25 @@ async function ejecutar(
       return fin(r.respuesta, r.llamadas, r.decisiones);
     }
     case "pedir_visita":
-    case "contactar_agente":
+    case "contactar_agente": {
+      // El asistente prepara la solicitud; la persona la revisa y la envía desde el formulario de la ficha.
+      const ref = interp.inmuebleRef ?? viendo?.ref ?? (estado.visibles.length === 1 ? estado.visibles[0]!.ref : null);
+      const i = ref ? (await deps.repo.porRefs([ref]))[0] : undefined;
+      const visita = intencion === "pedir_visita";
+      if (!i) {
+        const candidatos = visita ? await deps.repo.porRefs(estado.visibles.slice(0, 4).map((v) => v.ref)) : [];
+        const r = vacia(estado, locale, intencion, [candidatos.length ? p.visitaElegir : rellenar(p.contactoGeneral)], degradado);
+        r.enlaces.push(...candidatos.map((c) => ({ texto: `${c.titulo} · ref. ${c.ref}`, href: `${urlFicha(locale, c)}?visita=1&origen=asistente#contacto` })));
+        return fin(r);
+      }
+      const pref = preferenciaVisita(mensaje);
+      const q = new URLSearchParams({ ...(visita ? { visita: "1" } : {}), ...(visita && pref.fecha ? { fecha: pref.fecha } : {}), ...(visita && pref.franja !== "indiferente" ? { franja: pref.franja } : {}), origen: "asistente" });
+      const cuando = pref.fecha ? [new Intl.DateTimeFormat(locale === "es" ? "es-ES" : "en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${pref.fecha}T12:00:00Z`)), p.franjasTexto[pref.franja]].filter(Boolean).join(" ") : null;
+      const texto = !visita ? p.contactoBorrador : cuando ? p.visitaBorrador : p.visitaSinFecha;
+      const r = vacia(estado, locale, intencion, [rellenar(texto, { titulo: i.titulo, ref: i.ref, cuando: cuando ?? "" })], degradado);
+      r.enlaces.push({ texto: p.revisarEnviar, href: `${urlFicha(locale, i)}?${q.toString()}#contacto` });
+      return fin(r);
+    }
     case "crear_alerta":
     case "valorar_mi_vivienda": {
       const r = vacia(estado, locale, intencion, [rellenar(p.noDisponible[intencion])], degradado);

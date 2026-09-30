@@ -16,7 +16,7 @@ Portal, asistente, backoffice, pipeline de datos y valoración para una inmobili
 | 1 · Datos | Ingesta, evidencias, normalizadores, cascada SDE, adjudicación, cola de revisión, geocodificación, POI, 300 inmuebles ficticios | **Hecha** |
 | 2 · Portal | Resultados con lista y mapa, ficha, zonas, favoritos, comparador, SEO | **Hecha** |
 | 3-4 · Asistente | Llamadas 1 y 2, ficha de búsqueda con chips, relajación, encaje, feedback, hipoteca, zonas, sugerencias de un clic, modo básico sin Jev | **Hecha** (falta: alertas y búsquedas guardadas) |
-| 5 · Conversión | Visitas y contacto con confirmación, CRM, emails, calendario | **Siguiente** |
+| 5 · Conversión | Visitas y contacto con confirmación, CRM, emails (calendario de agentes: pendiente) | Hecha |
 | 6 · Valoración | Comparables + ajuste de Jev; modelo ML si supera la validación | — |
 | 7 · Endurecimiento | Barrido de umbrales con Jev real, e2e completos, carga y seguridad | Parcial: SEO, accesibilidad (axe WCAG 2.2 AA + buenas prácticas), rendimiento, diagnóstico de Jev |
 
