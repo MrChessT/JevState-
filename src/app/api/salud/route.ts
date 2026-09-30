@@ -2,11 +2,17 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { ASSISTANT_CATALOG_VERSION } from "@/asistente/version";
 import { CATALOG_VERSION } from "@/catalog/index";
+import { pruebaAsistente } from "@/asistente/prueba";
+import { loadThresholds } from "@/gates/thresholds";
+import { portal } from "@/portal/datos";
 import { getRuntime } from "@/server/runtime";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 let diagnosticoCache: { hasta: number; datos: ReturnType<ReturnType<typeof getRuntime>["jev"]["diagnostico"]> } | null = null;
+
+let pruebaAsistenteCache: { hasta: number; datos: Promise<unknown> } | null = null;
 
 function autorizado(request: NextRequest, token: string | undefined): boolean {
   const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
@@ -55,6 +61,19 @@ export async function GET(request: NextRequest) {
       tokenOidcEnLaPeticion: tokenOidc,
       prueba: await diagnosticoCache.datos,
     };
+  }
+  // Prueba del asistente completo con Jev (?jev=asistente), reutilizada 5 minutos: con la caché de
+  // Jev, repetirla no cuesta llamadas nuevas y no sirve para abusar del modelo.
+  if (request.nextUrl.searchParams.get("jev") === "asistente") {
+    const ahora = Date.now();
+    if (jev.model === "jev-fake") {
+      body.pruebaAsistente = { ok: false, motivo: "Jev no está configurado: el asistente funciona en modo básico." };
+    } else {
+      if (!pruebaAsistenteCache || pruebaAsistenteCache.hasta < ahora) {
+        pruebaAsistenteCache = { hasta: ahora + 5 * 60_000, datos: portal().then((repo) => pruebaAsistente({ jev, repo, thresholds: loadThresholds() })).catch((err) => ({ ok: false, error: String(err).slice(0, 200) })) };
+      }
+      body.pruebaAsistente = await pruebaAsistenteCache.datos;
+    }
   }
   if (autorizado(request, config.METRICS_TOKEN)) {
     body.jev = { ...(body.jev as object), salud: await jev.health() };
