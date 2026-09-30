@@ -83,6 +83,51 @@ describe("motor del asistente", async () => {
     expect(d.respuesta.parrafos.join(" ")).toMatch(/licencia turística/);
   });
 
+  it("metros, baños y rango de precio", async () => {
+    const a = await responder({ mensaje: "piso de más de 100 metros en Murcia con 2 baños" }, deps(null));
+    expect(a.respuesta.chips.map((c) => c.clave)).toEqual(expect.arrayContaining(["m2Min", "banosMin"]));
+    expect(a.respuesta.tarjetas.every((t) => (t.i.superficie ?? 0) >= 100 && (t.i.banos ?? 0) >= 2)).toBe(true);
+    const b = await responder({ mensaje: "busco algo entre 100.000 y 150.000 en San Javier" }, deps(null));
+    expect(b.respuesta.estado.ficha).toMatchObject({ precioMin: 100_000, precioMax: 150_000 });
+  });
+
+  it("qué me puedo permitir: ahorros e ingresos → precio máximo calculado y búsqueda", async () => {
+    const r = await responder({ mensaje: "tengo 40.000 ahorrados y cobramos 3.000 al mes entre los dos, ¿qué piso me puedo permitir en Murcia?" }, deps(null));
+    expect(r.respuesta.parrafos[0]).toMatch(/hasta unos 133\.000/);
+    expect(r.respuesta.parrafos.join(" ")).toMatch(/los ahorros/);
+    expect(r.respuesta.estado.ficha).toMatchObject({ precioMax: 133_000, operacion: "venta" });
+    expect(r.respuesta.cifras.length).toBe(3);
+  });
+
+  it("órdenes escritas: quitar un filtro, cambiar a alquiler, el más barato y guardar", async () => {
+    const a = await responder({ mensaje: "piso en Murcia con terraza y garaje hasta 200.000" }, deps(null));
+    const b = await responder({ mensaje: "quita el garaje", estado: a.respuesta.estado }, deps(null));
+    expect(b.respuesta.chips.map((c) => c.clave)).not.toContain("req:garaje");
+    expect(b.respuesta.chips.map((c) => c.clave)).toContain("req:terraza");
+    const c = await responder({ mensaje: "ahora en alquiler", estado: b.respuesta.estado }, deps(null));
+    expect(c.respuesta.estado.ficha?.operacion).toBe("alquiler");
+    expect(c.respuesta.estado.ficha?.precioMax).toBeUndefined();
+    const d0 = await responder({ mensaje: "piso en Murcia" }, deps(null));
+    const d = await responder({ mensaje: "¿cuál es el más barato?", estado: d0.respuesta.estado }, deps(null));
+    expect(d.respuesta.parrafos[0]).toMatch(/El más barato de esta búsqueda es/);
+    const precios = d.respuesta.tarjetas.map((t) => t.i.precio!);
+    expect(precios[0]).toBe(Math.min(...precios));
+    const e = await responder({ mensaje: "el segundo me gusta, guárdalo", estado: d0.respuesta.estado }, deps(null));
+    expect(e.respuesta.guardar).toBe(d0.respuesta.estado.visibles[1]!.ref);
+    expect(e.llamadasJev).toBe(0);
+  });
+
+  it("sobre un piso: si está bien de precio (frente a la zona) y qué tiene cerca", async () => {
+    const a = await responder({ mensaje: "piso en Cartagena hasta 180.000" }, deps(null));
+    const b = await responder({ mensaje: "¿el primero está bien de precio?", estado: a.respuesta.estado }, deps(null));
+    expect(b.respuesta.parrafos[0]).toMatch(/€\/m², un \d+ % (por debajo|por encima) de la mediana de/);
+    const conDistancias = todos.find((i) => i.operacion === "venta");
+    const c = await responder({ mensaje: "¿qué tiene cerca?", viendo: conDistancias!.ref }, deps(null));
+    expect(c.respuesta.parrafos[0]).toMatch(/Lo más cercano a|Aún no tengo los alrededores/);
+    const v = await responder({ mensaje: "piso con vistas en Cartagena" }, deps(null));
+    expect(v.respuesta.chips.some((x) => x.clave === "req:vistas")).toBe(true);
+  });
+
   it("sin Jev funciona en modo degradado y lo dice", async () => {
     const { respuesta, llamadasJev } = await responder({ mensaje: "piso en Cartagena hasta 200000" }, deps(null));
     expect(llamadasJev).toBe(0);

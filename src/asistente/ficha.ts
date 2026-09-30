@@ -16,6 +16,9 @@ export const FichaBusqueda = z.object({
   tolerancia: z.number().min(0).max(30).default(5),
   tipos: z.array(z.string()).default([]),
   habMin: z.number().int().min(0).max(10).optional(),
+  banosMin: z.number().int().min(1).max(10).optional(),
+  /** Superficie mínima en m². */
+  m2Min: z.number().int().min(10).max(5000).optional(),
   requisitos: z.record(z.string(), z.enum(NIVEL_REQUISITO)).default({}),
   proximidad: z.record(z.string(), z.enum(NIVEL_PROXIMIDAD)).default({}),
   prioridad: z.string().optional(),
@@ -33,7 +36,7 @@ export type FichaBusqueda = z.infer<typeof FichaBusqueda>;
 export const fichaVacia = (): FichaBusqueda => FichaBusqueda.parse({});
 
 export function fichaTieneCriterios(f: FichaBusqueda): boolean {
-  return Boolean(f.zonas.length || f.precioMax || f.precioMin || f.tipos.length || f.habMin !== undefined || Object.keys(f.requisitos).length);
+  return Boolean(f.zonas.length || f.precioMax || f.precioMin || f.tipos.length || f.habMin !== undefined || f.m2Min !== undefined || f.banosMin !== undefined || Object.keys(f.requisitos).length);
 }
 
 /** Hereda de la ficha anterior lo que el mensaje no dice (seguimiento). */

@@ -9,6 +9,7 @@ import type { EstadoAsistente, RespuestaAsistente, TarjetaAsistente } from "@/as
 import type { Locale } from "@/i18n/config";
 import type { Diccionario } from "@/i18n/diccionario";
 import { BotonFavorito } from "@/ui/portal/botones";
+import { anadirALista } from "@/ui/portal/lista-local";
 import { euros, numero } from "@/ui/portal/formato";
 import s from "./asistente.module.css";
 
@@ -136,6 +137,8 @@ export function ChatAsistente({ locale, textos, variante, alCerrar }: { locale: 
         setFase(null);
       }
       const r = respuesta as RespuestaAsistente | null;
+      // «Guárdalo»: el servidor dice qué inmueble; se guarda en este navegador, como el corazón.
+      if (r?.guardar) anadirALista("favoritos", r.guardar);
       const final: Guardado = r
         ? { estado: r.estado, mensajes: [...mensajes, { id: nuevoId(), rol: "asistente", r }] }
         : { ...base, mensajes: [...mensajes, { id: nuevoId(), rol: "error", texto: error ?? textos.error }] };

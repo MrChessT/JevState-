@@ -70,3 +70,17 @@ export function useListaLocal(clave: "favoritos" | "comparar", maximo = 200) {
   }, [clave]);
   return { lista, alternar, vaciar };
 }
+
+/** Añade una referencia a una lista local fuera de un componente (p. ej. «guárdalo» en el asistente). */
+export function anadirALista(clave: "favoritos" | "comparar", ref: string, maximo = 200): boolean {
+  const actual = leer(clave);
+  if (actual.includes(ref)) return true;
+  if (actual.length >= maximo) return false;
+  try {
+    localStorage.setItem(clave, JSON.stringify([...actual, ref]));
+  } catch {
+    return false;
+  }
+  window.dispatchEvent(new Event(EVENTO));
+  return true;
+}

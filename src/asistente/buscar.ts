@@ -51,6 +51,8 @@ export function filtrar(todos: InmuebleResumen[], f: FichaBusqueda): InmuebleRes
     if (max !== null && (i.precio === null || i.precio > max)) return false;
     if (f.precioMin && (i.precio ?? 0) < f.precioMin) return false;
     if (f.habMin !== undefined && (i.habitaciones ?? 0) < f.habMin) return false;
+    if (f.banosMin !== undefined && (i.banos ?? 0) < f.banosMin) return false;
+    if (f.m2Min !== undefined && (i.superficie ?? 0) < f.m2Min) return false;
     if (f.tipos.length && !f.tipos.some((t) => (TIPOS_INCLUIDOS[t] ?? [t]).includes(i.tipo ?? ""))) return false;
     if (f.descartados.includes(i.ref)) return false;
     for (const [campo, nivel] of Object.entries(f.requisitos)) {

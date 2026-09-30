@@ -8,7 +8,7 @@ import { ACCION_DE_INTENCION, POLITICAS, umbral, type Accion } from "@/gates/pol
 import type { GateKey, Thresholds } from "@/gates/thresholds";
 import type { JevAnswer } from "@/jev/port";
 import { PREGUNTAS, type Intencion, type PreguntaCatalogo } from "./catalogo";
-import type { Extraccion } from "./extraer";
+import { noEsPrecio, type Extraccion } from "./extraer";
 import type { FichaBusqueda } from "./ficha";
 
 export interface ContextoMensaje {
@@ -56,10 +56,12 @@ export function construirPreguntas(e: Extraccion, ctx: ContextoMensaje): { pregu
     mapa[z.id] = PREGUNTAS.zona(z.literal, z.candidatas.map((c) => ({ clave: c.zona.path.replace(/\//g, "__").replace(/-/g, "_"), descripcion: `${c.zona.nombre} (${c.zona.nivel === "municipio" ? "municipality" : `neighbourhood of ${c.zona.nombreMunicipio}`}, Region of Murcia)` })));
   });
   if (e.tipos.length) mapa.tipo = PREGUNTAS.tipo();
-  e.cifras.forEach((c) => {
+  const precios = e.cifras.filter((c) => !noEsPrecio(c));
+  precios.forEach((c) => {
     mapa[`presupuesto_ok_${c.id}`] = PREGUNTAS.presupuesto_ok(`${c.valor.toString()} EUR`, c.literal);
   });
-  if (e.cifras.length) mapa.presupuesto_tipo = PREGUNTAS.presupuesto_tipo(`${e.cifras[0]!.valor.toString()} EUR`);
+  // En un rango explícito el tipo lo da el propio rango (mínimo y máximo): no se pregunta.
+  if (precios.length && !precios.some((c) => c.rango)) mapa.presupuesto_tipo = PREGUNTAS.presupuesto_tipo(`${precios[0]!.valor.toString()} EUR`);
   e.requisitos.forEach((r) => (mapa[r.id] = PREGUNTAS.requisito(r.literal)));
   e.proximidad.forEach((x) => (mapa[x.id] = PREGUNTAS.proximidad(x.literal)));
   if (e.textoLibre) mapa.prioridad = PREGUNTAS.prioridad();
@@ -143,13 +145,13 @@ export function interpretarRespuestas(e: Extraccion, ctx: ContextoMensaje, answe
 
   // Presupuesto: cifra que Jev confirma como precio; tipo (máximo, mínimo, aproximado…).
   const tipoP = asChoice(answers.presupuesto_tipo);
-  for (const c of e.cifras) {
+  for (const c of e.cifras.filter((x) => !noEsPrecio(x))) {
     const a = asNoul(answers[`presupuesto_ok_${c.id}`]);
     if (!a) continue;
     const out = gateNoul(a, t.presupuesto_ok);
     reg(`presupuesto_ok_${c.id}`, "presupuesto_ok", out, c.valor.toNumber(), a.noul);
     if (out === "preguntar") continue;
-    const clase = tipoP && gateChoice(tipoP, t.presupuesto_tipo).outcome !== "preguntar" ? tipoP.choice : c.pista === "minimo" ? "minimo" : "maximo";
+    const clase = c.rango ? c.pista : tipoP && gateChoice(tipoP, t.presupuesto_tipo).outcome !== "preguntar" ? tipoP.choice : c.pista === "minimo" ? "minimo" : "maximo";
     if (clase === "cuota_mensual") continue; // una cuota no es un precio: no se filtra por ella
     if (clase === "minimo") cambios.precioMin = c.valor.toNumber();
     else {
@@ -159,6 +161,8 @@ export function interpretarRespuestas(e: Extraccion, ctx: ContextoMensaje, answe
     if (out === "confirmar") avisos.push("presupuesto_dudoso");
   }
   if (e.habitaciones !== null) cambios.habMin = e.habitaciones;
+  if (e.m2Min !== null) cambios.m2Min = e.m2Min;
+  if (e.banosMin !== null) cambios.banosMin = e.banosMin;
 
   // Requisitos y proximidad.
   const requisitos: Record<string, "imprescindible" | "deseable" | "rechazo"> = {};
@@ -260,12 +264,18 @@ export function interpretarSinJev(e: Extraccion, ctx: ContextoMensaje, mensaje: 
     .filter((x): x is string => x !== null);
   if (zonas.length) cambios.zonas = zonas;
   if (e.tipos.length === 1) cambios.tipos = e.tipos;
-  const precio = e.cifras.find((c) => c.pista !== "cuota");
-  if (precio) {
-    if (precio.pista === "minimo") cambios.precioMin = precio.valor.toNumber();
-    else cambios.precioMax = precio.valor.toNumber();
+  const precios = e.cifras.filter((c) => !noEsPrecio(c));
+  const rango = precios.filter((c) => c.rango);
+  if (rango.length >= 2) {
+    cambios.precioMin = rango.find((c) => c.pista === "minimo")!.valor.toNumber();
+    cambios.precioMax = rango.find((c) => c.pista === "maximo")!.valor.toNumber();
+  } else if (precios[0]) {
+    if (precios[0].pista === "minimo") cambios.precioMin = precios[0].valor.toNumber();
+    else cambios.precioMax = precios[0].valor.toNumber();
   }
   if (e.habitaciones !== null) cambios.habMin = e.habitaciones;
+  if (e.m2Min !== null) cambios.m2Min = e.m2Min;
+  if (e.banosMin !== null) cambios.banosMin = e.banosMin;
   const req: Record<string, "imprescindible" | "deseable" | "rechazo"> = {};
   const nivel = IMPRESCINDIBLE.test(p) && !DESEABLE.test(p) ? "imprescindible" : "deseable";
   for (const r of e.requisitos) req[r.campo] = r.negado ? "rechazo" : nivel;
