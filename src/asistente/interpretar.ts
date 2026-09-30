@@ -210,8 +210,19 @@ export function interpretarRespuestas(e: Extraccion, ctx: ContextoMensaje, answe
 
 // Interpretación degradada (sin Jev) -----------------------------------------------------
 
+/** Datos privados o intentos de saltarse las reglas: se responde con la plantilla de rechazo. */
+const INYECCION = /\b(ignora|olvida (tus|las) (instrucciones|reglas)|system prompt|comision|propietari|duen[oa]|dni|ignore (previous|your)|owner)\w*\b|\b(telefono|email|correo|direccion exacta|phone number)\b.*\b(propietari|duen|vendedor|inquilin|owner|seller)/;
+/** Temas ajenos al portal (tiempo, noticias…): no son preguntas sobre un inmueble. */
+const AJENO = /\b(que tiempo|el tiempo|clima|lluvia|noticias|futbol|partido|receta|chiste|horoscopo|weather|news|football|joke)\b/;
+/** Empiezan como continuación de la búsqueda anterior («y con garaje», «pero más barato»). */
+const CONTINUACION = /^(y|e|pero|mejor|tambien|ademas|con|sin|solo|solamente|ahora|entonces|vale|ok|que (tenga|sea|este)|and|but|with|without|also|only)\b/;
+/** Refuerzan un requisito como imprescindible o lo rebajan a deseable. */
+const IMPRESCINDIBLE = /\b(imprescindible|obligatori[oa]|necesari[oa]|si o si|tiene que tener|debe tener|sin falta|must|essential|required)\b/;
+const DESEABLE = /\b(si puede ser|a ser posible|ideal(mente)?|preferiblemente|opcional|no es imprescindible|nice to have|ideally|if possible)\b/;
+
 const PALABRAS_INTENCION: Array<[RegExp, Intencion]> = [
-  [/\b(ignora|olvida (tus|las) (instrucciones|reglas)|system prompt|comision|datos del propietario|ignore (previous|your))\w*\b/, "fuera_de_ambito"],
+  [INYECCION, "fuera_de_ambito"],
+  [AJENO, "fuera_de_ambito"],
   [/\b(visit|visita|visitar|ver (el|la) (piso|casa)|verlo|viewing)\w*\b/, "pedir_visita"],
   [/\b(contact|llamad|llamen|agente|hablar con)\w*\b/, "contactar_agente"],
   [/\b(alert|alerta|avisame|avisadme|notif)\w*\b/, "crear_alerta"],
@@ -219,7 +230,7 @@ const PALABRAS_INTENCION: Array<[RegExp, Intencion]> = [
   [/\b(precio medio|precio por metro|m2 en|metro cuadrado en|como es (la zona|el barrio|el pueblo)|que tal es|cuanto cuesta vivir|average price|what is .* like)\b/, "info_zona"],
   [/\b(compar)\w*\b/, "comparar"],
   [/\b(valor|tasar|cuanto vale mi|vender mi|value my)\w*\b/, "valorar_mi_vivienda"],
-  [/\b(no me (gusta|encaja|convence)|muy (oscuro|caro|pequeno)|demasiado|me gusta)\w*\b/, "feedback_resultado"],
+  [/\b(no me (gusta|encaja|convence|interesa)|muy (oscuro|caro|pequeno)|demasiado|me (gusta|encanta|interesa)|not for me|i like)\w*\b/, "feedback_resultado"],
   [/\b(tiene|cuanto|cual es|hay|does it|how much)\w*\b.*\?|\?$/, "detalle_inmueble"],
   [/\b(busco|buscamos|quiero|queremos|necesito|piso|casa|chalet|atico|alquil|compr|zona|en venta|looking|want)\w*\b/, "buscar"],
   [/\b(hola|gracias|buenas|buenos dias|hello|hi|hey|thanks|thank you)\b/, "conversar"],
@@ -227,15 +238,26 @@ const PALABRAS_INTENCION: Array<[RegExp, Intencion]> = [
 
 export function interpretarSinJev(e: Extraccion, ctx: ContextoMensaje, mensaje: string): Interpretacion {
   const p = mensaje.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  let intencion: Intencion = PALABRAS_INTENCION.find(([re]) => re.test(p))?.[1] ?? (e.zonas.length || e.cifras.length || e.requisitos.length ? "buscar" : "conversar");
-  if (intencion === "detalle_inmueble" && !ctx.viendo && !e.inmuebles.refs.length && e.inmuebles.ordinal === null && (e.zonas.length || e.cifras.length)) intencion = "buscar";
-  if (intencion === "buscar" && ctx.ficha && !e.zonas.length && !e.cifras.length) intencion = "refinar";
+  const hablaDeInmueble = Boolean(ctx.viendo || e.inmuebles.refs.length || e.inmuebles.ordinal !== null || e.inmuebles.deictico);
+  let intencion: Intencion = PALABRAS_INTENCION.find(([re]) => re.test(p))?.[1] ?? (e.zonas.length || e.cifras.length || e.requisitos.length || e.proximidad.length ? "buscar" : "conversar");
+  // «¿…?» solo es una pregunta sobre un inmueble si se refiere a uno; si no, es una búsqueda o una charla.
+  if (intencion === "detalle_inmueble" && !hablaDeInmueble) intencion = e.zonas.length || e.cifras.length || e.tipos.length || e.requisitos.length ? "buscar" : "conversar";
+  // Búsqueda nueva o continuación: se continúa si empieza como continuación («y con garaje»), si es
+  // relativa («más barato») o si no trae criterios propios de una búsqueda nueva (zona, precio, tipo).
+  const criteriosNuevos = e.zonas.length > 0 || e.cifras.length > 0 || e.tipos.length > 0 || e.proximidad.some((x) => x.concepto === "playa");
+  const continua = Boolean(ctx.ficha) && (CONTINUACION.test(p) || e.relativo !== null || !criteriosNuevos);
+  if ((intencion === "buscar" || intencion === "refinar") && ctx.ficha) intencion = continua ? "refinar" : "buscar";
   if (e.relativo && ctx.ficha) intencion = "refinar";
   const accion = ACCION_DE_INTENCION[intencion] ?? null;
   const cambios: Partial<FichaBusqueda> = {};
   if (e.operacion) cambios.operacion = e.operacion;
-  // Sin Jev solo se aceptan zonas escritas tal cual o con errata clara (score alto).
-  const zonas = e.zonas.map((z) => z.candidatas[0]).filter((c) => c && c.score >= 0.9).map((c) => c!.zona.path);
+  // Sin Jev: la zona escrita tal cual o con una errata clara (la candidata más probable destaca).
+  const zonas = e.zonas
+    .map((z) => {
+      const [a, b] = z.candidatas;
+      return a && (a.score >= 0.9 || (a.score >= 0.72 && (!b || a.score - b.score >= 0.12))) ? a.zona.path : null;
+    })
+    .filter((x): x is string => x !== null);
   if (zonas.length) cambios.zonas = zonas;
   if (e.tipos.length === 1) cambios.tipos = e.tipos;
   const precio = e.cifras.find((c) => c.pista !== "cuota");
@@ -245,23 +267,32 @@ export function interpretarSinJev(e: Extraccion, ctx: ContextoMensaje, mensaje: 
   }
   if (e.habitaciones !== null) cambios.habMin = e.habitaciones;
   const req: Record<string, "imprescindible" | "deseable" | "rechazo"> = {};
-  for (const r of e.requisitos) req[r.campo] = r.negado ? "rechazo" : "deseable";
+  const nivel = IMPRESCINDIBLE.test(p) && !DESEABLE.test(p) ? "imprescindible" : "deseable";
+  for (const r of e.requisitos) req[r.campo] = r.negado ? "rechazo" : nivel;
   if (e.sinBajos) req.planta_baja = "rechazo";
   if (Object.keys(req).length) cambios.requisitos = req;
+  const proximidad: Record<string, "muy_cerca" | "cerca"> = {};
+  for (const x of e.proximidad) proximidad[x.concepto] = /\b(al lado|pegad|primera linea|andando|a pie|walking|next to)\b/.test(p) ? "muy_cerca" : "cerca";
+  if (Object.keys(proximidad).length) cambios.proximidad = proximidad;
+  // Perfil solo si el usuario lo declara con sus palabras (nunca se infiere).
+  if (/\b(tengo|tenemos|con) (\d+ |un |una |dos |tres )?(hij|nin|peque)|\bfamilia\b|\bkids\b|\bchildren\b/.test(p)) cambios.perfil = "vivienda_habitual_con_hijos";
+  else if (/\b(inversion|invertir|para alquilarlo|rentabilidad|invest)/.test(p)) cambios.perfil = "inversion";
+  else if (/\b(veranear|vacaciones|segunda residencia|holiday home)\b/.test(p)) cambios.perfil = "segunda_residencia";
   let inmuebleRef = e.inmuebles.refs[0] ?? null;
   if (!inmuebleRef && e.inmuebles.ordinal !== null) inmuebleRef = ctx.visibles.at(e.inmuebles.ordinal > 0 ? e.inmuebles.ordinal - 1 : -1)?.ref ?? null;
   if (!inmuebleRef && ctx.viendo) inmuebleRef = ctx.viendo.ref;
   const campo = CATALOG.fields.find((f) => f.public && new RegExp(`\\b${f.label.es.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(" ")[0]}`).test(p));
+  const gustado = /\b(me (gusta|encanta|interesa)|perfecto|i like|love it)\b/.test(p) && !/\bno me\b|\bnot\b/.test(p);
   return {
     intencion,
     accion,
     aclarar: null,
     cambios,
-    seguimiento: Boolean(ctx.ficha) && !e.zonas.length,
+    seguimiento: continua,
     inmuebleRef,
     campoPregunta: campo?.id ?? null,
-    feedbackMotivo: /oscur/.test(p) ? "luz" : /car[oa]/.test(p) ? "precio" : /pequen/.test(p) ? "tamano" : null,
-    inyeccion: intencion === "fuera_de_ambito" && /ignora|instrucciones|system|comision|propietario|ignore/.test(p),
+    feedbackMotivo: gustado ? "gustado" : /oscur|dark/.test(p) ? "luz" : /car[oa]|expensive/.test(p) ? "precio" : /pequen|small/.test(p) ? "tamano" : /reform|estado|viejo|old/.test(p) ? "estado" : null,
+    inyeccion: INYECCION.test(p),
     avisos: ["degradado"],
     decisiones: [],
     degradado: true,

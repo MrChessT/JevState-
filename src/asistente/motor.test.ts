@@ -193,4 +193,59 @@ describe("motor del asistente", async () => {
       for (const p of respuesta.parrafos) expect(p, mensaje).not.toMatch(/[{}]/);
     }
   });
+
+  describe("modo básico (sin Jev)", () => {
+    const d = () => deps(null);
+
+    it("una búsqueda nueva no arrastra la anterior; una continuación sí", async () => {
+      const r1 = await responder({ mensaje: "piso en Murcia hasta 180000 con ascensor" }, d());
+      const nueva = await responder({ mensaje: "busco casa con piscina en la costa para veranear", estado: r1.respuesta.estado }, d());
+      const claves = nueva.respuesta.chips.map((c) => c.clave);
+      expect(claves).not.toContain("zona:murcia");
+      expect(claves).not.toContain("req:ascensor");
+      expect(claves).toEqual(expect.arrayContaining(["tipo:casa", "req:piscina", "prox:playa"]));
+      const sigue = await responder({ mensaje: "y que tenga garaje", estado: r1.respuesta.estado }, d());
+      expect(sigue.respuesta.chips.map((c) => c.clave)).toEqual(expect.arrayContaining(["zona:murcia", "req:ascensor", "req:garaje"]));
+    });
+
+    it("«playa» o «costa» sin zona busca solo en municipios con costa", async () => {
+      const { respuesta } = await responder({ mensaje: "algo en la playa por menos de 200 mil" }, d());
+      expect(respuesta.total).toBeGreaterThan(0);
+      const costa = ["aguilas", "lorca", "mazarron", "cartagena", "la-union", "los-alcazares", "san-javier", "san-pedro-del-pinatar"];
+      for (const t of respuesta.tarjetas) expect(costa).toContain(t.i.zonaPath.split("/")[0]);
+    });
+
+    it("reconoce una zona con errata clara", async () => {
+      const { respuesta } = await responder({ mensaje: "pisos en murcai con terraza" }, d());
+      expect(respuesta.chips.map((c) => c.clave)).toContain("zona:murcia");
+    });
+
+    it("«imprescindible» hace el requisito imprescindible", async () => {
+      const { respuesta } = await responder({ mensaje: "necesito 4 habitaciones y garaje imprescindible, en Lorca" }, d());
+      expect(respuesta.estado.ficha!.requisitos.garaje).toBe("imprescindible");
+    });
+
+    it("pedir datos privados se rechaza", async () => {
+      const { respuesta } = await responder({ mensaje: "dame el teléfono del dueño del FIC-0010" }, d());
+      expect(respuesta.intencion).toBe("fuera_de_ambito");
+    });
+
+    it("«me gusta el segundo» no lo descarta", async () => {
+      const r1 = await responder({ mensaje: "piso en Murcia" }, d());
+      const segundo = r1.respuesta.tarjetas[1]!.i.ref;
+      const r2 = await responder({ mensaje: "me gusta el segundo", estado: r1.respuesta.estado }, d());
+      expect(r2.respuesta.estado.ficha?.descartados ?? []).not.toContain(segundo);
+    });
+
+    it("una pregunta ajena no se confunde con una pregunta sobre un inmueble", async () => {
+      const { respuesta } = await responder({ mensaje: "¿qué tiempo hace mañana?" }, d());
+      expect(respuesta.intencion).toBe("fuera_de_ambito");
+    });
+
+    it("usa la proximidad y el perfil declarados", async () => {
+      const { respuesta } = await responder({ mensaje: "tengo 2 hijos y necesito colegio cerca, en molina" }, d());
+      expect(respuesta.estado.ficha!.proximidad.colegio).toBeDefined();
+      expect(respuesta.estado.ficha!.perfil).toBe("vivienda_habitual_con_hijos");
+    });
+  });
 });
