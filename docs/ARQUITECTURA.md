@@ -2,7 +2,7 @@
 
 Plataforma inmobiliaria con asistente dirigido por **Jev** (TypeSafe AI). Este documento describe cómo está construida y cómo encajan las piezas. Las decisiones y sus motivos están en [DECISIONES.md](DECISIONES.md); el catálogo de preguntas y los umbrales, en [CATALOGO_JEV.md](CATALOGO_JEV.md), que se genera desde el código.
 
-> **Estado:** fases 0 (base), 1 (datos) y 2 (portal) terminadas. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
+> **Estado:** fases 0 (base), 1 (datos), 2 (portal) y 3-4 (asistente, salvo alertas) terminadas. Las secciones marcadas *(fase N)* describen el diseño acordado para las siguientes fases; aún no hay código para ellas.
 
 ## 1. Principio rector
 
@@ -143,7 +143,7 @@ listing_fields (value, confidence, status, method, evidence_ids, catalog_version
 
 Reglas que garantizan «nunca se inventa» (D-120 a D-124): el «no» de Jev sin evidencia negativa es `no_consta`; los ordinales exigen «¿consta?»; todo valor cita al menos una evidencia (lo valida el esquema zod del canónico); los enumerados incompatibles con la fuente estructurada nunca se confirman solos.
 
-## 6. Asistente *(fases 3-4)*
+## 6. Asistente
 
 Flujo por mensaje, con un máximo de **2 llamadas a Jev**:
 
