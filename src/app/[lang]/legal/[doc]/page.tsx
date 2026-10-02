@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/legal/[doc
   const { lang, doc } = await params;
   if (!isLocale(lang) || !esDoc(doc)) return {};
   const alt = alternativas(BRAND.siteUrl, "legal", doc);
-  return { title: TEXTOS_LEGALES[doc][lang].titulo, alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt } };
+  const d = await diccionario(lang);
+  return { title: TEXTOS_LEGALES[doc][lang].titulo, description: t(d.meta.legal, { doc: TEXTOS_LEGALES[doc][lang].titulo }), alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt } };
 }
 
 export default async function Legal({ params }: PageProps<"/[lang]/legal/[doc]">) {

@@ -4,6 +4,10 @@ import type { Diccionario } from "../diccionario";
 const en: Diccionario = {
   meta: {
     descripcion: "{marca}: flats, houses and commercial premises for sale and rent in the Region of Murcia. Search with our assistant, compare and book a viewing.",
+    favoritos: "The properties you have saved at {marca}, with their price and key details, ready to compare or book a viewing.",
+    comparar: "Compare up to three {marca} properties side by side: price, size, bedrooms, extras and running costs.",
+    agencia: "About {marca}: our team, how we work and how to contact our estate agency in the Region of Murcia.",
+    legal: "{doc} of {marca}: legal information about using the website and how your data is handled.",
   },
   nav: {
     menu: "Menu",
@@ -176,6 +180,7 @@ const en: Diccionario = {
     anterior: "Previous",
     siguiente: "Next",
     pagina: "Page {n} of {total}",
+    paginaN: "Page {n}",
     filtros: "Filters",
     guardarBusqueda: "Save search",
     guardarBusquedaAyuda: "Sign in to save searches and get alerts.",

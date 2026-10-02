@@ -3,6 +3,10 @@
 const es = {
   meta: {
     descripcion: "{marca}: pisos, casas y locales en venta y alquiler en la Región de Murcia. Busca con nuestro asistente, compara y pide visita.",
+    favoritos: "Los inmuebles que has guardado en {marca}, con su precio y sus datos clave, listos para comparar o pedir visita.",
+    comparar: "Compara hasta tres inmuebles de {marca} lado a lado: precio, superficie, habitaciones, extras y gastos.",
+    agencia: "Quiénes somos en {marca}: equipo, forma de trabajar y contacto de nuestra inmobiliaria en la Región de Murcia.",
+    legal: "{doc} de {marca}: información legal sobre el uso de la web y el tratamiento de tus datos.",
   },
   nav: {
     menu: "Menú",
@@ -175,6 +179,7 @@ const es = {
     anterior: "Anterior",
     siguiente: "Siguiente",
     pagina: "Página {n} de {total}",
+    paginaN: "Página {n}",
     filtros: "Filtros",
     guardarBusqueda: "Guardar búsqueda",
     guardarBusquedaAyuda: "Entra en tu cuenta para guardar búsquedas y recibir alertas.",

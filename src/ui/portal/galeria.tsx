@@ -45,7 +45,7 @@ export function Galeria({ fotos, alt, textos }: { fotos: string[]; alt: string; 
       <dialog ref={dialogo} className={s.lightbox} aria-label={textos.galeria}>
         <p aria-live="polite">{texto(actual)}</p>
         {/* eslint-disable-next-line @next/next/no-img-element -- ver Tarjeta */}
-        <img src={fotos[actual]} alt={`${alt} · ${texto(actual)}`} />
+        <img src={fotos[actual]} alt={`${alt} · ${texto(actual)}`} width={1600} height={1067} loading="lazy" decoding="async" />
         <div className={s.lightboxBotones}>
           <button type="button" onClick={() => mover(-1)}>
             ← {textos.anterior}

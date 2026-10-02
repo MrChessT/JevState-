@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import { alternativas, isLocale, LOCALE_TAGS, ruta } from "@/i18n/config";
-import { diccionario } from "@/i18n/diccionario";
+import { diccionario, t } from "@/i18n/diccionario";
 import Link from "next/link";
 import { FOTOS } from "@/config/imagenes";
 import { publicada } from "@/config/secciones";
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/agencia">)
   if (!isLocale(lang)) return {};
   const d = await diccionario(lang);
   const alt = alternativas(BRAND.siteUrl, "agencia");
-  return { title: d.agencia.titulo, alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt } };
+  return { title: d.agencia.titulo, description: t(d.meta.agencia), alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt } };
 }
 
 export default async function Agencia({ params }: PageProps<"/[lang]/agencia">) {

@@ -55,8 +55,13 @@ export async function metadataOperacion(operacion: "venta" | "alquiler", { param
   const descripcion = r.total
     ? t(d.buscar.metaDescripcion, { n: r.total, operacion: operacion === "venta" ? d.buscar.metaVenta : d.buscar.metaAlquiler, donde: nz ? t(d.buscar.en, { zona: nz }) : d.buscar.metaRegion, desde: euros(lang, Math.min(...(precios.length ? precios : [0]))) ?? "" })
     : undefined;
-  // Las combinaciones de filtros no se indexan: la canónica es la de operación + zona.
-  return { title: titulo, description: descripcion, alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt }, openGraph: { title: titulo, description: descripcion, url: alt[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) }, ...(tieneFiltros(f) || r.total === 0 ? { robots: { index: false, follow: true } } : {}) };
+  // Las combinaciones de filtros no se indexan: la canónica es la de operación + zona. Las páginas
+  // 2, 3… sin otros filtros sí: cada una con su canónica, su hreflang y su título (Google lo pide así).
+  const soloPagina = f.pagina > 1 && !tieneFiltros({ ...f, pagina: 1 });
+  const altP = soloPagina ? Object.fromEntries(Object.entries(alt).map(([k, v]) => [k, `${v}?pagina=${f.pagina}`])) : alt;
+  const tituloP = f.pagina > 1 ? `${titulo} · ${t(d.buscar.paginaN, { n: f.pagina })}` : titulo;
+  const noIndexar = (tieneFiltros(f) && !soloPagina) || r.total === 0;
+  return { title: tituloP, description: descripcion, alternates: { canonical: altP[LOCALE_TAGS[lang].intl], languages: altP }, openGraph: { title: tituloP, description: descripcion, url: altP[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) }, ...(noIndexar ? { robots: { index: false, follow: true } } : {}) };
 }
 
 export async function PaginaOperacion({ operacion, props }: { operacion: "venta" | "alquiler"; props: Props }) {
