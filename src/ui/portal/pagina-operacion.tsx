@@ -63,7 +63,7 @@ export async function metadataOperacion(operacion: "venta" | "alquiler", { param
   const altP = soloPagina ? Object.fromEntries(Object.entries(alt).map(([k, v]) => [k, `${v}?pagina=${f.pagina}`])) : alt;
   const tituloP = f.pagina > 1 ? `${titulo} · ${t(d.buscar.paginaN, { n: f.pagina })}` : titulo;
   const noIndexar = (tieneFiltros(f) && !soloPagina) || r.total === 0;
-  return { title: tituloP, description: descripcion, alternates: { canonical: altP[LOCALE_TAGS[lang].intl], languages: altP }, openGraph: { title: tituloP, description: descripcion, url: altP[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) }, ...(noIndexar ? { robots: { index: false, follow: true } } : {}) };
+  return { title: { absolute: conMarca(tituloP) }, description: descripcion, alternates: { canonical: altP[LOCALE_TAGS[lang].intl], languages: altP }, openGraph: { title: tituloP, description: descripcion, url: altP[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) }, ...(noIndexar ? { robots: { index: false, follow: true } } : {}) };
 }
 
 export async function PaginaOperacion({ operacion, props }: { operacion: "venta" | "alquiler"; props: Props }) {

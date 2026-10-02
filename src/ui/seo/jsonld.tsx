@@ -6,7 +6,7 @@ const abs = (path: string) => `${BRAND.siteUrl}${path}`;
 
 export function organizacion(locale: Locale): Record<string, unknown> {
   return {
-    "@type": "RealEstateAgent",
+    "@type": ["RealEstateAgent", "LocalBusiness"],
     "@id": abs("/#agencia"),
     name: NOMBRE_VISIBLE,
     url: abs(ruta(locale)),
