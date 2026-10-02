@@ -823,3 +823,12 @@
   transition: transform var(--dur-1) var(--curva);
 }
 .abrirAsistente:hover { transform: translateY(-1px); }
+
+/* Guía bajo el chat de la página del asistente: qué se le puede pedir y cómo funciona. */
+.guia { display: grid; gap: var(--e-4); margin-top: var(--e-7); }
+.guia h2 { margin: 0; font-size: var(--t-xl); }
+.guiaLista { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); margin: 0; }
+.guiaLista div { display: grid; gap: var(--e-1); padding: var(--e-4); border: 1px solid var(--borde); border-radius: var(--r-3); background: var(--superficie); align-content: start; }
+.guiaLista dt { font-weight: 600; }
+.guiaLista dd { margin: 0; color: var(--texto-suave); font-size: var(--t-sm); line-height: 1.55; }
+.guiaTexto { margin: 0; max-width: var(--ancho-texto); color: var(--texto-suave); line-height: 1.65; }

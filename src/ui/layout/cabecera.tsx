@@ -58,7 +58,7 @@ export function Cabecera({ locale, d }: { locale: Locale; d: Diccionario }) {
               </svg>
             </Link>
           )}
-          <Link href={ruta(locale, "cuenta")} className={s.cuenta}>
+          <Link href={ruta(locale, "cuenta", "entrar")} className={s.cuenta}>
             {d.nav.cuenta}
           </Link>
           {enlaces.length > 0 && (
@@ -76,7 +76,7 @@ export function Cabecera({ locale, d }: { locale: Locale; d: Diccionario }) {
                   </Link>
                 ))}
                 {publicada("favoritos") && <Link href={ruta(locale, "favoritos")}>{d.favoritos.titulo}</Link>}
-                <Link href={ruta(locale, "cuenta")}>{d.nav.cuenta}</Link>
+                <Link href={ruta(locale, "cuenta", "entrar")}>{d.nav.cuenta}</Link>
               </nav>
             </details>
           )}

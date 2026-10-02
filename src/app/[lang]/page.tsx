@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { MAX_TITULO } from "@/ui/seo/titulo";
 import { BRAND, NOMBRE_VISIBLE } from "@/config/brand";
 import { imagenSitio, JsonLd, organizacion, sitioWeb } from "@/ui/seo/jsonld";
 import { notFound } from "next/navigation";
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]">): Promis
   const d = await diccionario(lang);
   const alt = alternativas(BRAND.siteUrl);
   return {
-    title: { absolute: `${NOMBRE_VISIBLE} · ${d.inicio.titulo}` },
+    title: { absolute: `${NOMBRE_VISIBLE} · ${d.inicio.titulo}`.length <= MAX_TITULO ? `${NOMBRE_VISIBLE} · ${d.inicio.titulo}` : `${NOMBRE_VISIBLE} · ${d.inicio.tituloCorto}` },
     description: t(d.meta.descripcion),
     alternates: { canonical: alt[LOCALE_TAGS[lang].intl], languages: alt },
     openGraph: { title: d.inicio.titulo, description: t(d.meta.descripcion), url: alt[LOCALE_TAGS[lang].intl], images: imagenSitio(lang) },

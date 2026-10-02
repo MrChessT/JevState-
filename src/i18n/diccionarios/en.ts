@@ -7,6 +7,7 @@ const en: Diccionario = {
     favoritos: "The properties you have saved at {marca}, with their price and key details, ready to compare or book a viewing.",
     comparar: "Compare up to three {marca} properties side by side: price, size, bedrooms, extras and running costs.",
     agencia: "About {marca}: our team, how we work and how to contact our estate agency in the Region of Murcia.",
+    entrar: "Sign in to your {marca} account with an email link, no password needed, to save favourites and searches.",
     legal: "{doc} of {marca}: legal information about using the website and how your data is handled.",
   },
   nav: {
@@ -44,6 +45,7 @@ const en: Diccionario = {
     destacadosTexto: "The latest listings, with every detail marked as confirmed or likely.",
     comoTexto: "Three commitments kept in every listing and every answer from the assistant.",
     titulo: "Find your home in the Region of Murcia",
+    tituloCorto: "Homes for sale and rent",
     subtitulo: "Tell us what you are looking for in your own words. We show you what fits and why, without making anything up.",
     ctaAsistente: "Search with the assistant",
     ctaValorar: "Value my home",
@@ -330,6 +332,12 @@ const en: Diccionario = {
     sin_vistas_destacables: "No notable views",
   },
   zonas: {
+    verVenta: "See {n} for sale in {zona}",
+    verAlquiler: "See {n} to rent in {zona}",
+    preguntar: "Ask the assistant",
+    preguntaZona: "I'm looking for a home in {zona}, what is there?",
+    verTodoVenta: "See properties for sale",
+    verTodoAlquiler: "See properties to rent",
     cifraMedianaZona: "median for sale",
     antetitulo: "Property market",
     cifraMunicipios: "municipalities with listings",
@@ -355,6 +363,24 @@ const en: Diccionario = {
     textoZona: "Properties for sale and rent in {zona}, with prices calculated from the listings on offer.",
   },
   asistente: {
+    guia: {
+      titulo: "What you can ask",
+      items: [
+        { titulo: "Search in your own words", texto: "“Quiet flat near the beach for working from home, up to €250,000”. It understands area, budget, bedrooms, size, bathrooms and extras." },
+        { titulo: "Refine without starting over", texto: "“Cartagena instead”, “remove the garage”, “to rent instead”, “sort by price” or “which is the cheapest?”." },
+        { titulo: "Find out what you can afford", texto: "“We have €40,000 saved and earn €3,000 a month”. It works out an indicative maximum price and shows what fits." },
+        { titulo: "Ask about a property", texto: "“Does the first one have a lift?”, “is it well priced?”. It answers with the listing's data and its status; if it isn't stated, it says so." },
+        { titulo: "Compare", texto: "“Compare the first two”: price, size, bedrooms, extras and running costs, side by side." },
+        { titulo: "Work out a mortgage", texto: "Monthly payment, loan and savings needed for any property, with the term and deposit you choose." },
+        { titulo: "Learn about an area", texto: "Median price per square metre and listings in each municipality, calculated from the properties on sale." },
+        { titulo: "Book a viewing", texto: "“I'd like to see it on Saturday afternoon”. It prepares the request; nothing is sent until you review it and press “Send”." },
+      ],
+      comoTitulo: "How it works",
+      como: [
+        "A specialised language model, Jev, understands what you ask. Code does everything else: filtering, sorting, calculating and checking every detail against the property listing. That's why it never invents prices or features: if something isn't stated, it tells you and offers to ask the agent.",
+        "Emails and phone numbers are removed from your message before Jev sees it. Calculations (mortgage, affordability, price versus the area) are indicative and explain the assumptions behind them.",
+      ],
+    },
     siguientes: "Next steps",
     cuota: "Payment",
     guardar: "Save to favourites",

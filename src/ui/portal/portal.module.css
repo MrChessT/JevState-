@@ -191,3 +191,10 @@
 .contactoOkTitulo { font-weight: 700; font-size: var(--t-lg); }
 .enlaceBoton { justify-self: start; background: none; border: 0; padding: 0; color: var(--marca-enlace); text-decoration: underline; cursor: pointer; font: inherit; }
 .trampa { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Cómo trabajamos, al pie de los listados: confianza y contexto para quien llega desde un buscador. */
+.confianzaListado { display: grid; gap: var(--e-3); padding-block: var(--e-6); border-top: 1px solid var(--borde); margin-top: var(--e-6); }
+.confianzaListado h2 { margin: 0; font-size: var(--t-lg); }
+.confianzaListado ul { display: grid; gap: var(--e-3); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); list-style: none; padding: 0; margin: 0; }
+.confianzaListado li { color: var(--texto-suave); font-size: var(--t-sm); line-height: 1.6; }
+.confianzaListado strong { color: var(--texto); }

@@ -31,6 +31,23 @@ export default async function Pagina({ params }: PageProps<"/[lang]/asistente">)
         </ul>
       </header>
       <ChatAsistente locale={lang} textos={{ ...d.asistente, hab: d.tarjeta.hab, mes: d.tarjeta.mes }} variante="pagina" />
+      <section className={s.guia} aria-labelledby="guia-titulo">
+        <h2 id="guia-titulo">{d.asistente.guia.titulo}</h2>
+        <dl className={s.guiaLista}>
+          {d.asistente.guia.items.map((x) => (
+            <div key={x.titulo}>
+              <dt>{x.titulo}</dt>
+              <dd>{x.texto}</dd>
+            </div>
+          ))}
+        </dl>
+        <h2>{d.asistente.guia.comoTitulo}</h2>
+        {d.asistente.guia.como.map((p) => (
+          <p key={p.slice(0, 20)} className={s.guiaTexto}>
+            {p}
+          </p>
+        ))}
+      </section>
     </div>
   );
 }

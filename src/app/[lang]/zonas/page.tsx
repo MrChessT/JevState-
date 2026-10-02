@@ -57,6 +57,13 @@ export default async function Zonas({ params }: PageProps<"/[lang]/zonas">) {
           { etiqueta: d.zonas.cifraInmuebles, valor: numero(lang, todas.length) },
           ...(regional?.medianaM2 ? [{ etiqueta: d.zonas.cifraMediana, valor: t(d.zonas.mediana, { m2: numero(lang, regional.medianaM2) }) }] : []),
         ]}
+        acciones={
+          <>
+            <Link href={ruta(lang, "venta")}>{d.zonas.verTodoVenta}</Link>
+            <Link href={ruta(lang, "alquiler")}>{d.zonas.verTodoAlquiler}</Link>
+            <Link href={ruta(lang, "asistente")}>{d.zonas.preguntar}</Link>
+          </>
+        }
       />
       <div className={`contenedor ${v.pagina}`}>
         {conMediana.length > 0 && (

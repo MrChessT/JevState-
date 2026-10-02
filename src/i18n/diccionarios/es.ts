@@ -6,6 +6,7 @@ const es = {
     favoritos: "Los inmuebles que has guardado en {marca}, con su precio y sus datos clave, listos para comparar o pedir visita.",
     comparar: "Compara hasta tres inmuebles de {marca} lado a lado: precio, superficie, habitaciones, extras y gastos.",
     agencia: "Quiénes somos en {marca}: equipo, forma de trabajar y contacto de nuestra inmobiliaria en la Región de Murcia.",
+    entrar: "Entra en tu cuenta de {marca} con un enlace por email, sin contraseña, para guardar favoritos y búsquedas.",
     legal: "{doc} de {marca}: información legal sobre el uso de la web y el tratamiento de tus datos.",
   },
   nav: {
@@ -43,6 +44,7 @@ const es = {
     destacadosTexto: "Los últimos inmuebles publicados, con cada dato marcado como confirmado o probable.",
     comoTexto: "Tres compromisos que se cumplen en cada ficha y en cada respuesta del asistente.",
     titulo: "Encuentra tu casa en la Región de Murcia",
+    tituloCorto: "Pisos y casas en venta y alquiler",
     subtitulo: "Cuéntanos qué buscas con tus palabras. Te enseñamos lo que encaja y por qué, sin inventar ni un dato.",
     ctaAsistente: "Buscar con el asistente",
     ctaValorar: "Valorar mi vivienda",
@@ -329,6 +331,12 @@ const es = {
     sin_vistas_destacables: "Sin vistas destacables",
   },
   zonas: {
+    verVenta: "Ver {n} en venta en {zona}",
+    verAlquiler: "Ver {n} en alquiler en {zona}",
+    preguntar: "Preguntar al asistente",
+    preguntaZona: "Busco casa en {zona}, ¿qué hay?",
+    verTodoVenta: "Ver inmuebles en venta",
+    verTodoAlquiler: "Ver inmuebles en alquiler",
     cifraMedianaZona: "mediana en venta",
     antetitulo: "Mercado inmobiliario",
     cifraMunicipios: "municipios con oferta",
@@ -354,6 +362,24 @@ const es = {
     textoZona: "Inmuebles en venta y alquiler en {zona}, con precios calculados a partir de la oferta publicada.",
   },
   asistente: {
+    guia: {
+      titulo: "Qué puedes pedirle",
+      items: [
+        { titulo: "Buscar con tus palabras", texto: "«Piso tranquilo cerca de la playa para teletrabajar, hasta 250.000 €». Entiende zona, presupuesto, habitaciones, metros, baños y extras." },
+        { titulo: "Afinar sin empezar de cero", texto: "«Mejor en Cartagena», «quita el garaje», «ahora en alquiler», «ordénalos por precio» o «¿cuál es el más barato?»." },
+        { titulo: "Saber qué te puedes permitir", texto: "«Tengo 40.000 € ahorrados y cobramos 3.000 al mes». Calcula un precio máximo orientativo y te enseña lo que entra." },
+        { titulo: "Preguntar por un piso", texto: "«¿El primero tiene ascensor?», «¿está bien de precio?». Responde con el dato de la ficha y su estado; si no consta, lo dice." },
+        { titulo: "Comparar", texto: "«Compara los dos primeros»: precio, superficie, habitaciones, extras y gastos, lado a lado." },
+        { titulo: "Calcular la hipoteca", texto: "Cuota mensual, préstamo y ahorro necesario de cualquier inmueble, con el plazo y la entrada que elijas." },
+        { titulo: "Conocer una zona", texto: "Precio medio por metro cuadrado y oferta de cada municipio, calculados con los inmuebles publicados." },
+        { titulo: "Pedir una visita", texto: "«Quiero verlo el sábado por la tarde». Prepara la solicitud; nada se envía sin que la revises y pulses «Enviar»." },
+      ],
+      comoTitulo: "Cómo funciona",
+      como: [
+        "Un modelo de lenguaje especializado, Jev, entiende lo que pides. Todo lo demás lo hace el código: filtrar, ordenar, calcular y comprobar cada dato contra la ficha del inmueble. Por eso no inventa precios ni características: si algo no consta, te lo dice y te ofrece preguntárselo al agente.",
+        "Antes de consultar a Jev se quitan del mensaje los emails y teléfonos. Las cuentas (hipoteca, lo que te puedes permitir, precio frente a la zona) son orientativas y te explican con qué supuestos se han hecho.",
+      ],
+    },
     siguientes: "Siguientes pasos",
     cuota: "Cuota",
     guardar: "Guardar en favoritos",

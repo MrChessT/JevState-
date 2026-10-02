@@ -7,8 +7,10 @@ import { buscarUnaVez, fichaUnaVez, portal } from "@/portal/datos";
 import { esSlugFicha, leerFiltros, tieneFiltros, urlFicha } from "@/portal/filtros";
 import { zona } from "@/zonas/buscar";
 import { imagenSitio, JsonLd, listaInmuebles, migas } from "@/ui/seo/jsonld";
+import { conMarca } from "@/ui/seo/titulo";
 import { Ficha } from "./ficha";
 import { euros } from "./formato";
+import s from "./portal.module.css";
 import { Resultados } from "./resultados";
 
 type Props = { params: Promise<{ lang: string; ruta?: string[] }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -38,7 +40,7 @@ export async function metadataOperacion(operacion: "venta" | "alquiler", { param
     const descripcion = i.descripcion.replace(/\s+/g, " ").slice(0, 155).replace(/\s\S*$/, "…");
     const og = `${BRAND.siteUrl}/api/og/inmueble/${encodeURIComponent(i.ref)}?lang=${lang}`;
     return {
-      title: titulo,
+      title: { absolute: conMarca(titulo) },
       description: descripcion,
       alternates: { canonical: `${BRAND.siteUrl}${url}`, languages: { ...alt, "x-default": alt[LOCALE_TAGS.es.intl]! } },
       openGraph: { title: titulo, description: descripcion, url: `${BRAND.siteUrl}${url}`, images: [{ url: og, width: 1200, height: 630, alt: i.titulo }], type: "website" },
@@ -86,6 +88,16 @@ export async function PaginaOperacion({ operacion, props }: { operacion: "venta"
     <>
       <JsonLd grafo={[migas(rastro), listaInmuebles(r.items.map((i) => urlFicha(lang, i)))]} />
       <Resultados f={f} r={r} titulo={nz ? `${base} ${t(d.buscar.en, { zona: nz })}` : base} locale={lang} d={d} />
+      <section className={`contenedor ${s.confianzaListado}`} aria-labelledby="como-trabajamos">
+        <h2 id="como-trabajamos">{d.inicio.promesasTitulo}</h2>
+        <ul>
+          {d.inicio.promesas.map((x) => (
+            <li key={x.titulo}>
+              <strong>{x.titulo}.</strong> {x.texto}
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
   );
 }

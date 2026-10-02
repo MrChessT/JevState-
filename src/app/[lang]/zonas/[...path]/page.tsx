@@ -61,8 +61,9 @@ export default async function ZonaPagina({ params }: PageProps<"/[lang]/zonas/[.
         ]}
         acciones={
           <>
-            <Link href={ruta(lang, "venta", ...path)}>{d.buscar.tituloVenta}</Link>
-            <Link href={ruta(lang, "alquiler", ...path)}>{d.buscar.tituloAlquiler}</Link>
+            {venta.total > 0 && <Link href={ruta(lang, "venta", ...path)}>{t(d.zonas.verVenta, { n: venta.total, zona: z.nombre })}</Link>}
+            {alquiler.total > 0 && <Link href={ruta(lang, "alquiler", ...path)}>{t(d.zonas.verAlquiler, { n: alquiler.total, zona: z.nombre })}</Link>}
+            <Link href={`${ruta(lang, "asistente")}?q=${encodeURIComponent(t(d.zonas.preguntaZona, { zona: z.nombre }))}`}>{d.zonas.preguntar}</Link>
           </>
         }
       />

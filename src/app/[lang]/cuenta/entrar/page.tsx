@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { isLocale, ruta } from "@/i18n/config";
-import { diccionario } from "@/i18n/diccionario";
+import { BRAND } from "@/config/brand";
+import { alternativas, isLocale, LOCALE_TAGS, ruta } from "@/i18n/config";
+import { diccionario, t } from "@/i18n/diccionario";
 import { sesion } from "@/lib/supabase/server";
 import { Aviso } from "@/ui/componentes";
 import { FormularioEnlace } from "./formulario";
@@ -9,7 +10,8 @@ import { FormularioEnlace } from "./formulario";
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   const d = await diccionario(isLocale(lang) ? lang : "es");
-  return { title: d.cuenta.entrarTitulo, robots: { index: false } };
+  const alt = alternativas(BRAND.siteUrl, "cuenta", "entrar");
+  return { title: d.cuenta.entrarTitulo, description: t(d.meta.entrar), alternates: { canonical: alt[LOCALE_TAGS[isLocale(lang) ? lang : "es"].intl], languages: alt }, robots: { index: false } };
 }
 
 export default async function Entrar({ params, searchParams }: PageProps<"/[lang]/cuenta/entrar">) {
